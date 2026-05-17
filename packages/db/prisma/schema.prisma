@@ -1,0 +1,14 @@
+// @investio/db — Prisma schema
+//
+// Source of truth is docs/schema.sql (DDL with RLS policies).
+// Actual models arrive in T-006 after `prisma db pull` from Supabase.
+// This file intentionally only has generator + datasource blocks.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}

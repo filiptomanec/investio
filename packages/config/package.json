@@ -1,0 +1,9 @@
+{
+  "name": "@investio/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./tsconfig": "./tsconfig.base.json",
+    "./eslint": "./eslint.config.mjs"
+  }
+}
