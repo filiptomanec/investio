@@ -15,19 +15,38 @@
     "password": "Password",
     "passwordConfirm": "Confirm password",
     "signInCta": "Sign in",
-    "signUpCta": "Create account"
+    "signUpCta": "Create account",
+    "signInWithGoogle": "Continue with Google",
+    "signInError": "Sign in failed. Check your email and password.",
+    "signUpSuccess": "Account created",
+    "checkEmail": "Check your email to confirm your registration.",
+    "passwordMismatch": "Passwords do not match.",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "googleDisabledTooltip": "Connect Supabase project (T-006 README)",
+    "backendNotConfigured": "Backend not configured — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
   },
   "dashboard": {
     "title": "My scenarios",
     "newScenario": "New scenario",
+    "filter": {
+      "all": "All",
+      "compound": "Stocks",
+      "realEstate": "Real estate"
+    },
     "empty": {
       "title": "You have no scenarios yet.",
       "compoundCta": "New compound interest",
       "realEstateCta": "New real estate"
     },
-    "filter": {
-      "all": "All",
-      "compound": "Stocks",
+    "actions": {
+      "open": "Open",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this scenario?"
+    },
+    "types": {
+      "compound": "Compound interest",
       "realEstate": "Real estate"
     }
   },
