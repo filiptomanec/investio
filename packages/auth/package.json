@@ -33,7 +33,16 @@
     "@supabase/supabase-js": "^2.47.12",
     "@supabase/ssr": "^0.5.2"
   },
+  "peerDependencies": {
+    "expo-secure-store": ">=13.0.0"
+  },
+  "peerDependenciesMeta": {
+    "expo-secure-store": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "expo-secure-store": ">=13.0.0",
     "typescript": "^5.7.3"
   }
 }

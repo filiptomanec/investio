@@ -12,7 +12,10 @@
     "signUp": "Registrovat",
     "signOut": "Odhlásit",
     "email": "E-mail",
-    "password": "Heslo"
+    "password": "Heslo",
+    "passwordConfirm": "Potvrdit heslo",
+    "signInCta": "Přihlásit se",
+    "signUpCta": "Vytvořit účet"
   },
   "dashboard": {
     "title": "Moje scénáře",
@@ -27,12 +30,30 @@
   "calc": {
     "compound": {
       "title": "Složené úročení",
+      "subtitle": "Spočítáme finální hodnotu pravidelného vkladu se zhodnocením.",
       "fields": {
         "initialAmount": "Počáteční částka",
         "monthlyContribution": "Měsíční vklad",
         "annualReturnPct": "Roční výnos",
-        "horizonYears": "Horizont (roky)"
-      }
+        "horizonYears": "Horizont (roky)",
+        "contributionTiming": {
+          "label": "Načasování vkladu",
+          "begin": "Začátek měsíce",
+          "end": "Konec měsíce"
+        }
+      },
+      "results": {
+        "finalValue": "Konečná hodnota",
+        "totalContributions": "Celkem vloženo",
+        "totalGains": "Zhodnocení"
+      },
+      "chart": {
+        "contributions": "Vklady",
+        "gains": "Zhodnocení",
+        "month": "Měsíc",
+        "value": "Hodnota"
+      },
+      "disclaimer": "Zjednodušený model. Pro konkrétní rozhodnutí konzultujte poradce."
     },
     "realEstate": {
       "title": "Nemovitost & cashflow",
