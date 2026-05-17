@@ -57,14 +57,49 @@
     },
     "realEstate": {
       "title": "Real estate & cashflow",
+      "subtitle": "Monthly cashflow, IRR, and equity build-up for an investment property.",
       "fields": {
         "purchasePrice": "Purchase price",
         "downPayment": "Down payment",
         "mortgage": "Mortgage",
         "rate": "Interest rate",
         "term": "Term",
-        "monthlyRent": "Monthly rent"
-      }
+        "monthlyRent": "Monthly rent",
+        "monthlyExpenses": "Monthly expenses",
+        "vacancyRatePct": "Vacancy rate",
+        "annualRentGrowthPct": "Annual rent growth",
+        "annualAppreciationPct": "Annual appreciation",
+        "incomeTaxPct": "Income tax rate",
+        "exitMonth": "Exit month"
+      },
+      "sections": {
+        "purchase": "Purchase",
+        "financing": "Financing",
+        "income": "Income",
+        "costs": "Costs",
+        "horizon": "Horizon"
+      },
+      "results": {
+        "monthlyPayment": "Monthly payment",
+        "averageMonthlyCashflow": "Avg. monthly cashflow",
+        "grossYield": "Gross yield",
+        "netYield": "Net yield",
+        "irr": "IRR (annual)",
+        "breakEvenMonth": "Break-even month",
+        "finalEquity": "Final equity",
+        "totalCashflow": "Total cashflow",
+        "irrUncomputable": "Cannot compute",
+        "breakEvenNever": "Never"
+      },
+      "chart": {
+        "cashflow": "Monthly cashflow",
+        "equity": "Equity",
+        "propertyValue": "Property value",
+        "remainingBalance": "Remaining balance",
+        "netCashflow": "Net cashflow"
+      },
+      "disclaimer": "Simplified tax model. Does not include flat-rate deductions, solidarity surcharge, or VAT. Consult a tax advisor for your specific situation.",
+      "saveTooltip": "Saving scenarios will be available on dashboard (T-013)"
     }
   },
   "comparison": {

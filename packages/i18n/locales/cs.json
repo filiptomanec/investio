@@ -57,14 +57,49 @@
     },
     "realEstate": {
       "title": "Nemovitost & cashflow",
+      "subtitle": "Měsíční cashflow, IRR a růst equity při koupi investiční nemovitosti.",
       "fields": {
         "purchasePrice": "Kupní cena",
         "downPayment": "Vlastní kapitál",
         "mortgage": "Hypotéka",
         "rate": "Úrok",
         "term": "Splatnost",
-        "monthlyRent": "Měsíční nájem"
-      }
+        "monthlyRent": "Měsíční nájem",
+        "monthlyExpenses": "Měsíční náklady",
+        "vacancyRatePct": "Míra neobsazenosti",
+        "annualRentGrowthPct": "Roční růst nájmu",
+        "annualAppreciationPct": "Roční zhodnocení",
+        "incomeTaxPct": "Sazba daně z příjmu",
+        "exitMonth": "Měsíc prodeje"
+      },
+      "sections": {
+        "purchase": "Koupě",
+        "financing": "Financování",
+        "income": "Příjmy",
+        "costs": "Náklady",
+        "horizon": "Horizont"
+      },
+      "results": {
+        "monthlyPayment": "Měsíční splátka",
+        "averageMonthlyCashflow": "Průměrný měs. cashflow",
+        "grossYield": "Hrubý výnos",
+        "netYield": "Čistý výnos",
+        "irr": "IRR (roční)",
+        "breakEvenMonth": "Break-even měsíc",
+        "finalEquity": "Finální equity",
+        "totalCashflow": "Celkový cashflow",
+        "irrUncomputable": "Nelze spočítat",
+        "breakEvenNever": "Nikdy"
+      },
+      "chart": {
+        "cashflow": "Měsíční cashflow",
+        "equity": "Equity",
+        "propertyValue": "Hodnota nemovitosti",
+        "remainingBalance": "Zbývající dluh",
+        "netCashflow": "Čistý cashflow"
+      },
+      "disclaimer": "Zjednodušený daňový model. Nezahrnuje paušální odpočty, solidární zvýšení ani DPH. Konkrétní daňové dopady konzultujte s daňovým poradcem.",
+      "saveTooltip": "Ukládání scénářů bude dostupné v dashboard (T-013)"
     }
   },
   "comparison": {
