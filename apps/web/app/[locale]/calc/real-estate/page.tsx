@@ -16,6 +16,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { AlertTriangle, Save } from "lucide-react";
+import { ExportPdfButton } from "@/components/pdf/ExportPdfButton";
+import { RealEstatePdf } from "@/components/pdf/RealEstatePdf";
+import { buildPdfFilename } from "@/lib/pdf";
 import {
   Accordion,
   AccordionContent,
@@ -264,6 +267,7 @@ function ResultItem({ label, value, highlighted, positive, negative }: ResultIte
 
 export default function RealEstatePage() {
   const t = useTranslations("calc.realEstate");
+  const tPdf = useTranslations("pdf");
   const locale = useLocale() as AppLocale;
 
   const {
@@ -361,19 +365,79 @@ export default function RealEstatePage() {
                 {t("subtitle")}
               </p>
             </div>
-            <Tooltip>
-              <TooltipTrigger
-                disabled
-                aria-disabled="true"
-                className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed select-none"
-              >
-                <Save className="h-4 w-4" aria-hidden="true" />
-                {locale === "cs" ? "Uložit" : "Save"}
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("saveTooltip")}</p>
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger
+                  disabled
+                  aria-disabled="true"
+                  className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed select-none"
+                >
+                  <Save className="h-4 w-4" aria-hidden="true" />
+                  {locale === "cs" ? "Uložit" : "Save"}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("saveTooltip")}</p>
+                </TooltipContent>
+              </Tooltip>
+              <ExportPdfButton
+                label={tPdf("exportButton")}
+                filename={buildPdfFilename("real-estate")}
+                documentFactory={() => {
+                  const currentValues = getValues();
+                  return (
+                    <RealEstatePdf
+                      input={currentValues}
+                      result={result}
+                      locale={locale}
+                      labels={{
+                        title: tPdf("title.realEstate"),
+                        generatedOn: tPdf("generatedOn"),
+                        sections: {
+                          inputs: tPdf("sections.inputs"),
+                          results: tPdf("sections.results"),
+                          chart: tPdf("sections.chart"),
+                          purchase: t("sections.purchase"),
+                          financing: t("sections.financing"),
+                          income: t("sections.income"),
+                          costs: t("sections.costs"),
+                          horizon: t("sections.horizon"),
+                        },
+                        fields: {
+                          purchasePrice: t("fields.purchasePrice"),
+                          downPayment: t("fields.downPayment"),
+                          mortgageRate: t("fields.rate"),
+                          mortgageTerm: t("fields.term"),
+                          monthlyRent: t("fields.monthlyRent"),
+                          monthlyExpenses: t("fields.monthlyExpenses"),
+                          vacancyRate: t("fields.vacancyRatePct"),
+                          rentGrowth: t("fields.annualRentGrowthPct"),
+                          appreciation: t("fields.annualAppreciationPct"),
+                          incomeTax: t("fields.incomeTaxPct"),
+                          horizonYears: tPdf("fields.horizonYears"),
+                          monthlyPayment: t("results.monthlyPayment"),
+                          avgMonthlyCashflow: t("results.averageMonthlyCashflow"),
+                          grossYield: t("results.grossYield"),
+                          netYield: t("results.netYield"),
+                          irr: t("results.irr"),
+                          breakEven: t("results.breakEvenMonth"),
+                          finalEquity: t("results.finalEquity"),
+                          totalCashflow: t("results.totalCashflow"),
+                        },
+                        table: {
+                          year: tPdf("table.year"),
+                          netCashflow: tPdf("table.netCashflow"),
+                          equity: tPdf("table.equity"),
+                          propertyValue: tPdf("table.propertyValue"),
+                        },
+                        irrUncomputable: t("results.irrUncomputable"),
+                        breakEvenNever: t("results.breakEvenNever"),
+                        disclaimer: tPdf("disclaimer"),
+                      }}
+                    />
+                  );
+                }}
+              />
+            </div>
           </div>
         </div>
 
