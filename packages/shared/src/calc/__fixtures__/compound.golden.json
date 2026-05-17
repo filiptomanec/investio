@@ -1,0 +1,82 @@
+[
+  {
+    "_comment": "Case 1: 10000 initial + 100/mo @ 7% for 10 years, end-of-month. Geometric monthly rate used: r=(1.07)^(1/12)-1. Cross-checked via closed-form formula.",
+    "input": {
+      "type": "compound",
+      "initialAmount": 10000,
+      "monthlyContribution": 100,
+      "annualReturnPct": 0.07,
+      "horizonYears": 10,
+      "contributionTiming": "end"
+    },
+    "expected": {
+      "finalValue": 36776.686699,
+      "totalContributions": 22000,
+      "totalGains": 14776.686699
+    }
+  },
+  {
+    "_comment": "Case 2: 0 initial + 500/mo @ 8% for 20 years, end-of-month.",
+    "input": {
+      "type": "compound",
+      "initialAmount": 0,
+      "monthlyContribution": 500,
+      "annualReturnPct": 0.08,
+      "horizonYears": 20,
+      "contributionTiming": "end"
+    },
+    "expected": {
+      "finalValue": 284499.534604,
+      "totalContributions": 120000,
+      "totalGains": 164499.534604
+    }
+  },
+  {
+    "_comment": "Case 3: 50000 initial + 0/mo @ 6% for 30 years. Simple compounding, no contributions.",
+    "input": {
+      "type": "compound",
+      "initialAmount": 50000,
+      "monthlyContribution": 0,
+      "annualReturnPct": 0.06,
+      "horizonYears": 30,
+      "contributionTiming": "end"
+    },
+    "expected": {
+      "finalValue": 287174.558646,
+      "totalContributions": 50000,
+      "totalGains": 237174.558646
+    }
+  },
+  {
+    "_comment": "Case 4: r=0 edge case — 5000 initial + 200/mo @ 0% for 5 years. Linear accumulation only.",
+    "input": {
+      "type": "compound",
+      "initialAmount": 5000,
+      "monthlyContribution": 200,
+      "annualReturnPct": 0,
+      "horizonYears": 5,
+      "contributionTiming": "end"
+    },
+    "expected": {
+      "finalValue": 17000,
+      "totalContributions": 17000,
+      "totalGains": 0
+    }
+  },
+  {
+    "_comment": "Case 5: begin-of-month contributions — same as case 1 but timing=begin. FV is higher by approximately one extra month of compounding on contributions.",
+    "input": {
+      "type": "compound",
+      "initialAmount": 10000,
+      "monthlyContribution": 100,
+      "annualReturnPct": 0.07,
+      "horizonYears": 10,
+      "contributionTiming": "begin"
+    },
+    "expected": {
+      "finalValue": 36873.401834,
+      "totalContributions": 22000,
+      "totalGains": 14873.401834
+    }
+  }
+]
