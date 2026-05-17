@@ -362,16 +362,13 @@ export default function RealEstatePage() {
               </p>
             </div>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed select-none"
-                >
-                  <Save className="h-4 w-4" aria-hidden="true" />
-                  {locale === "cs" ? "Uložit" : "Save"}
-                </button>
+              <TooltipTrigger
+                disabled
+                aria-disabled="true"
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed select-none"
+              >
+                <Save className="h-4 w-4" aria-hidden="true" />
+                {locale === "cs" ? "Uložit" : "Save"}
               </TooltipTrigger>
               <TooltipContent>
                 <p>{t("saveTooltip")}</p>
