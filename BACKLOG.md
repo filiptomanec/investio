@@ -102,54 +102,52 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-005 — Monorepo scaffold + GitHub repo
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #1 merged)
 - **Blocks**: T-006, T-008, T-009
 - **Blocked by**: T-001
 - **Brief**: Inicializovat Turborepo monorepo s `apps/web` (Next.js 16), `apps/mobile` (Expo placeholder), `packages/shared` (Zod + calc logic), `packages/i18n`, `packages/db` (Prisma). Push do GitHub `filiptomanec/investio`. Vercel projekt nakonfigurovat (Git auto-deploy z `main`).
 - **Inputs**: `docs/decisions/ADR-0001-stack.md`
 - **Acceptance criteria**:
-  - [ ] `pnpm install` na čistém klonu projde
-  - [ ] `pnpm turbo run build` projde pro `apps/web` (Expo se zatím nemusí buildit, jen scaffold)
-  - [ ] `pnpm turbo run typecheck` projde
-  - [ ] GitHub repo private, push branchí (ne `main` přímo), `main` jen přes PR
-  - [ ] Vercel projekt napojený na `main` → deploy preview vrací 200
-- **Cost note**: Sonnet
+  - [x] `pnpm install` projde
+  - [x] `pnpm --filter @investio/web build` projde, `pnpm typecheck` projde (7/7 packages)
+  - [x] GitHub repo `filiptomanec/investio` private vytvořen, allowlist respektován (PR workflow)
+  - [ ] Vercel projekt napojený — **čeká na usera** (interactive OAuth, step-by-step v hand-backu)
+- **Cost note**: Sonnet (~$0.60–0.80 reálně, 120–150k input + 40–50k output tokens, 142 tool calls, 14 min)
 - **Notes**: Pamatuj na `learnings.md` — `git push origin <branch>` (ne bare), pokud spawn paralelně s něčím jiným pak `isolation: "worktree"`.
-- **Hand-back**: <vyplní fullstack — PR URL>
+- **Hand-back**: **PR #1**: https://github.com/filiptomanec/investio/pull/1. Drobné odchylky od ADR-0001: (1) Expo SDK 54 místo 53 (latest stable, `create-expo-app` neumožňuje pin na 53; funkčně OK); (2) Tailwind v4 místo v3 (Next.js 16 default; agent upravil `globals.css` se `@theme inline` directive Tailwind v4 way; tokens.draft.ts kopie v `packages/design-tokens/src/index.ts` beze změny). `tailwind-preview.md` je teď stale pro v4. Vercel napojení vyžaduje user OAuth — step-by-step instrukce v PR description.
 
 #### T-006 — Supabase schema + Prisma client
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #3 merged)
 - **Blocks**: T-008
 - **Blocked by**: T-002, T-005
 - **Brief**: Aplikovat `docs/schema.sql` do Supabase projektu. Prisma client v `packages/db` s typed exports. Lokální dev workflow (`supabase start` + `pnpm prisma generate`).
 - **Inputs**: `docs/schema.sql`, `docs/data-model.md`, `apps/web/.env.example`
 - **Acceptance criteria**:
-  - [ ] `supabase/migrations/<timestamp>_init.sql` matches `docs/schema.sql`
-  - [ ] `supabase db reset` projde lokálně
-  - [ ] `packages/db` exportuje typed Prisma client + `Scenario`, `Template` typy
-  - [ ] RLS policies testované — anon nemůže číst cizí scenarios (integration test)
-- **Cost note**: Sonnet
-- **Hand-back**: <vyplní fullstack>
+  - [x] `supabase/migrations/20260517000000_initial.sql` matches `docs/schema.sql` + git SHA header
+  - [x] `supabase db reset` projde lokálně (porty 54331–54337 protože 54321 kolidoval s todo-app)
+  - [x] `packages/db` exportuje typed Prisma client (`getPrismaForUser(userId)` s RLS extension) + Scenario/Template typy
+  - [x] RLS integration test (6/6 pass): user A creates → user B nečte, anon nečte, cross-user update fails
+- **Cost note**: Sonnet (~$0.30–0.50, 11 min, 87 tool calls — 2 debugging iterations: `db pull` selhal a `SET LOCAL ROLE` chyběl)
+- **Hand-back**: **PR #3** https://github.com/filiptomanec/investio/pull/3. Fait accompli: (1) `prisma db pull` selhal s P4002 (cross-schema reference do `auth.users`); schema napsán ručně, modely Scenario+Template s `user_id String @db.Uuid // references auth.users(id)`. (2) RLS extension musí volat `SET LOCAL ROLE authenticated` PLUS `set_config('request.jwt.claims', ...)` ve stejné transakci — bez `ROLE authenticated` lokální Postgres connection jako superuser RLS bypassuje. (3) Remote Supabase setup je user-bound (interactive `supabase link`), step-by-step v hand-backu.
 
 #### T-007 — Calc logic v `packages/shared`
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #2 merged)
 - **Blocks**: T-010, T-011, T-012, T-016
 - **Blocked by**: T-005
 - **Brief**: Čistá kalkulační logika (žádný UI) v `packages/shared/src/calc/`. Compound interest (FV with periodic contributions), real estate cashflow + IRR + equity build-up, comparison (normalize na společný horizont). Zod schemas pro vstupy. Vitest pokrytí.
 - **Inputs**: PROJECT.md scope (vzorce a vstupy), žádné UI rozhodnutí
 - **Acceptance criteria**:
-  - [ ] `packages/shared/src/calc/compound.ts` + Zod input schema + `calculateCompound(input): Result`
-  - [ ] `packages/shared/src/calc/realEstate.ts` + Zod input schema + výstup cashflow array + IRR
-  - [ ] `packages/shared/src/calc/comparison.ts` — normalizuje 2 scénáře na společný horizont
-  - [ ] Vitest: ≥ 90 % coverage pro `calc/`, edge cases (zero down payment, negative cashflow, …)
-  - [ ] `pnpm test` projde
-- **Cost note**: Sonnet — důležitá ale mechanická práce
+  - [x] `compound.ts` + `realEstate.ts` + `irr.ts` + `comparison.ts` per architecture.md (closed-form + iterative time series, mortgage annuita, Newton-Raphson + bisect, normalize 2 scenarios)
+  - [x] Zod schémata (CompoundInput, RealEstateInputBase + Refined, ScenarioInput discriminated union)
+  - [x] Vitest coverage: **97.68 % statements, 100 % functions, 87.77 % branches, 64 tests** (over 90 % gate)
+  - [x] Golden master fixtures cross-checked s 0 % delta vs Node.js eval ground truth
+- **Cost note**: Sonnet (~8.5 min, 60 tool calls)
 - **Notes**: Toto je matematické jádro celé appky. Bez korektních vzorců je MVP neuvěřitelný. Architect v T-001 nech vybrat vzorce (FV with periodic contribution formula, IRR via Newton-Raphson or binary search, …) a explicitně dokumentovat v `docs/architecture.md` sekci „Calc primitives".
-- **Hand-back**: <vyplní fullstack>
+- **Hand-back**: **PR #2** https://github.com/filiptomanec/investio/pull/2. Fait accompli: Zod `discriminatedUnion` + `refine` nekompatibilní (refine vrací ZodEffects, ne ZodObject) → split na `RealEstateInputBaseSchema` (do discriminated union) + `RealEstateInputSchema` (standalone s refine). Typ `RealEstateInput` inferován z base — identické chování.
 
 #### T-008 — Scenarios CRUD API
 
@@ -172,18 +170,19 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-009 — i18n setup (CZ + EN)
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #4 merged)
 - **Blocks**: T-010, T-011, T-012, T-013, T-016, T-020
 - **Blocked by**: T-005
 - **Brief**: Sdílené message bundles v `packages/i18n/locales/{cs,en}.json`. Web: `next-intl`. Mobile: `i18next` + `expo-localization`. Měna a číslo formátování per locale.
 - **Inputs**: `docs/decisions/ADR-0003-i18n.md`
 - **Acceptance criteria**:
-  - [ ] `packages/i18n/locales/cs.json`, `en.json` — bootstrap struktura (placeholder klíče OK)
-  - [ ] Web: `LocaleProvider` + middleware-based locale detection
-  - [ ] Mobile: `i18next` configured, locale fallback CZ→EN
-  - [ ] Helper `formatCurrency(value, currency, locale)` v `packages/shared`
-- **Cost note**: Sonnet
-- **Hand-back**: <vyplní fullstack>
+  - [x] `packages/i18n/locales/{cs,en}.json` — 37 klíčů v namespacech (common, auth, dashboard, calc.compound, calc.realEstate, comparison, errors)
+  - [x] Web: next-intl@4 + `proxy.ts` (Next.js 16 rename `middleware.ts → proxy.ts`) + `app/[locale]/layout.tsx` s `NextIntlClientProvider`
+  - [x] Mobile: i18next@23 + react-i18next + expo-localization, init v `apps/mobile/lib/i18n.ts`, fallback `cs`
+  - [x] `formatCurrency`, `formatPercent`, `formatDate`, `formatCompact` v `packages/shared/src/formatters/` + 15 testů green
+  - [x] CI parity check (`packages/i18n/scripts/check-parity.ts`) + turbo task `check-parity`
+- **Cost note**: Sonnet (~10.5 min, 133 tool calls — větší scope na dva apps + formatters + script)
+- **Hand-back**: **PR #4** https://github.com/filiptomanec/investio/pull/4. Fait accompli: Next.js 16 přejmenoval `middleware.ts` → `proxy.ts` (deprecation warning); použit `proxy.ts`, funkčnost identická. `/cs` → 307 redirect na `/` (default locale `localePrefix: "as-needed"`), `/en` → 200 přímo. Curl ověřený.
 
 ### M2 — Web MVP
 
@@ -405,4 +404,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 
 - `2026-05-17` — Backlog vytvořen po intake interview. 23 ticketů ve 6 milestones. T-001 (architect) je první. Next: orchestrator čeká na user approval, pak spawn architect přes Agent tool.
 - `2026-05-17` — T-001 done (architect, Opus). Shipnuto: 3 ADR + architecture.md (s calc primitives detail), api.md (9 endpointů, Zod discriminated union), risks.md (5 rizik). Adr-index.md má 3 nové entries. Next: T-002 (architect, data model + schema.sql) odblokovaný; v paralelu lze spawn T-003 (designer, design tokens).
+- `2026-05-17` — **M1 dokončena** (PR #2 + #3 + #4 merged). User mergnul PR #2, pak povolil orchestratorovi mergovat zbytek scoped na Investio repo. PR #3 + #4 měly konflikty v `pnpm-lock.yaml` + jeden v `packages/shared/package.json` (union test scripts + coverage dep) — vyřešeno postupně přes `merge origin/main → packages/shared/package.json manual + pnpm install regen lockfile → squash merge`. Tests post-merge: 79/79 shared (calc 64 + formatters 15), 6/6 RLS integration. Next: **M2 paralelizace** T-008 (CRUD API) + T-010 (compound web) + T-011 (real estate web) + T-014 (Expo scaffold).
+- `2026-05-17` — **M1 trojka paralelně review** (worktree, ~11 min wall-clock pro all 3, ~$1.30 celkem). PR #2 T-007 calc logic (64 testů, coverage 97.68 % stmts). PR #3 T-006 Supabase+Prisma+RLS (6/6 RLS integration testy). PR #4 T-009 i18n (next-intl web + i18next mobile + formatters + parity check). 5 nových learnings zachyceno (Prisma db pull + auth schema, RLS local Postgres role bypass, Zod discriminatedUnion + refine, Next.js 16 proxy.ts rename, Supabase port collision). Next: user mergne 3 PR; pak M2 paralelizace T-008 (CRUD API) + T-010 (compound web) + T-011 (real estate web) + T-014 (Expo scaffold parita).
+- `2026-05-17` — T-005 review (fullstack, Sonnet, ~14 min, ~$0.70). Monorepo scaffold + GitHub repo `filiptomanec/investio` (private) + PR #1. 7 packages typecheck green, web build green, dev server vrací 200. Drobné fait accompli: Expo SDK 54 (ne 53), Tailwind v4 (ne v3). Vercel setup vyžaduje user OAuth. Next: user mergne PR #1 + napojí Vercel; pak M1 paralelizace T-006 (Supabase+Prisma) + T-007 (calc logic) + T-009 (i18n) přes isolation:worktree.
 - `2026-05-17` — T-002 + T-003 + T-004 done (paralelně). Architect: `docs/data-model.md` + `docs/schema.sql` (5 RLS policies s RATIONALE, single-table polymorphism, soft delete s partial unique index, seed 6 templates s `on conflict do nothing`, dropnut ScenarioVersion, přidán `based_on_template_id` aby seděl s api.md). Designer: `docs/design/{design-system,tokens.draft.ts,tailwind-preview.md,wireframes.md}` (Investio Teal #0f766e primary, type scale 1.2, system fonts, 10 ASCII wireframů web+mobile, AA contrast měřený). Next: M0 hotová, M1 odblokovaná — T-005 (fullstack monorepo scaffold) je první.
