@@ -1,8 +1,12 @@
 // @investio/db — Prisma schema
 //
 // Source of truth is docs/schema.sql (DDL with RLS policies).
-// Actual models arrive in T-006 after `prisma db pull` from Supabase.
-// This file intentionally only has generator + datasource blocks.
+// This schema was written manually because `prisma db pull` fails on cross-schema
+// FK: scenario.user_id → auth.users(id). Prisma does not support the `auth` schema
+// from Supabase as a valid introspection target without including it in `schemas`.
+// Including `auth` in schemas causes Prisma to try to manage Supabase-managed tables.
+// Resolution per ADR-0001: schema.sql is primary source; Prisma schema is manually kept
+// in sync. user_id is modelled as String (UUID) with a comment.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,4 +15,49 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Read-only seed scenarios, public read, write only via service role.
+model Template {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug           String    @unique
+  type           String
+  currency       String    @default("CZK")
+  name_cs        String
+  name_en        String
+  description_cs String?
+  description_en String?
+  inputs         Json
+  source_citation String?
+  source_url     String?
+  display_order  Int       @default(0)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  scenarios      Scenario[]
+
+  @@index([type], name: "template_type_idx")
+  @@index([display_order, slug], name: "template_display_order_idx")
+  @@map("template")
+}
+
+/// Per-user scenario. RLS enforced, archived_at = soft delete.
+model Scenario {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// references auth.users(id) — Supabase managed, FK enforced in DB, not in Prisma schema
+  user_id              String    @db.Uuid
+  name                 String
+  type                 String
+  currency             String    @default("CZK")
+  inputs               Json
+  based_on_template_id String?   @db.Uuid
+  archived_at          DateTime? @db.Timestamptz(6)
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @default(now()) @db.Timestamptz(6)
+
+  based_on_template    Template? @relation(fields: [based_on_template_id], references: [id])
+
+  @@index([user_id], name: "scenario_user_id_idx")
+  @@index([user_id, updated_at(sort: Desc)], name: "scenario_user_updated_at_idx")
+  @@map("scenario")
 }

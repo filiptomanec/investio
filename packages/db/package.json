@@ -16,6 +16,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "echo \"ESLint configured in T-010\"",
+    "test": "vitest run --pool=forks --reporter=verbose",
     "db:generate": "prisma generate",
     "db:pull": "prisma db pull"
   },
@@ -24,7 +25,11 @@
     "prisma": "^6.2.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "typescript": "^5.7.3"
+    "@supabase/supabase-js": "^2.47.12",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.19.41",
+    "jsonwebtoken": "^9.0.3",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.6"
   }
 }
