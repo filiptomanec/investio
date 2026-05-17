@@ -13,9 +13,12 @@
   "main": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"ESLint configured in T-010\""
+    "lint": "echo \"ESLint configured in T-010\"",
+    "check-parity": "tsx scripts/check-parity.ts"
   },
   "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.22.1",
     "typescript": "^5.7.3"
   }
 }

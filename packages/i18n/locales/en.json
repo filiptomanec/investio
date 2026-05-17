@@ -1,5 +1,61 @@
 {
   "common": {
-    "appName": "Investio"
+    "appName": "Investio",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "email": "Email",
+    "password": "Password"
+  },
+  "dashboard": {
+    "title": "My scenarios",
+    "newScenario": "New scenario",
+    "empty": "You have no scenarios yet.",
+    "filter": {
+      "all": "All",
+      "compound": "Stocks",
+      "realEstate": "Real estate"
+    }
+  },
+  "calc": {
+    "compound": {
+      "title": "Compound interest",
+      "fields": {
+        "initialAmount": "Initial amount",
+        "monthlyContribution": "Monthly contribution",
+        "annualReturnPct": "Annual return",
+        "horizonYears": "Horizon (years)"
+      }
+    },
+    "realEstate": {
+      "title": "Real estate & cashflow",
+      "fields": {
+        "purchasePrice": "Purchase price",
+        "downPayment": "Down payment",
+        "mortgage": "Mortgage",
+        "rate": "Interest rate",
+        "term": "Term",
+        "monthlyRent": "Monthly rent"
+      }
+    }
+  },
+  "comparison": {
+    "title": "Comparison",
+    "selectA": "Scenario A",
+    "selectB": "Scenario B",
+    "winner": "Better choice"
+  },
+  "errors": {
+    "validation": "Invalid input",
+    "network": "Network error",
+    "unauthorized": "Not signed in",
+    "notFound": "Not found"
   }
 }

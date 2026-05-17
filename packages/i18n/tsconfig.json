@@ -11,8 +11,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "declaration": true
+    "declaration": true,
+    "types": ["node"]
   },
-  "include": ["src/**/*", "locales/**/*"],
+  "include": ["src/**/*", "locales/**/*", "scripts/**/*"],
   "exclude": ["node_modules"]
 }

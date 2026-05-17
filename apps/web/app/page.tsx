@@ -1,7 +1,10 @@
-export default function Home() {
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center min-h-screen bg-background text-foreground">
-      Investio scaffold ready
-    </main>
-  );
+import { redirect } from "next/navigation";
+
+/**
+ * Root route redirects to the default locale.
+ * The middleware (next-intl) handles locale detection for most routes,
+ * but this fallback ensures the bare "/" path always resolves.
+ */
+export default function RootPage() {
+  redirect("/cs");
 }
