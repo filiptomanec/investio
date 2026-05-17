@@ -171,6 +171,45 @@
     "unauthorized": "Není přihlášen",
     "notFound": "Nenalezeno"
   },
+  "landing": {
+    "hero": {
+      "title": "Porovnej akcie s nemovitostmi za 5 minut",
+      "subtitle": "Investio spočítá složené úročení, cashflow z pronájmu a porovná obě strategie vedle sebe — bez excelu, bez registrace.",
+      "ctaPrimary": "Začni počítat",
+      "ctaSecondary": "Vyzkoušej šablonu"
+    },
+    "features": {
+      "calculators": {
+        "title": "Tři kalkulačky",
+        "description": "Složené úročení pro akcie a ETF, cashflow kalkulačka pro investiční nemovitost a porovnání obou strategií na stejném horizontu. Živý výpočet při každé změně vstupu.",
+        "cta": "Zkusit"
+      },
+      "compare": {
+        "title": "Porovnej a ukládej",
+        "description": "Uložte si scénáře do dashboardu a porovnejte je kdykoli. Pojmenované výpočty s historií úprav — vaše čísla se neztrácejí.",
+        "cta": "Dashboard"
+      },
+      "templates": {
+        "title": "Šablony reálných scénářů",
+        "description": "Předplněné šablony — S&P 500 historický výnos 1995–2025, průměrný pražský byt, CZ dividendové ETF. Zkopírujte a upravte podle vlastní situace.",
+        "cta": "Šablony"
+      }
+    },
+    "cta": {
+      "title": "Začni dnes",
+      "subtitle": "Žádná registrace pro vyzkoušení. Účet vytvoříš, až budeš chtít scénáře ukládat.",
+      "button": "Vytvořit bezplatný účet"
+    },
+    "footer": {
+      "disclaimer": "Investio je edukační nástroj, ne investiční poradce. Výpočty neslouží jako doporučení k investici.",
+      "github": "GitHub",
+      "privacy": "Soukromí"
+    }
+  },
+  "meta": {
+    "title": "Investio — Porovnej akcie s nemovitostmi",
+    "description": "Kalkulačka pro porovnání složeného úročení akcií a cashflow z nemovitosti. Živý výpočet, šablony reálných scénářů, CZ+EN. Vyzkoušej zdarma."
+  },
   "mobile": {
     "tabs": {
       "compound": "Složené",

@@ -171,6 +171,45 @@
     "unauthorized": "Not signed in",
     "notFound": "Not found"
   },
+  "landing": {
+    "hero": {
+      "title": "Compare stocks and real estate in 5 minutes",
+      "subtitle": "Investio calculates compound interest, rental cashflow, and compares both strategies side by side — no spreadsheets, no sign-up required.",
+      "ctaPrimary": "Start calculating",
+      "ctaSecondary": "Try a template"
+    },
+    "features": {
+      "calculators": {
+        "title": "Three calculators",
+        "description": "Compound interest for stocks and ETFs, cashflow calculator for investment property, and side-by-side comparison over the same horizon. Live recalculation on every input change.",
+        "cta": "Try it"
+      },
+      "compare": {
+        "title": "Compare and save",
+        "description": "Save scenarios to your dashboard and compare them any time. Named calculations with edit history — your numbers stay put.",
+        "cta": "Dashboard"
+      },
+      "templates": {
+        "title": "Real-world scenario templates",
+        "description": "Pre-filled templates — S&P 500 historical return 1995–2025, average Prague apartment, CZ dividend ETF. Copy and adjust to your own situation.",
+        "cta": "Templates"
+      }
+    },
+    "cta": {
+      "title": "Start today",
+      "subtitle": "No sign-up needed to try it. Create an account when you want to save scenarios.",
+      "button": "Create free account"
+    },
+    "footer": {
+      "disclaimer": "Investio is an educational tool, not an investment advisor. Calculations are not investment recommendations.",
+      "github": "GitHub",
+      "privacy": "Privacy"
+    }
+  },
+  "meta": {
+    "title": "Investio — Compare stocks with real estate",
+    "description": "Calculator for comparing compound interest from stocks with rental property cashflow. Live calculation, real-world templates, CZ+EN. Try free."
+  },
   "mobile": {
     "tabs": {
       "compound": "Compound",
