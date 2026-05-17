@@ -12,7 +12,10 @@
     "signUp": "Sign up",
     "signOut": "Sign out",
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "passwordConfirm": "Confirm password",
+    "signInCta": "Sign in",
+    "signUpCta": "Create account"
   },
   "dashboard": {
     "title": "My scenarios",

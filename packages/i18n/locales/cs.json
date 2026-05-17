@@ -12,7 +12,10 @@
     "signUp": "Registrovat",
     "signOut": "Odhlásit",
     "email": "E-mail",
-    "password": "Heslo"
+    "password": "Heslo",
+    "passwordConfirm": "Potvrdit heslo",
+    "signInCta": "Přihlásit se",
+    "signUpCta": "Vytvořit účet"
   },
   "dashboard": {
     "title": "Moje scénáře",
