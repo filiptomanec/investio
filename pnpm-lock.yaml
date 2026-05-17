@@ -147,6 +147,12 @@ importers:
       '@investio/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@supabase/ssr':
+        specifier: ^0.5.2
+        version: 0.5.2(@supabase/supabase-js@2.105.4)
+      '@supabase/supabase-js':
+        specifier: ^2.47.12
+        version: 2.105.4
       next:
         specifier: 16.2.6
         version: 16.2.6(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -159,6 +165,9 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -178,6 +187,9 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@types/node@20.19.41)(@vitest/coverage-v8@4.1.6)(vite@8.0.13(@types/node@20.19.41)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.1)(yaml@2.9.0))
 
   packages/auth:
     dependencies:
