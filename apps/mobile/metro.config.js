@@ -1,9 +1,12 @@
-import { getDefaultConfig } from "expo/metro-config";
-import path from "path";
+// Metro config for Expo + pnpm monorepo
+// @ts-check
+const { getDefaultConfig } = require("expo/metro-config");
+const path = require("path");
 
 const projectRoot = __dirname;
 const monorepoRoot = path.resolve(projectRoot, "../..");
 
+/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(projectRoot);
 
 // Critical for pnpm monorepo: watch monorepo root so Metro can resolve
@@ -19,4 +22,4 @@ config.resolver = {
   ],
 };
 
-export default config;
+module.exports = config;

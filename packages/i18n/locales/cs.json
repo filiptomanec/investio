@@ -36,8 +36,8 @@
     },
     "empty": {
       "title": "Zatím nemáš žádné scénáře.",
-      "compoundCta": "Složené úročení",
-      "realEstateCta": "Nemovitost"
+      "compoundCta": "Nový složený úrok",
+      "realEstateCta": "Nová nemovitost"
     },
     "actions": {
       "open": "Otevřít",
@@ -126,15 +126,71 @@
     }
   },
   "comparison": {
-    "title": "Porovnání",
+    "title": "Porovnání scénářů",
+    "subtitle": "Srovnejte dvě investiční strategie vedle sebe.",
     "selectA": "Scénář A",
     "selectB": "Scénář B",
-    "winner": "Lepší volba"
+    "winner": "Lepší volba",
+    "invalidLink": {
+      "description": "Odkaz na porovnání je neplatný nebo poškozený. Zkuste vytvořit nové porovnání.",
+      "backButton": "Zpět na kalkulačky"
+    },
+    "diff": {
+      "finalValue": "Finální hodnota",
+      "totalROI": "Celkové zhodnocení",
+      "winner": "Vítěz"
+    },
+    "share": "Sdílet odkaz",
+    "shareCopied": "Odkaz zkopírován!",
+    "chart": {
+      "title": "Trajektorie hodnoty",
+      "xAxis": "Rok",
+      "yAxis": "Hodnota (Kč)"
+    },
+    "scenarioTypes": {
+      "compound": "Složené úročení",
+      "real_estate": "Nemovitost"
+    },
+    "scenarioA": "Scénář A",
+    "scenarioB": "Scénář B",
+    "winnerA": "Scénář A vyhrává",
+    "winnerB": "Scénář B vyhrává",
+    "tie": "Remíza",
+    "difference": "Rozdíl",
+    "commonHorizon": "Společný horizont",
+    "years": "let",
+    "finalValueLabel": "Finální hodnota",
+    "roiLabel": "Celkové zhodnocení",
+    "inputs": "Vstupy",
+    "result": "Výsledek po {years} letech",
+    "backToDashboard": "Zpět na dashboard"
   },
   "errors": {
     "validation": "Neplatný vstup",
     "network": "Síťová chyba",
     "unauthorized": "Není přihlášen",
     "notFound": "Nenalezeno"
+  },
+  "mobile": {
+    "tabs": {
+      "compound": "Složené",
+      "realEstate": "Nemovitost",
+      "compare": "Porovnat",
+      "dashboard": "Přehled"
+    },
+    "pullToRefresh": "Potáhni pro obnovení",
+    "confirmDelete": "Opravdu chceš smazat tento scénář?",
+    "configBackend": "Konfiguruj backend — chybí EXPO_PUBLIC_SUPABASE_URL nebo EXPO_PUBLIC_SUPABASE_ANON_KEY v .env",
+    "deleteScenario": "Smazat scénář",
+    "noSession": "Pro zobrazení scénářů se přihlas.",
+    "advancedSection": "Pokročilé",
+    "saveScenario": "Uložit scénář",
+    "scenarioA": "Scénář A",
+    "scenarioB": "Scénář B",
+    "horizonLabel": "Společný horizont",
+    "winnerA": "Scénář A vyhrává",
+    "winnerB": "Scénář B vyhrává",
+    "tie": "Nerozhodně",
+    "finalValueDiff": "Rozdíl"
   }
 }
