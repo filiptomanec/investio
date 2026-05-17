@@ -27,12 +27,30 @@
   "calc": {
     "compound": {
       "title": "Compound interest",
+      "subtitle": "Calculate the final value of regular contributions with compounding.",
       "fields": {
         "initialAmount": "Initial amount",
         "monthlyContribution": "Monthly contribution",
         "annualReturnPct": "Annual return",
-        "horizonYears": "Horizon (years)"
-      }
+        "horizonYears": "Horizon (years)",
+        "contributionTiming": {
+          "label": "Contribution timing",
+          "begin": "Beginning of month",
+          "end": "End of month"
+        }
+      },
+      "results": {
+        "finalValue": "Final value",
+        "totalContributions": "Total contributions",
+        "totalGains": "Total gains"
+      },
+      "chart": {
+        "contributions": "Contributions",
+        "gains": "Gains",
+        "month": "Month",
+        "value": "Value"
+      },
+      "disclaimer": "Simplified model. For specific decisions, consult a financial advisor."
     },
     "realEstate": {
       "title": "Real estate & cashflow",
