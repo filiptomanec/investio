@@ -319,7 +319,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-018 — PDF export
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #19 merged)
 - **Blocked by**: T-012
 - **Brief**: Export scénáře nebo comparison view do PDF. `react-pdf` client-side (sdílené komponenty mezi web a mobile, nebo prozatím jen web).
 - **Acceptance criteria**:
@@ -334,7 +334,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-019 — E2E web (Playwright)
 
 - **Owner**: qa
-- **Status**: pending
+- **Status**: done (PR #18 merged, sloučeno s T-020)
 - **Blocked by**: T-013
 - **Brief**: Playwright suite pro happy paths: signup → create scenario → compare → export PDF. + form validation tests.
 - **Acceptance criteria**:
@@ -347,7 +347,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-020 — Mobile E2E (Maestro)
 
 - **Owner**: qa
-- **Status**: pending
+- **Status**: done (PR #18 merged, sloučeno s T-019)
 - **Blocked by**: T-015
 - **Brief**: Maestro flows pro mobile: signup, vytvoření compound scénáře, návrat na dashboard.
 - **Acceptance criteria**:
@@ -360,7 +360,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-021 — Security review
 
 - **Owner**: security
-- **Status**: pending
+- **Status**: done (Opus, sériový po finální vlně). PASS — 0 critical, 0 high, 6 medium, 4 low, 2 info. 5 follow-up tickets navrženo (T-024..T-028, post-launch hardening).
 - **Blocked by**: T-013, T-015
 - **Brief**: OWASP review, RLS policy audit, secrets scan, dep audit. Acceptance bar: žádné high/critical vulnerabilities, RLS pokrývá všechny tabulky, žádný secret v repu.
 - **Acceptance criteria**:
@@ -375,7 +375,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-022 — Sentry + monitoring
 
 - **Owner**: devops
-- **Status**: pending
+- **Status**: done (PR #17 merged)
 - **Blocked by**: T-013, T-015
 - **Brief**: Sentry projekt pro web + mobile. Source maps. Release tagging.
 - **Acceptance criteria**:
@@ -388,7 +388,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-023 — Landing page + SEO
 
 - **Owner**: marketing
-- **Status**: pending
+- **Status**: done (PR #20 merged)
 - **Blocked by**: T-013
 - **Brief**: `/` (landing) s hero, 3 feature sekcemi, CTA na signup. Meta tagy, JSON-LD, sitemap. CZ + EN.
 - **Acceptance criteria**:
@@ -404,6 +404,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 
 - `2026-05-17` — Backlog vytvořen po intake interview. 23 ticketů ve 6 milestones. T-001 (architect) je první. Next: orchestrator čeká na user approval, pak spawn architect přes Agent tool.
 - `2026-05-17` — T-001 done (architect, Opus). Shipnuto: 3 ADR + architecture.md (s calc primitives detail), api.md (9 endpointů, Zod discriminated union), risks.md (5 rizik). Adr-index.md má 3 nové entries. Next: T-002 (architect, data model + schema.sql) odblokovaný; v paralelu lze spawn T-003 (designer, design tokens).
+- `2026-05-17` — **MVP DOKONČENO** (23/23 ticketů done) — finální vlna PR #17 + #18 + #19 + #20 mergnuta paralelně (4 agenti, ~16 min wall-clock, ~$2-3 celkem) + T-021 security sériově (Opus, ~7 min). T-018 PDF export (annual tables fallback místo SVG chart embed, 16 testů), T-019+T-020 E2E (15 Playwright specs + 3 Maestro flows + docs/qa-strategy.md), T-022 Sentry (opt-in via env, CI workflow skeleton, observability.md guide), T-023 landing (hero + 3 features + dynamic OG image programmatically, 142 i18n keys, sitemap+robots, Lighthouse roadmap). Security review PASS: 0 critical/high, 6 medium, 4 low + 5 follow-up tickets navrženo (T-024..T-028 hardening). Konflikt jen `apps/web/package.json` deps (Sentry vs PDF) — union. **Investio MVP ready pro launch decision.**
 - `2026-05-17` — **M3 dokončena + Vercel build fix** (PR #11 fix prisma generate, PR #12-15 features mergnuty). 4 paralelní agenti (3× fullstack + mobile + content), ~16 min wall-clock, ~$3-4 celkem. T-012 comparison view (Base64 URL-based scenarios, default fallback, 11 testů). T-013 dashboard+auth (Supabase Auth UI, OAuth Google disabled bez env, middleware auth gate, 22 testů). T-015+T-016 sloučeno: mobile 4 tabs + Victory Native XL + Skia + direct Supabase, metro.config.ts→.js fix (Node 22 ESM). T-017 6 templates s realistic CZ data + source citations (Damodaran, MSCI, AirDNA, Hypoindex). Vercel deploy fix: `prepare` script v `packages/db` automaticky spustí `prisma generate` po install. Konflikt jen na `dashboard.empty.*` i18n keys (T-014 vs T-013 cta strings; vybrána T-014 "Nový/Nová" prefix verze). Next: T-018 PDF export + T-019/T-020 E2E + T-021 security + T-022/T-023 deploy polish.
 - `2026-05-17` — **M2 dokončena** (PR #6, #7, #8, #9 merged). 4 paralelní agenti přes worktree (3× fullstack + 1× mobile), ~14 min wall-clock. PR #7 mobile (T-014: parity check + auth UI + EAS) — clean merge. PR #9 API (T-008: 4 routes + helpers + integration testy) — clean merge. PR #8 compound web (T-010: form + Recharts + 8 testů, shadcn `base-nova` init) — i18n/lockfile/vitest.config konflikty resolved. PR #6 real estate web (T-011: accordion form + 2 charts + 14 testů, **manuálně Radix UI** ne shadcn) — i18n/lockfile/package.json + **shadcn variant konflikt** (T-010 base-ui vs T-011 Radix). Vyřešen takhle: ponechat T-010 base-ui Tooltip, T-011 page upravena drop `asChild` prop. Cost: ~$3 celkem. Next: M2-zbytek T-012 (comparison view) + T-013 (dashboard) + M3 mobile screens + M4 templates.
 - `2026-05-17` — **M1 dokončena** (PR #2 + #3 + #4 merged). User mergnul PR #2, pak povolil orchestratorovi mergovat zbytek scoped na Investio repo. PR #3 + #4 měly konflikty v `pnpm-lock.yaml` + jeden v `packages/shared/package.json` (union test scripts + coverage dep) — vyřešeno postupně přes `merge origin/main → packages/shared/package.json manual + pnpm install regen lockfile → squash merge`. Tests post-merge: 79/79 shared (calc 64 + formatters 15), 6/6 RLS integration. Next: **M2 paralelizace** T-008 (CRUD API) + T-010 (compound web) + T-011 (real estate web) + T-014 (Expo scaffold).
