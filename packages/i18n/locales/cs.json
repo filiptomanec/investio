@@ -20,7 +20,11 @@
   "dashboard": {
     "title": "Moje scénáře",
     "newScenario": "Nový scénář",
-    "empty": "Zatím nemáš žádné scénáře.",
+    "empty": {
+      "title": "Zatím nemáš žádné scénáře.",
+      "compoundCta": "Nový složený úrok",
+      "realEstateCta": "Nová nemovitost"
+    },
     "filter": {
       "all": "Vše",
       "compound": "Akciové",
@@ -113,5 +117,27 @@
     "network": "Síťová chyba",
     "unauthorized": "Není přihlášen",
     "notFound": "Nenalezeno"
+  },
+  "mobile": {
+    "tabs": {
+      "compound": "Složené",
+      "realEstate": "Nemovitost",
+      "compare": "Porovnat",
+      "dashboard": "Přehled"
+    },
+    "pullToRefresh": "Potáhni pro obnovení",
+    "confirmDelete": "Opravdu chceš smazat tento scénář?",
+    "configBackend": "Konfiguruj backend — chybí EXPO_PUBLIC_SUPABASE_URL nebo EXPO_PUBLIC_SUPABASE_ANON_KEY v .env",
+    "deleteScenario": "Smazat scénář",
+    "noSession": "Pro zobrazení scénářů se přihlas.",
+    "advancedSection": "Pokročilé",
+    "saveScenario": "Uložit scénář",
+    "scenarioA": "Scénář A",
+    "scenarioB": "Scénář B",
+    "horizonLabel": "Společný horizont",
+    "winnerA": "Scénář A vyhrává",
+    "winnerB": "Scénář B vyhrává",
+    "tie": "Nerozhodně",
+    "finalValueDiff": "Rozdíl"
   }
 }

@@ -20,7 +20,11 @@
   "dashboard": {
     "title": "My scenarios",
     "newScenario": "New scenario",
-    "empty": "You have no scenarios yet.",
+    "empty": {
+      "title": "You have no scenarios yet.",
+      "compoundCta": "New compound interest",
+      "realEstateCta": "New real estate"
+    },
     "filter": {
       "all": "All",
       "compound": "Stocks",
@@ -113,5 +117,27 @@
     "network": "Network error",
     "unauthorized": "Not signed in",
     "notFound": "Not found"
+  },
+  "mobile": {
+    "tabs": {
+      "compound": "Compound",
+      "realEstate": "Real estate",
+      "compare": "Compare",
+      "dashboard": "Dashboard"
+    },
+    "pullToRefresh": "Pull to refresh",
+    "confirmDelete": "Are you sure you want to delete this scenario?",
+    "configBackend": "Configure backend — EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY missing in .env",
+    "deleteScenario": "Delete scenario",
+    "noSession": "Sign in to view your scenarios.",
+    "advancedSection": "Advanced",
+    "saveScenario": "Save scenario",
+    "scenarioA": "Scenario A",
+    "scenarioB": "Scenario B",
+    "horizonLabel": "Common horizon",
+    "winnerA": "Scenario A wins",
+    "winnerB": "Scenario B wins",
+    "tie": "Tie",
+    "finalValueDiff": "Difference"
   }
 }
