@@ -15,16 +15,39 @@
     "password": "Heslo",
     "passwordConfirm": "Potvrdit heslo",
     "signInCta": "Přihlásit se",
-    "signUpCta": "Vytvořit účet"
+    "signUpCta": "Vytvořit účet",
+    "signInWithGoogle": "Pokračovat s Google",
+    "signInError": "Přihlášení selhalo. Zkontrolujte e-mail a heslo.",
+    "signUpSuccess": "Účet vytvořen",
+    "checkEmail": "Zkontroluj e-mail pro potvrzení registrace.",
+    "passwordMismatch": "Hesla se neshodují.",
+    "noAccount": "Nemáte účet?",
+    "hasAccount": "Již máte účet?",
+    "googleDisabledTooltip": "Připoj Supabase project (T-006 README)",
+    "backendNotConfigured": "Backend není nakonfigurován — nastav NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY."
   },
   "dashboard": {
     "title": "Moje scénáře",
     "newScenario": "Nový scénář",
-    "empty": "Zatím nemáš žádné scénáře.",
     "filter": {
       "all": "Vše",
       "compound": "Akciové",
       "realEstate": "Nemovitosti"
+    },
+    "empty": {
+      "title": "Zatím nemáš žádné scénáře.",
+      "compoundCta": "Složené úročení",
+      "realEstateCta": "Nemovitost"
+    },
+    "actions": {
+      "open": "Otevřít",
+      "duplicate": "Duplikovat",
+      "delete": "Smazat",
+      "deleteConfirm": "Opravdu chceš smazat tento scénář?"
+    },
+    "types": {
+      "compound": "Složené úročení",
+      "realEstate": "Nemovitost"
     }
   },
   "calc": {
