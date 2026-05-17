@@ -165,11 +165,119 @@
     "result": "Result after {years} years",
     "backToDashboard": "Back to dashboard"
   },
+  "pdf": {
+    "exportButton": "Export PDF",
+    "title": {
+      "compound": "Compound Interest – Investio",
+      "realEstate": "Real Estate & Cashflow – Investio",
+      "comparison": "Scenario Comparison – Investio"
+    },
+    "sections": {
+      "inputs": "Inputs",
+      "results": "Results",
+      "chart": "Time Series Overview",
+      "purchase": "Purchase",
+      "financing": "Financing",
+      "income": "Income",
+      "costs": "Costs",
+      "horizon": "Horizon",
+      "comparisonA": "Scenario A",
+      "comparisonB": "Scenario B",
+      "diff": "Comparison"
+    },
+    "fields": {
+      "initialAmount": "Initial amount",
+      "monthlyContribution": "Monthly contribution",
+      "annualReturnPct": "Annual return",
+      "horizonYears": "Horizon",
+      "contributionTiming": "Contribution timing",
+      "finalValue": "Final value",
+      "totalContributions": "Total contributions",
+      "totalGains": "Total gains",
+      "purchasePrice": "Purchase price",
+      "downPayment": "Down payment",
+      "mortgageRate": "Mortgage rate",
+      "mortgageTerm": "Mortgage term",
+      "monthlyRent": "Monthly rent",
+      "monthlyExpenses": "Monthly expenses",
+      "vacancyRate": "Vacancy rate",
+      "rentGrowth": "Annual rent growth",
+      "appreciation": "Annual appreciation",
+      "incomeTax": "Income tax rate",
+      "monthlyPayment": "Monthly payment",
+      "avgMonthlyCashflow": "Avg. monthly cashflow",
+      "grossYield": "Gross yield",
+      "netYield": "Net yield",
+      "irr": "IRR (annual)",
+      "breakEven": "Break-even month",
+      "finalEquity": "Final equity",
+      "totalCashflow": "Total cashflow",
+      "finalValueA": "Final value A",
+      "finalValueB": "Final value B",
+      "roiA": "ROI A",
+      "roiB": "ROI B",
+      "winner": "Better choice",
+      "delta": "Difference"
+    },
+    "table": {
+      "month": "Month",
+      "year": "Year",
+      "contributions": "Contributions",
+      "value": "Value",
+      "gains": "Gains",
+      "netCashflow": "Net cashflow",
+      "equity": "Equity",
+      "propertyValue": "Property value",
+      "scenarioA": "Scenario A",
+      "scenarioB": "Scenario B"
+    },
+    "disclaimer": "Simplified model. For specific decisions, consult a financial or tax advisor.",
+    "generatedOn": "Generated on {date}"
+  },
   "errors": {
     "validation": "Invalid input",
     "network": "Network error",
     "unauthorized": "Not signed in",
     "notFound": "Not found"
+  },
+  "landing": {
+    "hero": {
+      "title": "Compare stocks and real estate in 5 minutes",
+      "subtitle": "Investio calculates compound interest, rental cashflow, and compares both strategies side by side — no spreadsheets, no sign-up required.",
+      "ctaPrimary": "Start calculating",
+      "ctaSecondary": "Try a template"
+    },
+    "features": {
+      "calculators": {
+        "title": "Three calculators",
+        "description": "Compound interest for stocks and ETFs, cashflow calculator for investment property, and side-by-side comparison over the same horizon. Live recalculation on every input change.",
+        "cta": "Try it"
+      },
+      "compare": {
+        "title": "Compare and save",
+        "description": "Save scenarios to your dashboard and compare them any time. Named calculations with edit history — your numbers stay put.",
+        "cta": "Dashboard"
+      },
+      "templates": {
+        "title": "Real-world scenario templates",
+        "description": "Pre-filled templates — S&P 500 historical return 1995–2025, average Prague apartment, CZ dividend ETF. Copy and adjust to your own situation.",
+        "cta": "Templates"
+      }
+    },
+    "cta": {
+      "title": "Start today",
+      "subtitle": "No sign-up needed to try it. Create an account when you want to save scenarios.",
+      "button": "Create free account"
+    },
+    "footer": {
+      "disclaimer": "Investio is an educational tool, not an investment advisor. Calculations are not investment recommendations.",
+      "github": "GitHub",
+      "privacy": "Privacy"
+    }
+  },
+  "meta": {
+    "title": "Investio — Compare stocks with real estate",
+    "description": "Calculator for comparing compound interest from stocks with rental property cashflow. Live calculation, real-world templates, CZ+EN. Try free."
   },
   "mobile": {
     "tabs": {

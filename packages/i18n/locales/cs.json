@@ -165,11 +165,119 @@
     "result": "Výsledek po {years} letech",
     "backToDashboard": "Zpět na dashboard"
   },
+  "pdf": {
+    "exportButton": "Export PDF",
+    "title": {
+      "compound": "Složené úročení – Investio",
+      "realEstate": "Nemovitost & cashflow – Investio",
+      "comparison": "Porovnání scénářů – Investio"
+    },
+    "sections": {
+      "inputs": "Vstupy",
+      "results": "Výsledky",
+      "chart": "Přehled časové řady",
+      "purchase": "Koupě",
+      "financing": "Financování",
+      "income": "Příjmy",
+      "costs": "Náklady",
+      "horizon": "Horizont",
+      "comparisonA": "Scénář A",
+      "comparisonB": "Scénář B",
+      "diff": "Porovnání"
+    },
+    "fields": {
+      "initialAmount": "Počáteční částka",
+      "monthlyContribution": "Měsíční vklad",
+      "annualReturnPct": "Roční výnos",
+      "horizonYears": "Horizont",
+      "contributionTiming": "Načasování vkladu",
+      "finalValue": "Konečná hodnota",
+      "totalContributions": "Celkem vloženo",
+      "totalGains": "Zhodnocení",
+      "purchasePrice": "Kupní cena",
+      "downPayment": "Vlastní kapitál",
+      "mortgageRate": "Úrok hypotéky",
+      "mortgageTerm": "Splatnost",
+      "monthlyRent": "Měsíční nájem",
+      "monthlyExpenses": "Měsíční náklady",
+      "vacancyRate": "Míra neobsazenosti",
+      "rentGrowth": "Roční růst nájmu",
+      "appreciation": "Roční zhodnocení",
+      "incomeTax": "Sazba daně",
+      "monthlyPayment": "Měsíční splátka",
+      "avgMonthlyCashflow": "Průměrný měs. cashflow",
+      "grossYield": "Hrubý výnos",
+      "netYield": "Čistý výnos",
+      "irr": "IRR (roční)",
+      "breakEven": "Break-even měsíc",
+      "finalEquity": "Finální equity",
+      "totalCashflow": "Celkový cashflow",
+      "finalValueA": "Konečná hodnota A",
+      "finalValueB": "Konečná hodnota B",
+      "roiA": "ROI A",
+      "roiB": "ROI B",
+      "winner": "Lepší volba",
+      "delta": "Rozdíl"
+    },
+    "table": {
+      "month": "Měsíc",
+      "year": "Rok",
+      "contributions": "Vklady",
+      "value": "Hodnota",
+      "gains": "Zhodnocení",
+      "netCashflow": "Čistý cashflow",
+      "equity": "Equity",
+      "propertyValue": "Hodnota nemovitosti",
+      "scenarioA": "Scénář A",
+      "scenarioB": "Scénář B"
+    },
+    "disclaimer": "Zjednodušený model. Pro konkrétní rozhodnutí konzultujte finančního nebo daňového poradce.",
+    "generatedOn": "Vygenerováno {date}"
+  },
   "errors": {
     "validation": "Neplatný vstup",
     "network": "Síťová chyba",
     "unauthorized": "Není přihlášen",
     "notFound": "Nenalezeno"
+  },
+  "landing": {
+    "hero": {
+      "title": "Porovnej akcie s nemovitostmi za 5 minut",
+      "subtitle": "Investio spočítá složené úročení, cashflow z pronájmu a porovná obě strategie vedle sebe — bez excelu, bez registrace.",
+      "ctaPrimary": "Začni počítat",
+      "ctaSecondary": "Vyzkoušej šablonu"
+    },
+    "features": {
+      "calculators": {
+        "title": "Tři kalkulačky",
+        "description": "Složené úročení pro akcie a ETF, cashflow kalkulačka pro investiční nemovitost a porovnání obou strategií na stejném horizontu. Živý výpočet při každé změně vstupu.",
+        "cta": "Zkusit"
+      },
+      "compare": {
+        "title": "Porovnej a ukládej",
+        "description": "Uložte si scénáře do dashboardu a porovnejte je kdykoli. Pojmenované výpočty s historií úprav — vaše čísla se neztrácejí.",
+        "cta": "Dashboard"
+      },
+      "templates": {
+        "title": "Šablony reálných scénářů",
+        "description": "Předplněné šablony — S&P 500 historický výnos 1995–2025, průměrný pražský byt, CZ dividendové ETF. Zkopírujte a upravte podle vlastní situace.",
+        "cta": "Šablony"
+      }
+    },
+    "cta": {
+      "title": "Začni dnes",
+      "subtitle": "Žádná registrace pro vyzkoušení. Účet vytvoříš, až budeš chtít scénáře ukládat.",
+      "button": "Vytvořit bezplatný účet"
+    },
+    "footer": {
+      "disclaimer": "Investio je edukační nástroj, ne investiční poradce. Výpočty neslouží jako doporučení k investici.",
+      "github": "GitHub",
+      "privacy": "Soukromí"
+    }
+  },
+  "meta": {
+    "title": "Investio — Porovnej akcie s nemovitostmi",
+    "description": "Kalkulačka pro porovnání složeného úročení akcií a cashflow z nemovitosti. Živý výpočet, šablony reálných scénářů, CZ+EN. Vyzkoušej zdarma."
   },
   "mobile": {
     "tabs": {

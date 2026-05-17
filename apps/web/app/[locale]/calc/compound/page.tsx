@@ -31,6 +31,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ExportPdfButton } from "@/components/pdf/ExportPdfButton";
+import { CompoundPdf } from "@/components/pdf/CompoundPdf";
+import { buildPdfFilename } from "@/lib/pdf";
 
 // -----------------------------------------------------------------------
 // Form values type — annualReturnPct stored as percent (e.g. 7 = 7%)
@@ -337,6 +340,7 @@ function Field({ label, error, hint, suffix, children, htmlFor }: FieldProps) {
 // -----------------------------------------------------------------------
 export default function CompoundCalcPage() {
   const t = useTranslations("calc.compound");
+  const tPdf = useTranslations("pdf");
   const tCommon = useTranslations("common");
   const locale = useLocale();
 
@@ -528,7 +532,7 @@ export default function CompoundCalcPage() {
                   </div>
 
                   {/* Disabled save button — T-013 */}
-                  <div className="pt-2">
+                  <div className="pt-2 flex flex-col gap-2">
                     <Tooltip>
                       <TooltipTrigger className="w-full">
                         <Button
@@ -544,6 +548,51 @@ export default function CompoundCalcPage() {
                         <p>Uložit scénář – připojí se v T-013 (dashboard)</p>
                       </TooltipContent>
                     </Tooltip>
+                    <ExportPdfButton
+                      label={tPdf("exportButton")}
+                      filename={buildPdfFilename("compound")}
+                      documentFactory={() => {
+                        const input: import("@investio/shared/schemas").CompoundInput = {
+                          ...deferredValues,
+                          annualReturnPct: (deferredValues.annualReturnPct ?? 0) / 100,
+                        };
+                        return (
+                          <CompoundPdf
+                            input={input}
+                            result={displayResult}
+                            locale={locale as "cs" | "en"}
+                            labels={{
+                              title: tPdf("title.compound"),
+                              generatedOn: tPdf("generatedOn"),
+                              sections: {
+                                inputs: tPdf("sections.inputs"),
+                                results: tPdf("sections.results"),
+                                chart: tPdf("sections.chart"),
+                              },
+                              fields: {
+                                initialAmount: t("fields.initialAmount"),
+                                monthlyContribution: t("fields.monthlyContribution"),
+                                annualReturnPct: t("fields.annualReturnPct"),
+                                horizonYears: t("fields.horizonYears"),
+                                contributionTiming: t("fields.contributionTiming.label"),
+                                finalValue: t("results.finalValue"),
+                                totalContributions: t("results.totalContributions"),
+                                totalGains: t("results.totalGains"),
+                              },
+                              table: {
+                                year: tPdf("table.year"),
+                                contributions: tPdf("table.contributions"),
+                                value: tPdf("table.value"),
+                                gains: tPdf("table.gains"),
+                              },
+                              contributionTimingBegin: t("fields.contributionTiming.begin"),
+                              contributionTimingEnd: t("fields.contributionTiming.end"),
+                              disclaimer: tPdf("disclaimer"),
+                            }}
+                          />
+                        );
+                      }}
+                    />
                   </div>
                 </form>
               </CardContent>
@@ -564,7 +613,7 @@ export default function CompoundCalcPage() {
               </Card>
 
               {/* Chart */}
-              <Card>
+              <Card data-testid="compound-chart">
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">
                     Průběh investice

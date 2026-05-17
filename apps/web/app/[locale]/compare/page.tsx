@@ -14,6 +14,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ArrowLeft, Share2, TrendingUp, Home, Check, AlertCircle } from "lucide-react";
+import { ExportPdfButton } from "@/components/pdf/ExportPdfButton";
+import { ComparisonPdf } from "@/components/pdf/ComparisonPdf";
+import { buildPdfFilename } from "@/lib/pdf";
 import Link from "next/link";
 
 import type { ScenarioInput, CompoundInput, RealEstateInput } from "@investio/shared/schemas";
@@ -589,6 +592,7 @@ function ShareButton({ urlA, urlB }: ShareButtonProps) {
 
 function ComparePageInner() {
   const t = useTranslations("comparison");
+  const tPdf = useTranslations("pdf");
   const locale = useLocale() as AppLocale;
   const searchParams = useSearchParams();
 
@@ -708,7 +712,52 @@ function ComparePageInner() {
               {t("commonHorizon")}: {comparison.horizonYears} {t("years")}
             </p>
           </div>
-          <ShareButton urlA={urlParamA} urlB={urlParamB} />
+          <div className="flex items-center gap-2">
+            <ShareButton urlA={urlParamA} urlB={urlParamB} />
+            <ExportPdfButton
+              label={tPdf("exportButton")}
+              filename={buildPdfFilename("comparison")}
+              documentFactory={() => (
+                <ComparisonPdf
+                  inputA={inputA}
+                  inputB={inputB}
+                  comparison={comparison}
+                  locale={locale}
+                  labels={{
+                    title: tPdf("title.comparison"),
+                    generatedOn: tPdf("generatedOn"),
+                    sections: {
+                      inputs: tPdf("sections.inputs"),
+                      results: tPdf("sections.results"),
+                      chart: tPdf("sections.chart"),
+                      comparisonA: tPdf("sections.comparisonA"),
+                      comparisonB: tPdf("sections.comparisonB"),
+                      diff: tPdf("sections.diff"),
+                    },
+                    fields: {
+                      winner: tPdf("fields.winner"),
+                      finalValueA: tPdf("fields.finalValueA"),
+                      finalValueB: tPdf("fields.finalValueB"),
+                      roiA: tPdf("fields.roiA"),
+                      roiB: tPdf("fields.roiB"),
+                      delta: tPdf("fields.delta"),
+                      horizonYears: tPdf("fields.horizonYears"),
+                    },
+                    table: {
+                      year: tPdf("table.year"),
+                      scenarioA: tPdf("table.scenarioA"),
+                      scenarioB: tPdf("table.scenarioB"),
+                      delta: tPdf("fields.delta"),
+                    },
+                    winnerA: t("winnerA"),
+                    winnerB: t("winnerB"),
+                    tie: t("tie"),
+                    disclaimer: tPdf("disclaimer"),
+                  }}
+                />
+              )}
+            />
+          </div>
         </div>
 
         {/* Common chart — full width */}
