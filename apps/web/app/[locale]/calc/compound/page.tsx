@@ -613,7 +613,7 @@ export default function CompoundCalcPage() {
               </Card>
 
               {/* Chart */}
-              <Card>
+              <Card data-testid="compound-chart">
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">
                     Průběh investice
