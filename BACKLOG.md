@@ -152,7 +152,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-008 — Scenarios CRUD API
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #9 merged)
 - **Blocks**: T-013
 - **Blocked by**: T-006, T-007
 - **Brief**: Next.js Route Handlers pro Scenario CRUD. Zod input/output sdílené přes `packages/shared`. RLS-respecting queries přes Prisma + Supabase session.
@@ -189,7 +189,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-010 — Compound interest calculator (web)
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #8 merged)
 - **Blocks**: T-012
 - **Blocked by**: T-003, T-007, T-009
 - **Brief**: Web stránka `/calc/compound`. Form (Zod-validated, hookform), live graf (Recharts), výsledek (FV breakdown). Read-only mode pro template, edit mode pro save.
@@ -206,7 +206,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-011 — Real estate + cashflow calculator (web)
 
 - **Owner**: fullstack
-- **Status**: pending
+- **Status**: done (PR #6 merged)
 - **Blocks**: T-012
 - **Blocked by**: T-003, T-007, T-009
 - **Brief**: Web stránka `/calc/real-estate`. Form (kupní cena, vlastní kapitál, hypotéka, pronájem, náklady, daň, údržba, zhodnocení %). Cashflow tabulka + grafy (cashflow per měsíc, equity build-up, hodnota nemovitosti vs hypotéka).
@@ -257,7 +257,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 #### T-014 — Expo scaffold + sdílené packages
 
 - **Owner**: mobile
-- **Status**: pending
+- **Status**: done (PR #7 merged — scope adjusted: parity check + auth UI stubs + EAS profile, scaffold byl už v T-005)
 - **Blocks**: T-015, T-016, T-017, T-018
 - **Blocked by**: T-005, T-007, T-009
 - **Brief**: Expo SDK 53+ projekt v `apps/mobile`, sdílí `packages/shared`, `packages/i18n`. Navigace (Expo Router). Auth Supabase přes shared session strategy. EAS preview build pipeline.
@@ -404,6 +404,7 @@ Standardní per `templates/BACKLOG.md`. Append-only. Owner = jeden agent. AC = t
 
 - `2026-05-17` — Backlog vytvořen po intake interview. 23 ticketů ve 6 milestones. T-001 (architect) je první. Next: orchestrator čeká na user approval, pak spawn architect přes Agent tool.
 - `2026-05-17` — T-001 done (architect, Opus). Shipnuto: 3 ADR + architecture.md (s calc primitives detail), api.md (9 endpointů, Zod discriminated union), risks.md (5 rizik). Adr-index.md má 3 nové entries. Next: T-002 (architect, data model + schema.sql) odblokovaný; v paralelu lze spawn T-003 (designer, design tokens).
+- `2026-05-17` — **M2 dokončena** (PR #6, #7, #8, #9 merged). 4 paralelní agenti přes worktree (3× fullstack + 1× mobile), ~14 min wall-clock. PR #7 mobile (T-014: parity check + auth UI + EAS) — clean merge. PR #9 API (T-008: 4 routes + helpers + integration testy) — clean merge. PR #8 compound web (T-010: form + Recharts + 8 testů, shadcn `base-nova` init) — i18n/lockfile/vitest.config konflikty resolved. PR #6 real estate web (T-011: accordion form + 2 charts + 14 testů, **manuálně Radix UI** ne shadcn) — i18n/lockfile/package.json + **shadcn variant konflikt** (T-010 base-ui vs T-011 Radix). Vyřešen takhle: ponechat T-010 base-ui Tooltip, T-011 page upravena drop `asChild` prop. Cost: ~$3 celkem. Next: M2-zbytek T-012 (comparison view) + T-013 (dashboard) + M3 mobile screens + M4 templates.
 - `2026-05-17` — **M1 dokončena** (PR #2 + #3 + #4 merged). User mergnul PR #2, pak povolil orchestratorovi mergovat zbytek scoped na Investio repo. PR #3 + #4 měly konflikty v `pnpm-lock.yaml` + jeden v `packages/shared/package.json` (union test scripts + coverage dep) — vyřešeno postupně přes `merge origin/main → packages/shared/package.json manual + pnpm install regen lockfile → squash merge`. Tests post-merge: 79/79 shared (calc 64 + formatters 15), 6/6 RLS integration. Next: **M2 paralelizace** T-008 (CRUD API) + T-010 (compound web) + T-011 (real estate web) + T-014 (Expo scaffold).
 - `2026-05-17` — **M1 trojka paralelně review** (worktree, ~11 min wall-clock pro all 3, ~$1.30 celkem). PR #2 T-007 calc logic (64 testů, coverage 97.68 % stmts). PR #3 T-006 Supabase+Prisma+RLS (6/6 RLS integration testy). PR #4 T-009 i18n (next-intl web + i18next mobile + formatters + parity check). 5 nových learnings zachyceno (Prisma db pull + auth schema, RLS local Postgres role bypass, Zod discriminatedUnion + refine, Next.js 16 proxy.ts rename, Supabase port collision). Next: user mergne 3 PR; pak M2 paralelizace T-008 (CRUD API) + T-010 (compound web) + T-011 (real estate web) + T-014 (Expo scaffold parita).
 - `2026-05-17` — T-005 review (fullstack, Sonnet, ~14 min, ~$0.70). Monorepo scaffold + GitHub repo `filiptomanec/investio` (private) + PR #1. 7 packages typecheck green, web build green, dev server vrací 200. Drobné fait accompli: Expo SDK 54 (ne 53), Tailwind v4 (ne v3). Vercel setup vyžaduje user OAuth. Next: user mergne PR #1 + napojí Vercel; pak M1 paralelizace T-006 (Supabase+Prisma) + T-007 (calc logic) + T-009 (i18n) přes isolation:worktree.
