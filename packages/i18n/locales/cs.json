@@ -103,10 +103,44 @@
     }
   },
   "comparison": {
-    "title": "Porovnání",
+    "title": "Porovnání scénářů",
+    "subtitle": "Srovnejte dvě investiční strategie vedle sebe.",
     "selectA": "Scénář A",
     "selectB": "Scénář B",
-    "winner": "Lepší volba"
+    "winner": "Lepší volba",
+    "invalidLink": {
+      "description": "Odkaz na porovnání je neplatný nebo poškozený. Zkuste vytvořit nové porovnání.",
+      "backButton": "Zpět na kalkulačky"
+    },
+    "diff": {
+      "finalValue": "Finální hodnota",
+      "totalROI": "Celkové zhodnocení",
+      "winner": "Vítěz"
+    },
+    "share": "Sdílet odkaz",
+    "shareCopied": "Odkaz zkopírován!",
+    "chart": {
+      "title": "Trajektorie hodnoty",
+      "xAxis": "Rok",
+      "yAxis": "Hodnota (Kč)"
+    },
+    "scenarioTypes": {
+      "compound": "Složené úročení",
+      "real_estate": "Nemovitost"
+    },
+    "scenarioA": "Scénář A",
+    "scenarioB": "Scénář B",
+    "winnerA": "Scénář A vyhrává",
+    "winnerB": "Scénář B vyhrává",
+    "tie": "Remíza",
+    "difference": "Rozdíl",
+    "commonHorizon": "Společný horizont",
+    "years": "let",
+    "finalValueLabel": "Finální hodnota",
+    "roiLabel": "Celkové zhodnocení",
+    "inputs": "Vstupy",
+    "result": "Výsledek po {years} letech",
+    "backToDashboard": "Zpět na dashboard"
   },
   "errors": {
     "validation": "Neplatný vstup",

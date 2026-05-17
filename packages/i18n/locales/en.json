@@ -103,10 +103,44 @@
     }
   },
   "comparison": {
-    "title": "Comparison",
+    "title": "Scenario Comparison",
+    "subtitle": "Compare two investment strategies side by side.",
     "selectA": "Scenario A",
     "selectB": "Scenario B",
-    "winner": "Better choice"
+    "winner": "Better choice",
+    "invalidLink": {
+      "description": "The comparison link is invalid or corrupted. Try creating a new comparison.",
+      "backButton": "Back to calculators"
+    },
+    "diff": {
+      "finalValue": "Final value",
+      "totalROI": "Total ROI",
+      "winner": "Winner"
+    },
+    "share": "Share link",
+    "shareCopied": "Link copied!",
+    "chart": {
+      "title": "Value trajectory",
+      "xAxis": "Year",
+      "yAxis": "Value (CZK)"
+    },
+    "scenarioTypes": {
+      "compound": "Compound interest",
+      "real_estate": "Real estate"
+    },
+    "scenarioA": "Scenario A",
+    "scenarioB": "Scenario B",
+    "winnerA": "Scenario A wins",
+    "winnerB": "Scenario B wins",
+    "tie": "Tie",
+    "difference": "Difference",
+    "commonHorizon": "Common horizon",
+    "years": "years",
+    "finalValueLabel": "Final value",
+    "roiLabel": "Total ROI",
+    "inputs": "Inputs",
+    "result": "Result after {years} years",
+    "backToDashboard": "Back to dashboard"
   },
   "errors": {
     "validation": "Invalid input",
