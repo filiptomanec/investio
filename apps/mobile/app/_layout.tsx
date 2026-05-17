@@ -1,4 +1,6 @@
-// i18n must be initialized before any component renders
+// Sentry and i18n must be initialized before any component renders.
+// Sentry is opt-in: initSentry() is a no-op if EXPO_PUBLIC_SENTRY_DSN is absent.
+import { initSentry } from "../lib/sentry";
 import "../lib/i18n";
 
 import { useEffect } from "react";
@@ -9,6 +11,9 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { supabase, isBackendConfigured } from "@/lib/supabase";
+
+// Initialize Sentry at module load time — before the first render.
+initSentry();
 
 export const unstable_settings = {
   anchor: "(tabs)",
