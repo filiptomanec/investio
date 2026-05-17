@@ -17,6 +17,9 @@
     },
     "test": {
       "dependsOn": ["^build"]
+    },
+    "check-parity": {
+      "cache": false
     }
   }
 }

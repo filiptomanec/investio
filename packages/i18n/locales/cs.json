@@ -1,5 +1,61 @@
 {
   "common": {
-    "appName": "Investio"
+    "appName": "Investio",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "delete": "Smazat",
+    "loading": "Načítám...",
+    "error": "Chyba"
+  },
+  "auth": {
+    "signIn": "Přihlásit se",
+    "signUp": "Registrovat",
+    "signOut": "Odhlásit",
+    "email": "E-mail",
+    "password": "Heslo"
+  },
+  "dashboard": {
+    "title": "Moje scénáře",
+    "newScenario": "Nový scénář",
+    "empty": "Zatím nemáš žádné scénáře.",
+    "filter": {
+      "all": "Vše",
+      "compound": "Akciové",
+      "realEstate": "Nemovitosti"
+    }
+  },
+  "calc": {
+    "compound": {
+      "title": "Složené úročení",
+      "fields": {
+        "initialAmount": "Počáteční částka",
+        "monthlyContribution": "Měsíční vklad",
+        "annualReturnPct": "Roční výnos",
+        "horizonYears": "Horizont (roky)"
+      }
+    },
+    "realEstate": {
+      "title": "Nemovitost & cashflow",
+      "fields": {
+        "purchasePrice": "Kupní cena",
+        "downPayment": "Vlastní kapitál",
+        "mortgage": "Hypotéka",
+        "rate": "Úrok",
+        "term": "Splatnost",
+        "monthlyRent": "Měsíční nájem"
+      }
+    }
+  },
+  "comparison": {
+    "title": "Porovnání",
+    "selectA": "Scénář A",
+    "selectB": "Scénář B",
+    "winner": "Lepší volba"
+  },
+  "errors": {
+    "validation": "Neplatný vstup",
+    "network": "Síťová chyba",
+    "unauthorized": "Není přihlášen",
+    "notFound": "Nenalezeno"
   }
 }
