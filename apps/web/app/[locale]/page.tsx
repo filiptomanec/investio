@@ -1,8 +1,9 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import Link from "next/link";
-import { Calculator, GitCompare, BookOpen } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Calculator, GitCompare, BookOpen, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { LiveCounter } from "@/components/landing/LiveCounter";
+import { HeroChartAnchor } from "@/components/landing/HeroChartAnchor";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -56,44 +57,7 @@ function StructuredData() {
 }
 
 // -----------------------------------------------------------------------
-// Hero geometric pattern — pure CSS, no external images
-// -----------------------------------------------------------------------
-function HeroPattern() {
-  return (
-    <div
-      aria-hidden="true"
-      className="absolute inset-0 overflow-hidden pointer-events-none"
-      style={{
-        background:
-          "radial-gradient(ellipse 80% 60% at 60% 40%, hsl(174 80% 26% / 0.08) 0%, transparent 70%), " +
-          "radial-gradient(ellipse 50% 40% at 80% 80%, hsl(38 92% 50% / 0.06) 0%, transparent 60%)",
-      }}
-    >
-      {/* Geometric dots grid */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <pattern
-            id="hero-dots"
-            x="0"
-            y="0"
-            width="32"
-            height="32"
-            patternUnits="userSpaceOnUse"
-          >
-            <circle cx="1" cy="1" r="1" fill="hsl(174 80% 26% / 0.15)" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#hero-dots)" />
-      </svg>
-    </div>
-  );
-}
-
-// -----------------------------------------------------------------------
-// Feature card
+// Feature card — bolder treatment with accent icon halo and lift on hover
 // -----------------------------------------------------------------------
 type FeatureCardProps = {
   icon: React.ReactNode;
@@ -111,35 +75,61 @@ function FeatureCard({
   ctaHref,
 }: FeatureCardProps) {
   return (
-    <Card className="flex flex-col h-full" data-testid="feature-card">
-      <CardHeader>
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+    <Link
+      href={ctaHref}
+      data-testid="feature-card"
+      className="group relative flex h-full flex-col gap-5 overflow-hidden rounded-3xl border border-primary/10 bg-card p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 motion-safe:hover:shadow-[0_0_60px_-15px_hsl(174_80%_36%/0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      {/* Inner top-left accent glow — premium feel per references */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-12 -top-12 size-40 rounded-full bg-primary/[0.07] blur-2xl transition-opacity duration-300 group-hover:bg-primary/[0.15]"
+      />
+
+      {/* Icon with halo */}
+      <div className="relative">
+        <div
+          aria-hidden="true"
+          className="absolute -inset-2 rounded-full bg-primary/15 blur-md transition-opacity duration-300 group-hover:bg-primary/30"
+        />
+        <div className="relative flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
           {icon}
         </div>
-        <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        <CardDescription className="text-sm leading-relaxed">
+      </div>
+
+      <div className="relative space-y-2">
+        <h3 className="text-xl font-bold tracking-tight text-foreground">
+          {title}
+        </h3>
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1" />
-      <CardFooter>
-        <Link
-          href={ctaHref}
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {ctaLabel} →
-        </Link>
-      </CardFooter>
-    </Card>
+        </p>
+      </div>
+
+      <div className="relative mt-auto flex items-center gap-1.5 text-sm font-semibold text-primary">
+        <span>{ctaLabel}</span>
+        <ArrowRight
+          aria-hidden="true"
+          className="size-4 transition-transform duration-300 motion-safe:group-hover:translate-x-1"
+        />
+      </div>
+    </Link>
   );
 }
 
 // -----------------------------------------------------------------------
-// Landing page content — server component, no client interactivity
+// Landing page content — server component, no client interactivity except
+// the LiveCounter island below the fold.
 // -----------------------------------------------------------------------
 function LandingPage() {
   const t = useTranslations("landing");
   const tCommon = useTranslations("common");
+
+  // Split the hero title so the last word can carry the gradient treatment.
+  const heroTitle = t("hero.title");
+  const lastSpace = heroTitle.lastIndexOf(" ");
+  const titleHead = lastSpace > 0 ? heroTitle.slice(0, lastSpace) : heroTitle;
+  const titleTail = lastSpace > 0 ? heroTitle.slice(lastSpace + 1) : "";
 
   return (
     <>
@@ -154,41 +144,43 @@ function LandingPage() {
       </a>
 
       {/* ── Navigation ───────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-4 sm:px-6">
+      <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 font-semibold text-foreground"
+            className="flex items-center gap-2.5 font-semibold text-foreground"
             aria-label={tCommon("appName")}
           >
-            {/* Brand mark — teal square */}
+            {/* Brand mark — teal square with glow */}
             <span
               aria-hidden="true"
-              className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold"
+              className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground text-sm font-black ring-1 ring-primary/40 glow-accent-sm"
             >
               I
             </span>
-            <span className="text-sm font-semibold">{tCommon("appName")}</span>
+            <span className="text-base font-bold tracking-tight">
+              {tCommon("appName")}
+            </span>
           </Link>
           <nav
-            className="hidden gap-6 sm:flex items-center"
+            className="hidden gap-7 sm:flex items-center"
             aria-label="Main navigation"
           >
             <Link
               href="/cs/compare"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {t("features.templates.cta")}
             </Link>
             <Link
               href="/cs/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {tCommon("appName") === "Investio" ? "Přihlásit" : "Sign in"}
             </Link>
             <Link
               href="/cs/signup"
-              className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition-all motion-safe:hover:scale-[1.03] hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               {t("cta.button")}
             </Link>
@@ -199,83 +191,170 @@ function LandingPage() {
       <main id="main" className="flex-1">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
         <section
-          className="relative overflow-hidden bg-background py-20 sm:py-28 lg:py-36"
+          className="relative overflow-hidden bg-background"
           aria-labelledby="hero-heading"
         >
-          <HeroPattern />
-          <div className="relative mx-auto max-w-screen-xl px-4 sm:px-6 text-center">
-            {/* Amber accent badge */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 rounded-full bg-amber-500"
-              />
-              CZ + EN · Zdarma · Open source
+          {/* Layered atmosphere: teal halo + noise grain */}
+          <div aria-hidden="true" className="absolute inset-0 bg-halo-teal pointer-events-none" />
+          <div aria-hidden="true" className="absolute inset-0 bg-noise pointer-events-none mix-blend-overlay" />
+
+          <div className="relative mx-auto grid max-w-screen-xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-12 lg:gap-8 lg:py-28">
+            {/* Left: copy + CTAs */}
+            <div className="lg:col-span-7 flex flex-col items-start text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <Sparkles size={12} aria-hidden="true" />
+                <span>CZ + EN · Zdarma · Open source</span>
+              </div>
+
+              <h1
+                id="hero-heading"
+                className="mt-6 max-w-3xl text-display text-foreground"
+              >
+                {titleHead}
+                {titleTail && (
+                  <>
+                    {" "}
+                    <span className="text-gradient-teal">{titleTail}</span>
+                  </>
+                )}
+              </h1>
+
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+                {t("hero.subtitle")}
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href="/cs/calc/compound"
+                  className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground transition-all glow-accent motion-safe:hover:scale-[1.03] hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto"
+                >
+                  {t("hero.ctaPrimary")}
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5"
+                  />
+                </Link>
+                <Link
+                  href="/cs/compare"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-full border border-primary/40 bg-background/60 px-7 text-sm font-semibold text-foreground backdrop-blur transition-all motion-safe:hover:scale-[1.03] hover:border-primary/70 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto"
+                >
+                  {t("hero.ctaSecondary")}
+                </Link>
+              </div>
+
+              <p className="mt-5 text-xs font-medium text-muted-foreground">
+                Žádná registrace pro vyzkoušení. Žádný trading bias.
+              </p>
             </div>
 
-            <h1
-              id="hero-heading"
-              className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl"
-              style={{ lineHeight: 1.1, letterSpacing: "-0.02em" }}
-            >
-              {t("hero.title")}
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground leading-relaxed">
-              {t("hero.subtitle")}
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/cs/calc/compound"
-                className="inline-flex w-full sm:w-auto h-11 items-center justify-center rounded-lg bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {t("hero.ctaPrimary")}
-              </Link>
-              <Link
-                href="/cs/compare"
-                className="inline-flex w-full sm:w-auto h-11 items-center justify-center rounded-lg border border-border bg-background px-8 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {t("hero.ctaSecondary")}
-              </Link>
+            {/* Right: hero visual anchor — animated dual line chart */}
+            <div className="lg:col-span-5 relative">
+              <HeroChartAnchor />
             </div>
+          </div>
 
-            <p className="mt-5 text-xs text-muted-foreground">
-              Žádná registrace pro vyzkoušení. Žádný trading bias.
-            </p>
+          {/* Animated stat strip below the fold */}
+          <div className="relative border-t border-border/60 bg-card/30 backdrop-blur-sm">
+            <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-6 px-4 py-8 sm:flex-row sm:justify-around sm:px-6">
+              <div className="flex items-center gap-3">
+                <div
+                  aria-hidden="true"
+                  className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20"
+                >
+                  <TrendingUp size={18} />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Porovnáno scénářů
+                  </p>
+                  <p className="text-2xl font-black text-foreground text-finance">
+                    <LiveCounter target={12847} />
+                  </p>
+                </div>
+              </div>
+
+              <div className="hidden h-10 w-px bg-border sm:block" aria-hidden="true" />
+
+              <div className="flex items-center gap-3">
+                <div
+                  aria-hidden="true"
+                  className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20"
+                >
+                  <Calculator size={18} />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    3 kalkulačky
+                  </p>
+                  <p className="text-2xl font-black text-foreground text-finance">
+                    Akcie · Nemovitost · Porovnání
+                  </p>
+                </div>
+              </div>
+
+              <div className="hidden h-10 w-px bg-border sm:block" aria-hidden="true" />
+
+              <div className="flex items-center gap-3">
+                <div
+                  aria-hidden="true"
+                  className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20"
+                >
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Open source · MIT
+                  </p>
+                  <p className="text-2xl font-black text-foreground text-finance">
+                    Zdarma navždy
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* ── Features ─────────────────────────────────────────────────────── */}
         <section
-          className="bg-muted/30 py-20 sm:py-24"
+          className="relative overflow-hidden bg-muted/30 py-24 sm:py-28"
           aria-labelledby="features-heading"
         >
-          <div className="mx-auto max-w-screen-xl px-4 sm:px-6">
-            <h2
-              id="features-heading"
-              className="mb-12 text-center text-2xl font-semibold text-foreground sm:text-3xl"
-            >
-              Všechno, co potřebuješ k rozhodnutí
-            </h2>
+          <div aria-hidden="true" className="absolute inset-0 bg-halo-teal-bottom-left pointer-events-none" />
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="relative mx-auto max-w-screen-xl px-4 sm:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Vše v jednom nástroji
+              </p>
+              <h2
+                id="features-heading"
+                className="mt-4 text-display-lg text-foreground"
+              >
+                Spočítej. Porovnej. Rozhodni.
+              </h2>
+              <p className="mt-5 text-lg text-muted-foreground">
+                Tři kalkulačky, jeden cíl — vidět svá čísla jasně, než nalijete
+                peníze do akcií nebo do bytu.
+              </p>
+            </div>
+
+            <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
               <FeatureCard
-                icon={<Calculator size={20} aria-hidden="true" />}
+                icon={<Calculator size={22} aria-hidden="true" />}
                 title={t("features.calculators.title")}
                 description={t("features.calculators.description")}
                 ctaLabel={t("features.calculators.cta")}
                 ctaHref="/cs/calc/compound"
               />
               <FeatureCard
-                icon={<GitCompare size={20} aria-hidden="true" />}
+                icon={<GitCompare size={22} aria-hidden="true" />}
                 title={t("features.compare.title")}
                 description={t("features.compare.description")}
                 ctaLabel={t("features.compare.cta")}
                 ctaHref="/cs/dashboard"
               />
               <FeatureCard
-                icon={<BookOpen size={20} aria-hidden="true" />}
+                icon={<BookOpen size={22} aria-hidden="true" />}
                 title={t("features.templates.title")}
                 description={t("features.templates.description")}
                 ctaLabel={t("features.templates.cta")}
@@ -287,30 +366,60 @@ function LandingPage() {
 
         {/* ── CTA strip ────────────────────────────────────────────────────── */}
         <section
-          className="bg-primary py-16 sm:py-20"
+          className="relative overflow-hidden"
           aria-labelledby="cta-heading"
         >
-          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 text-center">
-            {/* Amber accent stripe */}
-            <div
-              aria-hidden="true"
-              className="mx-auto mb-6 h-1 w-16 rounded-full bg-amber-400"
-            />
+          {/* Layered teal gradient + grain texture */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg, hsl(174 80% 18%) 0%, hsl(174 80% 26%) 50%, hsl(174 80% 16%) 100%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-noise pointer-events-none mix-blend-overlay"
+          />
+          {/* Inner glow halos */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-32 top-1/2 size-96 -translate-y-1/2 rounded-full bg-white/10 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-32 bottom-0 size-72 rounded-full bg-white/[0.07] blur-3xl"
+          />
+
+          <div className="relative mx-auto max-w-screen-xl px-4 py-24 text-center sm:px-6 sm:py-32">
+            {/* Tiny pill badge */}
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+              <span
+                aria-hidden="true"
+                className="size-1.5 rounded-full bg-amber-300"
+              />
+              Začni hned
+            </div>
             <h2
               id="cta-heading"
-              className="text-2xl font-bold text-primary-foreground sm:text-3xl"
+              className="mx-auto max-w-2xl text-display-lg text-white"
             >
               {t("cta.title")}
             </h2>
-            <p className="mt-3 text-primary-foreground/80 text-base max-w-md mx-auto">
+            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-white/80">
               {t("cta.subtitle")}
             </p>
-            <div className="mt-8">
+            <div className="mt-10">
               <Link
                 href="/cs/signup"
-                className="inline-flex h-11 items-center justify-center rounded-lg bg-white px-10 text-sm font-semibold text-primary transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-primary transition-all motion-safe:hover:scale-[1.03] hover:bg-white/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
               >
                 {t("cta.button")}
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5"
+                />
               </Link>
             </div>
           </div>
@@ -318,26 +427,42 @@ function LandingPage() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border bg-background py-8">
-        <div className="mx-auto max-w-screen-xl px-4 sm:px-6">
-          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
-            <p className="text-xs text-muted-foreground max-w-md">
-              {t("footer.disclaimer")}
-            </p>
+      <footer className="border-t border-border bg-background">
+        {/* Top accent line */}
+        <div
+          aria-hidden="true"
+          className="h-px w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+        />
+        <div className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6">
+          <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-between sm:text-left">
+            <div className="flex items-center gap-2.5">
+              <span
+                aria-hidden="true"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-black"
+              >
+                I
+              </span>
+              <p className="max-w-md text-xs text-muted-foreground">
+                {t("footer.disclaimer")}
+              </p>
+            </div>
             <nav
-              className="flex items-center gap-4 text-xs text-muted-foreground"
+              className="flex items-center gap-4 text-xs font-medium text-muted-foreground"
               aria-label="Footer navigation"
             >
               <a
                 href="https://github.com/filiptomanec/investio"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-foreground"
               >
                 {t("footer.github")}
               </a>
               <span aria-hidden="true">·</span>
-              <Link href="/cs/privacy" className="hover:text-foreground transition-colors">
+              <Link
+                href="/cs/privacy"
+                className="transition-colors hover:text-foreground"
+              >
                 {t("footer.privacy")}
               </Link>
               <span aria-hidden="true">·</span>
