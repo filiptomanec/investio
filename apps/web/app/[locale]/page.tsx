@@ -20,7 +20,9 @@ export default async function LocalePage({ params }: Props) {
 // JSON-LD structured data — WebApplication + Organization
 // -----------------------------------------------------------------------
 function StructuredData() {
-  const baseUrl = "https://investio.app";
+  const baseUrl =
+    process.env["NEXT_PUBLIC_SITE_URL"]?.replace(/\/$/, "") ??
+    "https://investio.filiptomanec.cz";
   const jsonLd = [
     {
       "@context": "https://schema.org",

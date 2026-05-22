@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@investio/i18n";
 import "../globals.css";
 
-const BASE_URL = "https://investio.app";
+// Load Geist once at module level — next/font deduplicates across layouts.
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+
+// NEXT_PUBLIC_SITE_URL must be set in Vercel (e.g. https://investio.filiptomanec.cz).
+// Falls back to investio.app for backwards compatibility on domains not yet migrated.
+const BASE_URL =
+  process.env["NEXT_PUBLIC_SITE_URL"]?.replace(/\/$/, "") ??
+  "https://investio.filiptomanec.cz";
 
 export async function generateMetadata({
   params,
@@ -16,7 +25,11 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
 
-  const csUrl = `${BASE_URL}/cs`;
+  // localePrefix: "as-needed" — CS (default) is served WITHOUT /cs prefix.
+  // Canonicals must point at the actually-served URL to avoid LH "canonical
+  // points to hreflang" mismatch. EN is always at /en.
+  // hreflang alternates also use the same un-prefixed CS URL.
+  const csUrl = BASE_URL; // CS root = https://investio.filiptomanec.cz
   const enUrl = `${BASE_URL}/en`;
   const canonicalUrl = locale === "en" ? enUrl : csUrl;
   const ogImageUrl = `${BASE_URL}/${locale}/opengraph-image`;
@@ -81,14 +94,8 @@ export default async function LocaleLayout({ children, params }: Props) {
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className="h-full antialiased">
-      <body
-        className="min-h-full flex flex-col"
-        style={{
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, 'Helvetica Neue', Arial, sans-serif",
-        }}
-      >
+    <html lang={locale} className={cn("h-full antialiased font-sans", geist.variable)}>
+      <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
