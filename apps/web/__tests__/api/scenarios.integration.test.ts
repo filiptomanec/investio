@@ -371,3 +371,56 @@ describe("PATCH /api/scenarios/:id", () => {
     expect(body.scenario.name).toBe("Updated Name");
   });
 });
+
+// ---------------------------------------------------------------------------
+// T-024 — Defense-in-depth ownership filter cross-user tests
+// Verifies that app-layer user_id predicate (belt) rejects cross-user access
+// even though RLS (suspenders) would also block it at DB level.
+// ---------------------------------------------------------------------------
+
+describe("T-024 cross-user ownership — user B cannot access user A's scenario", () => {
+  it("user B GET user A scenario by id → 404", async () => {
+    const res = await apiFetch(`/scenarios/${userAScenarioId}`, userBToken);
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error.code).toBe("NOT_FOUND");
+  });
+
+  it("user B PATCH user A scenario → 404", async () => {
+    const res = await apiFetch(`/scenarios/${userAScenarioId}`, userBToken, {
+      method: "PATCH",
+      body: JSON.stringify({ name: "Hijacked Name" }),
+    });
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error.code).toBe("NOT_FOUND");
+  });
+
+  it("user B DELETE user A scenario → 404", async () => {
+    const res = await apiFetch(`/scenarios/${userAScenarioId}`, userBToken, {
+      method: "DELETE",
+    });
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error.code).toBe("NOT_FOUND");
+  });
+
+  it("user B DUPLICATE user A scenario → 404", async () => {
+    const res = await apiFetch(
+      `/scenarios/${userAScenarioId}/duplicate`,
+      userBToken,
+      { method: "POST", body: JSON.stringify({}) },
+    );
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error.code).toBe("NOT_FOUND");
+  });
+
+  it("user A's scenario name is unchanged after B's failed attempts", async () => {
+    const res = await apiFetch(`/scenarios/${userAScenarioId}`, userAToken);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // Name was last legitimately updated to "Updated Name" in the PATCH suite above
+    expect(body.scenario.name).toBe("Updated Name");
+  });
+});
