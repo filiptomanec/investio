@@ -1,15 +1,15 @@
 /**
- * Real estate calculator — T-015.
+ * Real estate calculator — T-015 (bolder mobile pass).
  *
  * Layout:
- *   1. Hero metrics (monthlyCashflow, yield, IRR, equity, break-even)
- *   2. Cashflow chart + Equity build-up chart
- *   3. Input accordion sections: Koupě / Financování / Příjmy / Náklady / Horizont
- *   4. Disclaimer
- *   5. Sticky save CTA (stub)
- *
- * Chart: Victory Native XL CartesianChart + Area/Line.
- * Requires a dev build with @shopify/react-native-skia.
+ *   1. Page title + subtitle
+ *   2. Hero gradient card — avgMonthlyCashflow (big number) + IRR pill + 4-grid
+ *      of secondary metrics
+ *   3. Cashflow chart card
+ *   4. Equity chart card with legend
+ *   5. 5 accordion sections (Koupě / Financování / Příjmy / Náklady / Horizont)
+ *   6. Disclaimer
+ *   7. Sticky bottom CTA — pill, accent glow
  */
 
 import { useCallback, useDeferredValue, useEffect, useState } from "react";
@@ -28,13 +28,12 @@ import { CartesianChart, Area, Line } from "victory-native";
 
 import { calculateRealEstate } from "@investio/shared";
 import { formatCurrency, formatPercent } from "@investio/shared";
-import { tokens } from "@investio/design-tokens";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Accordion } from "@/components/ui/accordion";
-
-const c = tokens.colors.light;
+import { Badge } from "@/components/ui/badge";
+import { useTheme, heroGradient, radii, typo, space } from "@/lib/theme";
 
 const DEFAULTS = {
   purchasePrice: 6500000,
@@ -54,7 +53,6 @@ function safeFloat(raw: string, fallback: number): number {
   const n = parseFloat(raw.replace(",", "."));
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
-
 function safePct(raw: string, fallback: number): number {
   const n = parseFloat(raw.replace(",", "."));
   return Number.isFinite(n) ? n / 100 : fallback;
@@ -62,7 +60,12 @@ function safePct(raw: string, fallback: number): number {
 
 export default function RealEstateScreen() {
   const { t } = useTranslation();
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const theme = useTheme();
+  const c = theme.colors;
+  const hero = heroGradient(theme);
+  // We still query reduce-motion to keep parity with web — when we wire
+  // chart animations we'll consume this. Today: just no-op listener.
+  const [, setReducedMotion] = useState(false);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReducedMotion);
@@ -100,14 +103,23 @@ export default function RealEstateScreen() {
       annualRatePct: safePct(mortgageRateStr, DEFAULTS.mortgage.annualRatePct),
       termYears: Math.max(
         1,
-        Math.min(40, Math.round(safeFloat(mortgageTermStr, DEFAULTS.mortgage.termYears)))
+        Math.min(
+          40,
+          Math.round(safeFloat(mortgageTermStr, DEFAULTS.mortgage.termYears))
+        )
       ),
     },
     monthlyRent: safeFloat(monthlyRentStr, DEFAULTS.monthlyRent),
     monthlyExpenses: safeFloat(monthlyExpensesStr, DEFAULTS.monthlyExpenses),
     vacancyRatePct: safePct(vacancyStr, DEFAULTS.vacancyRatePct),
-    maintenancePctOfRent: safePct(maintenanceStr, DEFAULTS.maintenancePctOfRent),
-    annualAppreciationPct: safePct(appreciationStr, DEFAULTS.annualAppreciationPct),
+    maintenancePctOfRent: safePct(
+      maintenanceStr,
+      DEFAULTS.maintenancePctOfRent
+    ),
+    annualAppreciationPct: safePct(
+      appreciationStr,
+      DEFAULTS.annualAppreciationPct
+    ),
     annualRentGrowthPct: safePct(rentGrowthStr, DEFAULTS.annualRentGrowthPct),
     incomeTaxPct: safePct(taxStr, DEFAULTS.incomeTaxPct),
     horizonYears: Math.max(
@@ -116,12 +128,10 @@ export default function RealEstateScreen() {
     ),
   };
 
-  // Guard: downPayment must not exceed purchasePrice
   const validInput =
-    calcInput.downPayment <= calcInput.purchasePrice ? calcInput : {
-      ...calcInput,
-      downPayment: calcInput.purchasePrice,
-    };
+    calcInput.downPayment <= calcInput.purchasePrice
+      ? calcInput
+      : { ...calcInput, downPayment: calcInput.purchasePrice };
 
   const deferredInput = useDeferredValue(validInput);
   const result = calculateRealEstate(deferredInput);
@@ -130,12 +140,17 @@ export default function RealEstateScreen() {
   const equityData = downsampleEquity(result.timeSeries, 100);
 
   const handleSave = useCallback(() => {
-    // eslint-disable-next-line no-console
     console.log("TODO: save real-estate scenario", deferredInput);
   }, [deferredInput]);
 
+  const positiveCashflow = result.averageMonthlyCashflow >= 0;
+  const cashflowColor = positiveCashflow ? hero.foreground : c.destructive;
+
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: c.background }]}
+      edges={["top"]}
+    >
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -146,92 +161,181 @@ export default function RealEstateScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Screen title */}
-          <Text style={styles.screenTitle} accessibilityRole="header">
+          {/* Title */}
+          <Text
+            style={[typo.pageTitle, { color: c.foreground }]}
+            accessibilityRole="header"
+          >
             {t("calc.realEstate.title")}
           </Text>
-          <Text style={styles.screenSubtitle}>{t("calc.realEstate.subtitle")}</Text>
+          <Text style={[styles.subtitle, { color: c.mutedForeground }]}>
+            {t("calc.realEstate.subtitle")}
+          </Text>
 
           {/* Hero metrics */}
-          <Card style={styles.heroCard}>
-            <Text style={styles.heroMainLabel}>
+          <View
+            style={[
+              styles.hero,
+              { backgroundColor: hero.background, borderRadius: radii.card },
+            ]}
+            accessibilityRole="summary"
+          >
+            <View
+              style={[
+                styles.heroHalo,
+                { backgroundColor: hero.haloColor, opacity: 0.35 },
+              ]}
+              pointerEvents="none"
+            />
+            <Text style={[styles.heroLabel, { color: hero.mutedForeground }]}>
               {t("calc.realEstate.results.averageMonthlyCashflow")}
             </Text>
             <Text
-              style={[
-                styles.heroMainValue,
-                result.averageMonthlyCashflow >= 0
-                  ? styles.positiveValue
-                  : styles.negativeValue,
-              ]}
-              accessibilityLabel={`Průměrný měsíční cashflow: ${formatCurrency(result.averageMonthlyCashflow, "CZK", "cs")}`}
+              style={[typo.heroNumber, { color: cashflowColor }]}
+              accessibilityLabel={`Průměrný měsíční cashflow: ${formatCurrency(
+                result.averageMonthlyCashflow,
+                "CZK",
+                "cs"
+              )}`}
             >
-              {result.averageMonthlyCashflow >= 0 ? "+" : ""}
+              {positiveCashflow ? "+" : ""}
               {formatCurrency(result.averageMonthlyCashflow, "CZK", "cs")}
             </Text>
 
-            <View style={styles.metricsGrid}>
-              <MetricCell
-                label={t("calc.realEstate.results.grossYield")}
-                value={formatPercent(result.grossYield, "cs")}
-              />
-              <MetricCell
-                label={t("calc.realEstate.results.netYield")}
-                value={formatPercent(result.netYield, "cs")}
-              />
-              <MetricCell
-                label={t("calc.realEstate.results.irr")}
-                value={
-                  result.irr !== null
+            {/* IRR + breakeven pills */}
+            <View style={styles.heroPillsRow}>
+              <View
+                style={[
+                  styles.heroPill,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.teal[800] : theme.teal[200],
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.heroPillLabel,
+                    { color: hero.mutedForeground },
+                  ]}
+                >
+                  IRR
+                </Text>
+                <Text
+                  style={[
+                    styles.heroPillValue,
+                    { color: hero.foreground },
+                  ]}
+                >
+                  {result.irr !== null
                     ? formatPercent(result.irr, "cs")
-                    : t("calc.realEstate.results.irrUncomputable")
-                }
-              />
-              <MetricCell
-                label={t("calc.realEstate.results.finalEquity")}
-                value={formatCurrency(result.finalEquity, "CZK", "cs")}
-              />
-              <MetricCell
-                label={t("calc.realEstate.results.breakEvenMonth")}
-                value={
-                  result.breakEvenMonth !== null
-                    ? `${result.breakEvenMonth}. měsíc`
-                    : t("calc.realEstate.results.breakEvenNever")
-                }
-              />
-              <MetricCell
-                label={t("calc.realEstate.results.monthlyPayment")}
-                value={formatCurrency(result.monthlyPayment, "CZK", "cs")}
-              />
+                    : "—"}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.heroPill,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.teal[800] : theme.teal[200],
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.heroPillLabel,
+                    { color: hero.mutedForeground },
+                  ]}
+                >
+                  {t("calc.realEstate.results.breakEvenMonth")}
+                </Text>
+                <Text
+                  style={[
+                    styles.heroPillValue,
+                    { color: hero.foreground },
+                  ]}
+                >
+                  {result.breakEvenMonth !== null
+                    ? `${result.breakEvenMonth}. m.`
+                    : "—"}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Secondary metrics grid */}
+          <View style={styles.metricsGrid}>
+            <MetricCell
+              label={t("calc.realEstate.results.grossYield")}
+              value={formatPercent(result.grossYield, "cs")}
+            />
+            <MetricCell
+              label={t("calc.realEstate.results.netYield")}
+              value={formatPercent(result.netYield, "cs")}
+            />
+            <MetricCell
+              label={t("calc.realEstate.results.finalEquity")}
+              value={formatCurrency(result.finalEquity, "CZK", "cs")}
+            />
+            <MetricCell
+              label={t("calc.realEstate.results.monthlyPayment")}
+              value={formatCurrency(result.monthlyPayment, "CZK", "cs")}
+            />
+          </View>
+
+          {/* Cashflow chart */}
+          <Card tone="accent" radius={radii.panel} style={styles.chartCard}>
+            <Text style={[styles.chartTitle, { color: c.foreground }]}>
+              {t("calc.realEstate.chart.cashflow")}
+            </Text>
+            <View style={styles.chartContainer} accessibilityRole="image">
+              <CashflowChart data={cashflowData} />
             </View>
           </Card>
 
-          {/* Cashflow chart */}
-          <Text style={styles.chartTitle}>{t("calc.realEstate.chart.cashflow")}</Text>
-          <View style={styles.chartContainer} accessibilityRole="image">
-            <CashflowChart data={cashflowData} />
-          </View>
-
           {/* Equity chart */}
-          <Text style={styles.chartTitle}>{t("calc.realEstate.chart.equity")}</Text>
-          <View style={styles.chartContainer} accessibilityRole="image">
-            <EquityChart data={equityData} />
-          </View>
-          <View style={styles.legendRow}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: c.chart[1] }]} />
-              <Text style={styles.legendLabel}>{t("calc.realEstate.chart.propertyValue")}</Text>
+          <Card tone="accent" radius={radii.panel} style={styles.chartCard}>
+            <Text style={[styles.chartTitle, { color: c.foreground }]}>
+              {t("calc.realEstate.chart.equity")}
+            </Text>
+            <View style={styles.chartContainer} accessibilityRole="image">
+              <EquityChart data={equityData} />
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: c.chart[3] }]} />
-              <Text style={styles.legendLabel}>{t("calc.realEstate.chart.equity")}</Text>
+            <View style={styles.legendRow}>
+              <View style={styles.legendItem}>
+                <View
+                  style={[styles.legendDot, { backgroundColor: c.chart[1] }]}
+                />
+                <Text
+                  style={[styles.legendLabel, { color: c.mutedForeground }]}
+                >
+                  {t("calc.realEstate.chart.propertyValue")}
+                </Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View
+                  style={[styles.legendDot, { backgroundColor: c.chart[3] }]}
+                />
+                <Text
+                  style={[styles.legendLabel, { color: c.mutedForeground }]}
+                >
+                  {t("calc.realEstate.chart.equity")}
+                </Text>
+              </View>
             </View>
-          </View>
+          </Card>
 
-          {/* Input accordion sections */}
-          <Text style={styles.sectionLabel}>VSTUPY</Text>
+          {/* Sections */}
+          <Text
+            style={[typo.eyebrow, { color: c.mutedForeground, marginTop: 6 }]}
+          >
+            {t("mobile.inputsSection")}
+          </Text>
 
-          <Accordion title={t("calc.realEstate.sections.purchase")} defaultOpen={true}>
+          <Accordion
+            title={t("calc.realEstate.sections.purchase")}
+            defaultOpen={true}
+          >
             <Input
               label={t("calc.realEstate.fields.purchasePrice")}
               value={purchasePriceStr}
@@ -260,7 +364,10 @@ export default function RealEstateScreen() {
             />
           </Accordion>
 
-          <Accordion title={t("calc.realEstate.sections.financing")} defaultOpen={false}>
+          <Accordion
+            title={t("calc.realEstate.sections.financing")}
+            defaultOpen={false}
+          >
             <Input
               label={t("calc.realEstate.fields.rate")}
               value={mortgageRateStr}
@@ -277,7 +384,10 @@ export default function RealEstateScreen() {
             />
           </Accordion>
 
-          <Accordion title={t("calc.realEstate.sections.income")} defaultOpen={false}>
+          <Accordion
+            title={t("calc.realEstate.sections.income")}
+            defaultOpen={false}
+          >
             <Input
               label={t("calc.realEstate.fields.monthlyRent")}
               value={monthlyRentStr}
@@ -301,7 +411,10 @@ export default function RealEstateScreen() {
             />
           </Accordion>
 
-          <Accordion title={t("calc.realEstate.sections.costs")} defaultOpen={false}>
+          <Accordion
+            title={t("calc.realEstate.sections.costs")}
+            defaultOpen={false}
+          >
             <Input
               label={t("calc.realEstate.fields.monthlyExpenses")}
               value={monthlyExpensesStr}
@@ -325,7 +438,10 @@ export default function RealEstateScreen() {
             />
           </Accordion>
 
-          <Accordion title={t("calc.realEstate.sections.horizon")} defaultOpen={false}>
+          <Accordion
+            title={t("calc.realEstate.sections.horizon")}
+            defaultOpen={false}
+          >
             <Input
               label={t("calc.compound.fields.horizonYears")}
               value={horizonStr}
@@ -335,16 +451,24 @@ export default function RealEstateScreen() {
             />
           </Accordion>
 
-          <Text style={styles.disclaimer}>{t("calc.realEstate.disclaimer")}</Text>
+          <Text style={[styles.disclaimer, { color: c.mutedForeground }]}>
+            {t("calc.realEstate.disclaimer")}
+          </Text>
 
           <View style={styles.saveButtonSpacer} />
         </ScrollView>
 
-        <View style={styles.stickyBar}>
+        <View
+          style={[
+            styles.stickyBar,
+            { backgroundColor: c.background, borderTopColor: c.border },
+          ]}
+        >
           <Button
             variant="primary"
             size="lg"
             fullWidth
+            glow
             onPress={handleSave}
             accessibilityLabel={t("mobile.saveScenario")}
           >
@@ -356,34 +480,55 @@ export default function RealEstateScreen() {
   );
 }
 
-// ── Subcomponents ─────────────────────────────────────────────────────────────
+// ── Subcomponents ───────────────────────────────────────────────────────────
 
 function MetricCell({ label, value }: { label: string; value: string }) {
+  const theme = useTheme();
+  const c = theme.colors;
   return (
-    <View style={styles.metricCell} accessibilityLabel={`${label}: ${value}`}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text style={styles.metricValue}>{value}</Text>
+    <View
+      style={[
+        styles.metricCell,
+        {
+          backgroundColor: c.muted,
+          borderRadius: radii.input,
+        },
+      ]}
+      accessibilityLabel={`${label}: ${value}`}
+    >
+      <Text style={[styles.metricLabel, { color: c.mutedForeground }]}>
+        {label}
+      </Text>
+      <Text style={[styles.metricValue, { color: c.foreground }]}>{value}</Text>
     </View>
   );
 }
 
-// Victory Native XL requires data to satisfy Record<string, unknown>
 interface CashflowPoint extends Record<string, unknown> {
   month: number;
   netCashflow: number;
 }
 
 function CashflowChart({ data }: { data: CashflowPoint[] }) {
+  const theme = useTheme();
+  const c = theme.colors;
+
   if (data.length === 0) {
     return (
       <View style={styles.chartEmpty}>
-        <Text style={styles.chartEmptyText}>Vyplňte vstupy pro zobrazení grafu</Text>
+        <Text style={[styles.chartEmptyText, { color: c.mutedForeground }]}>
+          Vyplňte vstupy pro zobrazení grafu
+        </Text>
       </View>
     );
   }
-
   return (
-    <CartesianChart data={data} xKey="month" yKeys={["netCashflow"]} domainPadding={{ top: 20 }}>
+    <CartesianChart
+      data={data}
+      xKey="month"
+      yKeys={["netCashflow"]}
+      domainPadding={{ top: 20 }}
+    >
       {({ points, chartBounds }) => (
         <Area
           points={points.netCashflow}
@@ -396,7 +541,6 @@ function CashflowChart({ data }: { data: CashflowPoint[] }) {
   );
 }
 
-// Victory Native XL requires data to satisfy Record<string, unknown>
 interface EquityPoint extends Record<string, unknown> {
   month: number;
   propertyValue: number;
@@ -404,14 +548,18 @@ interface EquityPoint extends Record<string, unknown> {
 }
 
 function EquityChart({ data }: { data: EquityPoint[] }) {
+  const theme = useTheme();
+  const c = theme.colors;
+
   if (data.length === 0) {
     return (
       <View style={styles.chartEmpty}>
-        <Text style={styles.chartEmptyText}>Vyplňte vstupy pro zobrazení grafu</Text>
+        <Text style={[styles.chartEmptyText, { color: c.mutedForeground }]}>
+          Vyplňte vstupy pro zobrazení grafu
+        </Text>
       </View>
     );
   }
-
   return (
     <CartesianChart
       data={data}
@@ -427,18 +575,18 @@ function EquityChart({ data }: { data: EquityPoint[] }) {
             color={c.chart[1]}
             opacity={0.3}
           />
-          <Line
-            points={points.equity}
-            color={c.chart[3]}
-            strokeWidth={2}
-          />
+          <Line points={points.equity} color={c.chart[3]} strokeWidth={2} />
         </>
       )}
     </CartesianChart>
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Suppress unused-import warning for Badge — we expose it through the IRR pill
+// pattern but inline JSX uses inline styles. Kept import for future use.
+void Badge;
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function downsampleSeries(
   series: Array<{ month: number; netCashflow: number }>,
@@ -449,8 +597,11 @@ function downsampleSeries(
   const result: CashflowPoint[] = [];
   for (let i = 0; i < series.length; i += step) {
     const pt = series[i];
-    // `as CashflowPoint` is safe — the object satisfies the interface
-    if (pt) result.push({ month: pt.month, netCashflow: pt.netCashflow } as CashflowPoint);
+    if (pt)
+      result.push({
+        month: pt.month,
+        netCashflow: pt.netCashflow,
+      } as CashflowPoint);
   }
   return result;
 }
@@ -465,7 +616,6 @@ function downsampleEquity(
   for (let i = 0; i < series.length; i += step) {
     const pt = series[i];
     if (pt)
-      // `as EquityPoint` is safe — the object satisfies the interface
       result.push({
         month: pt.month,
         propertyValue: pt.propertyValue,
@@ -475,81 +625,103 @@ function downsampleEquity(
   return result;
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// ── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: c.background },
+  safe: { flex: 1 },
   flex: { flex: 1 },
-  scroll: { padding: 16, paddingBottom: 0, gap: 12 },
-  screenTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: c.foreground,
-    marginBottom: 2,
+  scroll: {
+    padding: space.gutter,
+    paddingBottom: 0,
+    gap: space.betweenCards,
   },
-  screenSubtitle: {
-    fontSize: 13,
-    color: c.mutedForeground,
+  subtitle: {
+    fontSize: 14,
+    marginTop: -8,
     marginBottom: 4,
   },
 
   // Hero
-  heroCard: { gap: 10 },
-  heroMainLabel: {
+  hero: {
+    padding: space.card,
+    overflow: "hidden",
+    gap: 8,
+  },
+  heroHalo: {
+    position: "absolute",
+    top: -60,
+    right: -40,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+  },
+  heroLabel: {
     fontSize: 12,
-    fontWeight: "500",
-    color: c.mutedForeground,
-    letterSpacing: 0.3,
+    fontWeight: "700",
+    letterSpacing: 1.2,
     textTransform: "uppercase",
   },
-  heroMainValue: {
-    fontSize: 30,
-    fontWeight: "700",
-    letterSpacing: -0.5,
+  heroPillsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
   },
-  positiveValue: { color: c.success },
-  negativeValue: { color: c.destructive },
+  heroPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radii.pill,
+  },
+  heroPillLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  heroPillValue: {
+    fontSize: 14,
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
+  },
+
+  // Metrics grid
   metricsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
+    gap: 10,
   },
   metricCell: {
-    minWidth: "46%",
-    flex: 1,
-    backgroundColor: c.muted,
-    borderRadius: 6,
-    padding: 10,
-    gap: 2,
+    flexBasis: "47%",
+    flexGrow: 1,
+    padding: 14,
+    gap: 4,
   },
   metricLabel: {
     fontSize: 10,
-    color: c.mutedForeground,
-    fontWeight: "500",
+    fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0.6,
   },
   metricValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: c.foreground,
+    fontSize: 16,
+    fontWeight: "700",
+    fontVariant: ["tabular-nums"],
   },
 
   // Charts
+  chartCard: {
+    gap: 10,
+  },
   chartTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: c.foreground,
-    marginBottom: -4,
+    fontSize: 14,
+    fontWeight: "700",
   },
   chartContainer: {
     height: 180,
-    borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: c.card,
-    borderWidth: 1,
-    borderColor: c.border,
+    borderRadius: radii.sm,
   },
   chartEmpty: {
     flex: 1,
@@ -558,7 +730,6 @@ const styles = StyleSheet.create({
   },
   chartEmptyText: {
     fontSize: 13,
-    color: c.mutedForeground,
     textAlign: "center",
   },
   legendRow: {
@@ -578,32 +749,20 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
-    color: c.mutedForeground,
-  },
-
-  // Form
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: c.mutedForeground,
-    letterSpacing: 0.8,
-    marginTop: 8,
+    fontWeight: "500",
   },
 
   disclaimer: {
     fontSize: 11,
-    color: c.mutedForeground,
     fontStyle: "italic",
     textAlign: "center",
     marginTop: 4,
     paddingHorizontal: 8,
   },
-  saveButtonSpacer: { height: 80 },
+  saveButtonSpacer: { height: 96 },
   stickyBar: {
     padding: 16,
-    paddingBottom: 8,
-    backgroundColor: c.background,
+    paddingBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: c.border,
   },
 });
