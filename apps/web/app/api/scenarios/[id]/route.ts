@@ -27,7 +27,9 @@ export async function GET(req: NextRequest, ctx: RouteContext) {
     const { id } = ScenarioIdParamSchema.parse(await ctx.params);
     const db = getPrismaForUser(userId);
 
-    const scenario = await db.scenario.findUnique({ where: { id } });
+    const scenario = await db.scenario.findFirst({
+      where: { id, user_id: userId },
+    });
     assertFound(scenario);
 
     return Response.json({ scenario: toScenarioDetail(scenario) });
@@ -47,9 +49,11 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     const body = await parseBody(req, UpdateScenarioBodySchema);
     const db = getPrismaForUser(userId);
 
-    // Ensure the scenario exists and belongs to the user (RLS would silently
-    // return nothing on update, so we check explicitly for a better DX error).
-    const existing = await db.scenario.findUnique({ where: { id } });
+    // Ensure the scenario exists and belongs to the user (defense-in-depth:
+    // app-level ownership check in addition to RLS — belt + suspenders).
+    const existing = await db.scenario.findFirst({
+      where: { id, user_id: userId },
+    });
     assertFound(existing);
 
     const updateData: Record<string, unknown> = {
@@ -97,7 +101,9 @@ export async function DELETE(req: NextRequest, ctx: RouteContext) {
     const { id } = ScenarioIdParamSchema.parse(await ctx.params);
     const db = getPrismaForUser(userId);
 
-    const existing = await db.scenario.findUnique({ where: { id } });
+    const existing = await db.scenario.findFirst({
+      where: { id, user_id: userId },
+    });
     assertFound(existing);
 
     await db.scenario.update({

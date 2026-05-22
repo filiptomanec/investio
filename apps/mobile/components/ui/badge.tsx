@@ -1,12 +1,29 @@
 /**
- * Badge — small label chip. Used for scenario type indicator on dashboard.
+ * Badge — themed pill chip.
+ *
+ * Bolder mobile pass:
+ *   - pill radius (was 4)
+ *   - more breathing padding (10/4 → 12/5)
+ *   - new soft `accent-soft` variant: tinted bg, accent foreground (used for
+ *     the dashboard type indicator — looks lighter than "filled primary").
  */
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import { tokens } from "@investio/design-tokens";
+import {
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import { useTheme, radii } from "@/lib/theme";
 
-const c = tokens.colors.light;
-
-export type BadgeVariant = "default" | "success" | "warning" | "info" | "destructive" | "muted";
+export type BadgeVariant =
+  | "default"
+  | "success"
+  | "warning"
+  | "info"
+  | "destructive"
+  | "muted"
+  | "accent-soft";
 
 export interface BadgeProps {
   children: React.ReactNode;
@@ -15,9 +32,43 @@ export interface BadgeProps {
 }
 
 export function Badge({ children, variant = "default", style }: BadgeProps) {
+  const theme = useTheme();
+  const c = theme.colors;
+
+  const { bg, fg } = (() => {
+    switch (variant) {
+      case "success":
+        return { bg: c.success, fg: c.successForeground };
+      case "warning":
+        return { bg: c.warning, fg: c.warningForeground };
+      case "info":
+        return { bg: c.info, fg: c.infoForeground };
+      case "destructive":
+        return { bg: c.destructive, fg: c.destructiveForeground };
+      case "muted":
+        return { bg: c.muted, fg: c.mutedForeground };
+      case "accent-soft":
+        return {
+          bg:
+            theme.mode === "dark" ? theme.teal[900] : theme.teal[100],
+          fg:
+            theme.mode === "dark" ? theme.teal[200] : theme.teal[800],
+        };
+      case "default":
+      default:
+        return { bg: c.primary, fg: c.primaryForeground };
+    }
+  })();
+
   return (
-    <View style={[styles.base, variantStyles[variant].container, style]}>
-      <Text style={[styles.label, variantStyles[variant].text]} numberOfLines={1}>
+    <View
+      style={[
+        styles.base,
+        { backgroundColor: bg, borderRadius: radii.badge },
+        style,
+      ]}
+    >
+      <Text style={[styles.label, { color: fg }]} numberOfLines={1}>
         {children}
       </Text>
     </View>
@@ -26,41 +77,13 @@ export function Badge({ children, variant = "default", style }: BadgeProps) {
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     alignSelf: "flex-start",
   },
   label: {
     fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 0.3,
+    fontWeight: "700",
+    letterSpacing: 0.4,
   },
 });
-
-const variantStyles = {
-  default: StyleSheet.create({
-    container: { backgroundColor: c.primary },
-    text: { color: c.primaryForeground },
-  }),
-  success: StyleSheet.create({
-    container: { backgroundColor: c.success },
-    text: { color: c.successForeground },
-  }),
-  warning: StyleSheet.create({
-    container: { backgroundColor: c.warning },
-    text: { color: c.warningForeground },
-  }),
-  info: StyleSheet.create({
-    container: { backgroundColor: c.info },
-    text: { color: c.infoForeground },
-  }),
-  destructive: StyleSheet.create({
-    container: { backgroundColor: c.destructive },
-    text: { color: c.destructiveForeground },
-  }),
-  muted: StyleSheet.create({
-    container: { backgroundColor: c.muted },
-    text: { color: c.mutedForeground },
-  }),
-};

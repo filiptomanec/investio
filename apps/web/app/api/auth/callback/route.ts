@@ -7,6 +7,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
+import { safeRedirect } from "@/lib/safe-redirect";
 
 export const runtime = "nodejs";
 
@@ -15,8 +16,10 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // Extract locale from the Referer or default to "cs"
-  const next = searchParams.get("next") ?? "/";
+  // Validate the `next` redirect param against open-redirect attacks (SR-003).
+  // safeRedirect only allows relative paths that start with `/` (not `//`),
+  // have no `://`, no backslashes, and no dangerous URI schemes.
+  const next = safeRedirect(searchParams.get("next"), "/cs/dashboard");
 
   if (!code) {
     // No code — redirect to login with error
@@ -30,6 +33,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/cs/login?error=backend_not_configured`);
   }
 
+  // `next` has already been validated by safeRedirect above — safe to compose.
   const response = NextResponse.redirect(`${origin}${next}`);
 
   const supabase = createServerClient(url, anonKey, {
@@ -52,7 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/cs/login?error=auth_callback_failed`);
   }
 
-  // Determine redirect locale: prefer the `next` param, fallback to /cs/dashboard
-  const redirectTo = next.startsWith("/") ? `${origin}${next}` : `${origin}/cs/dashboard`;
-  return NextResponse.redirect(redirectTo);
+  // `next` is already a validated relative path — return the pre-built response
+  // which has the Supabase session cookies attached via setAll above.
+  return response;
 }

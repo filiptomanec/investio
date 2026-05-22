@@ -1,20 +1,20 @@
 /**
- * Compound interest calculator — T-015.
+ * Compound interest calculator — T-015 (bolder mobile pass).
  *
  * Layout (mobile-first):
- *   1. Hero result card (finalValue + breakdown) — always visible
- *   2. Chart (stacked area: contributions muted, gains teal)
- *   3. Form fields (numeric keyboard)
- *   4. Advanced accordion (contributionTiming)
- *   5. Sticky save CTA (stub — T-013 wires save)
+ *   1. Page title + subtitle
+ *   2. Hero result card — gradient teal bg, finalValue at 44px / 900, two
+ *      breakdown cells underneath
+ *   3. Chart panel (rounded 20, accent border) with legend pills
+ *   4. Form inputs (rounded 14, focus halo)
+ *   5. Advanced accordion (rounded 20)
+ *   6. Sticky bottom CTA — full-width pill, accent glow
  *
  * Chart: Victory Native XL CartesianChart + Area.
- * Requires a dev build with @shopify/react-native-skia native module.
- *
- * Live recalc: debounced 200ms via manual setTimeout ref.
+ * Live recalc: useDeferredValue (React 18 low-priority).
  */
 
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import {
   AccessibilityInfo,
   KeyboardAvoidingView,
@@ -30,19 +30,17 @@ import { CartesianChart, Area } from "victory-native";
 
 import { calculateCompound } from "@investio/shared";
 import { formatCurrency, formatPercent } from "@investio/shared";
-import { tokens } from "@investio/design-tokens";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Accordion } from "@/components/ui/accordion";
-
-const c = tokens.colors.light;
+import { useTheme, heroGradient, radii, typo, space } from "@/lib/theme";
 
 // Default inputs matching the S&P 500-like scenario from wireframes
 const DEFAULTS = {
   initialAmount: 100000,
   monthlyContribution: 5000,
-  annualReturnPct: 7,   // displayed as 7.0 → stored as 0.07 in calc
+  annualReturnPct: 7,
   horizonYears: 30,
   contributionTiming: "end" as const,
 };
@@ -54,8 +52,11 @@ function safeFloat(raw: string, fallback: number): number {
 
 export default function CompoundScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const c = theme.colors;
+  const hero = heroGradient(theme);
 
-  // Form state — raw string for display, derived number for calc
+  // Form state
   const [initialAmountStr, setInitialAmountStr] = useState(
     String(DEFAULTS.initialAmount)
   );
@@ -77,40 +78,43 @@ export default function CompoundScreen() {
     AccessibilityInfo.isReduceMotionEnabled().then(setReducedMotion);
   }, []);
 
-  // Build calc input from strings
   const calcInput = {
     type: "compound" as const,
     initialAmount: safeFloat(initialAmountStr, DEFAULTS.initialAmount),
-    monthlyContribution: safeFloat(monthlyContributionStr, DEFAULTS.monthlyContribution),
-    annualReturnPct: safeFloat(annualReturnPctStr, DEFAULTS.annualReturnPct) / 100,
+    monthlyContribution: safeFloat(
+      monthlyContributionStr,
+      DEFAULTS.monthlyContribution
+    ),
+    annualReturnPct:
+      safeFloat(annualReturnPctStr, DEFAULTS.annualReturnPct) / 100,
     horizonYears: Math.max(
       1,
-      Math.min(50, Math.round(safeFloat(horizonYearsStr, DEFAULTS.horizonYears)))
+      Math.min(
+        50,
+        Math.round(safeFloat(horizonYearsStr, DEFAULTS.horizonYears))
+      )
     ),
     contributionTiming,
   };
 
-  // Debounce via useDeferredValue — React 18 low-priority re-render
   const deferredInput = useDeferredValue(calcInput);
-
   const result = calculateCompound(deferredInput);
-
-  // Downsample time series for chart — max 120 points (yearly + some monthly)
   const chartData = downsampleSeries(result.timeSeries, 120);
-
   const gainsROI =
     result.totalContributions > 0
       ? result.totalGains / result.totalContributions
       : 0;
 
   const handleSave = useCallback(() => {
-    // T-013 will wire this to POST /scenarios via Supabase
-    // eslint-disable-next-line no-console
+    // T-013 wires the save action via Supabase. For now: stub.
     console.log("TODO: save compound scenario", deferredInput);
   }, [deferredInput]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: c.background }]}
+      edges={["top"]}
+    >
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -121,71 +125,118 @@ export default function CompoundScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Screen title */}
-          <Text style={styles.screenTitle} accessibilityRole="header">
+          {/* Title */}
+          <Text
+            style={[typo.pageTitle, { color: c.foreground }]}
+            accessibilityRole="header"
+          >
             {t("calc.compound.title")}
           </Text>
-          <Text style={styles.screenSubtitle}>{t("calc.compound.subtitle")}</Text>
+          <Text style={[styles.subtitle, { color: c.mutedForeground }]}>
+            {t("calc.compound.subtitle")}
+          </Text>
 
           {/* Hero result */}
-          <Card style={styles.heroCard}>
-            <Text style={styles.heroLabel}>
+          <View
+            style={[
+              styles.hero,
+              { backgroundColor: hero.background, borderRadius: radii.card },
+            ]}
+            accessibilityRole="summary"
+          >
+            {/* Halo accent dot (top-right) */}
+            <View
+              style={[
+                styles.heroHalo,
+                { backgroundColor: hero.haloColor, opacity: 0.35 },
+              ]}
+              pointerEvents="none"
+            />
+            <Text style={[styles.heroLabel, { color: hero.mutedForeground }]}>
               {t("calc.compound.results.finalValue")}
             </Text>
             <Text
-              style={styles.heroValue}
-              accessibilityLabel={`${t("calc.compound.results.finalValue")}: ${formatCurrency(result.finalValue, "CZK", "cs")}`}
+              style={[typo.heroNumber, { color: hero.foreground }]}
+              accessibilityLabel={`${t(
+                "calc.compound.results.finalValue"
+              )}: ${formatCurrency(result.finalValue, "CZK", "cs")}`}
             >
               {formatCurrency(result.finalValue, "CZK", "cs")}
             </Text>
             <View style={styles.heroRow}>
               <View style={styles.heroCell}>
-                <Text style={styles.heroCellLabel}>
+                <Text
+                  style={[styles.heroCellLabel, { color: hero.mutedForeground }]}
+                >
                   {t("calc.compound.results.totalContributions")}
                 </Text>
-                <Text style={styles.heroCellValue}>
+                <Text
+                  style={[styles.heroCellValue, { color: hero.foreground }]}
+                >
                   {formatCurrency(result.totalContributions, "CZK", "cs")}
                 </Text>
               </View>
-              <View style={styles.heroDivider} />
+              <View
+                style={[
+                  styles.heroDivider,
+                  { backgroundColor: hero.foreground, opacity: 0.15 },
+                ]}
+              />
               <View style={styles.heroCell}>
-                <Text style={styles.heroCellLabel}>
+                <Text
+                  style={[styles.heroCellLabel, { color: hero.mutedForeground }]}
+                >
                   {t("calc.compound.results.totalGains")}
                 </Text>
-                <Text style={[styles.heroCellValue, styles.gainsValue]}>
+                <Text
+                  style={[styles.heroCellValue, { color: hero.foreground }]}
+                >
                   +{formatCurrency(result.totalGains, "CZK", "cs")}
                 </Text>
-                <Text style={styles.gainsROI}>
+                <Text
+                  style={[styles.heroROI, { color: hero.foreground, opacity: 0.85 }]}
+                >
                   +{formatPercent(gainsROI, "cs")}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Chart panel */}
+          <Card tone="accent" radius={radii.panel} style={styles.chartCard}>
+            <View
+              style={styles.chartContainer}
+              accessibilityLabel={`${t(
+                "calc.compound.chart.contributions"
+              )} and ${t("calc.compound.chart.gains")} chart`}
+              accessibilityRole="image"
+            >
+              <ChartArea data={chartData} reducedMotion={reducedMotion} />
+            </View>
+            <View style={styles.legendRow}>
+              <View style={styles.legendItem}>
+                <View
+                  style={[styles.legendDot, { backgroundColor: c.chart[4] }]}
+                />
+                <Text style={[styles.legendLabel, { color: c.mutedForeground }]}>
+                  {t("calc.compound.chart.contributions")}
+                </Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View
+                  style={[styles.legendDot, { backgroundColor: c.chart[1] }]}
+                />
+                <Text style={[styles.legendLabel, { color: c.mutedForeground }]}>
+                  {t("calc.compound.chart.gains")}
                 </Text>
               </View>
             </View>
           </Card>
 
-          {/* Chart */}
-          <View
-            style={styles.chartContainer}
-            accessibilityLabel={`${t("calc.compound.chart.contributions")} and ${t("calc.compound.chart.gains")} chart`}
-            accessibilityRole="image"
-          >
-            <ChartArea
-              data={chartData}
-              reducedMotion={reducedMotion}
-            />
-          </View>
-          <View style={styles.legendRow}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: c.chart[4] }]} />
-              <Text style={styles.legendLabel}>{t("calc.compound.chart.contributions")}</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: c.chart[1] }]} />
-              <Text style={styles.legendLabel}>{t("calc.compound.chart.gains")}</Text>
-            </View>
-          </View>
-
           {/* Form */}
-          <Text style={styles.sectionLabel}>VSTUPY</Text>
+          <Text style={[typo.eyebrow, { color: c.mutedForeground, marginTop: 6 }]}>
+            {t("mobile.inputsSection")}
+          </Text>
 
           <Input
             label={t("calc.compound.fields.initialAmount")}
@@ -224,12 +275,9 @@ export default function CompoundScreen() {
             accessibilityHint="Zadejte investiční horizont v letech (1–50)"
           />
 
-          {/* Advanced accordion */}
-          <Accordion
-            title={t("mobile.advancedSection")}
-            defaultOpen={false}
-          >
-            <Text style={styles.fieldLabel}>
+          {/* Advanced */}
+          <Accordion title={t("mobile.advancedSection")} defaultOpen={false}>
+            <Text style={[styles.fieldLabel, { color: c.foreground }]}>
               {t("calc.compound.fields.contributionTiming.label")}
             </Text>
             <View style={styles.timingRow}>
@@ -238,34 +286,50 @@ export default function CompoundScreen() {
                 size="sm"
                 onPress={() => setContributionTiming("end")}
                 style={styles.timingBtn}
-                accessibilityLabel={t("calc.compound.fields.contributionTiming.end")}
+                accessibilityLabel={t(
+                  "calc.compound.fields.contributionTiming.end"
+                )}
               >
                 {t("calc.compound.fields.contributionTiming.end")}
               </Button>
               <Button
-                variant={contributionTiming === "begin" ? "primary" : "secondary"}
+                variant={
+                  contributionTiming === "begin" ? "primary" : "secondary"
+                }
                 size="sm"
                 onPress={() => setContributionTiming("begin")}
                 style={styles.timingBtn}
-                accessibilityLabel={t("calc.compound.fields.contributionTiming.begin")}
+                accessibilityLabel={t(
+                  "calc.compound.fields.contributionTiming.begin"
+                )}
               >
                 {t("calc.compound.fields.contributionTiming.begin")}
               </Button>
             </View>
           </Accordion>
 
-          <Text style={styles.disclaimer}>{t("calc.compound.disclaimer")}</Text>
+          <Text style={[styles.disclaimer, { color: c.mutedForeground }]}>
+            {t("calc.compound.disclaimer")}
+          </Text>
 
-          {/* Bottom spacer for sticky CTA */}
           <View style={styles.saveButtonSpacer} />
         </ScrollView>
 
         {/* Sticky save CTA */}
-        <View style={styles.stickyBar}>
+        <View
+          style={[
+            styles.stickyBar,
+            {
+              backgroundColor: c.background,
+              borderTopColor: c.border,
+            },
+          ]}
+        >
           <Button
             variant="primary"
             size="lg"
             fullWidth
+            glow
             onPress={handleSave}
             accessibilityLabel={t("mobile.saveScenario")}
           >
@@ -277,10 +341,8 @@ export default function CompoundScreen() {
   );
 }
 
-// ── Chart subcomponent ────────────────────────────────────────────────────────
+// ── Chart subcomponent ──────────────────────────────────────────────────────
 
-// Victory Native XL requires data to satisfy Record<string, unknown>
-// The index signature makes the type compatible while keeping named properties.
 interface ChartDataPoint extends Record<string, unknown> {
   month: number;
   contributions: number;
@@ -293,10 +355,15 @@ interface ChartAreaProps {
 }
 
 function ChartArea({ data }: ChartAreaProps) {
+  const theme = useTheme();
+  const c = theme.colors;
+
   if (data.length === 0) {
     return (
       <View style={styles.chartEmpty}>
-        <Text style={styles.chartEmptyText}>Vyplňte vstupy pro zobrazení grafu</Text>
+        <Text style={[styles.chartEmptyText, { color: c.mutedForeground }]}>
+          Vyplňte vstupy pro zobrazení grafu
+        </Text>
       </View>
     );
   }
@@ -328,12 +395,8 @@ function ChartArea({ data }: ChartAreaProps) {
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
-/**
- * Downsample time series to at most `maxPoints` for chart performance.
- * Keeps first + last point, samples evenly between.
- */
 function downsampleSeries(
   series: Array<{ month: number; contributions: number; value: number }>,
   maxPoints: number
@@ -354,7 +417,6 @@ function downsampleSeries(
     }
   }
 
-  // Always include the last point
   const last = series[series.length - 1];
   if (last && result[result.length - 1]?.month !== last.month) {
     result.push({
@@ -367,46 +429,45 @@ function downsampleSeries(
   return result;
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// ── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: c.background },
+  safe: { flex: 1 },
   flex: { flex: 1 },
   scroll: {
-    padding: 16,
+    padding: space.gutter,
     paddingBottom: 0,
-    gap: 12,
+    gap: space.betweenCards,
   },
-  screenTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: c.foreground,
-    marginBottom: 2,
-  },
-  screenSubtitle: {
-    fontSize: 13,
-    color: c.mutedForeground,
+  subtitle: {
+    fontSize: 14,
+    marginTop: -8,
     marginBottom: 4,
   },
 
-  // Hero card
-  heroCard: { gap: 8 },
+  // Hero
+  hero: {
+    padding: space.card,
+    overflow: "hidden",
+    gap: 8,
+  },
+  heroHalo: {
+    position: "absolute",
+    top: -60,
+    right: -40,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+  },
   heroLabel: {
     fontSize: 12,
-    fontWeight: "500",
-    color: c.mutedForeground,
-    letterSpacing: 0.3,
-    textTransform: "uppercase",
-  },
-  heroValue: {
-    fontSize: 32,
     fontWeight: "700",
-    color: c.primary,
-    letterSpacing: -0.5,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
   },
   heroRow: {
     flexDirection: "row",
-    marginTop: 4,
+    marginTop: 6,
   },
   heroCell: {
     flex: 1,
@@ -414,36 +475,32 @@ const styles = StyleSheet.create({
   },
   heroDivider: {
     width: 1,
-    backgroundColor: c.border,
-    marginHorizontal: 12,
+    marginHorizontal: 14,
   },
   heroCellLabel: {
     fontSize: 11,
-    color: c.mutedForeground,
     textTransform: "uppercase",
-    letterSpacing: 0.3,
+    letterSpacing: 0.6,
+    fontWeight: "600",
   },
   heroCellValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: c.foreground,
+    fontSize: 16,
+    fontWeight: "700",
+    fontVariant: ["tabular-nums"],
   },
-  gainsValue: {
-    color: c.success,
-  },
-  gainsROI: {
+  heroROI: {
     fontSize: 12,
-    color: c.success,
+    fontWeight: "600",
   },
 
-  // Chart
+  // Chart card
+  chartCard: {
+    gap: 8,
+  },
   chartContainer: {
     height: 200,
-    borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: c.card,
-    borderWidth: 1,
-    borderColor: c.border,
+    borderRadius: radii.sm,
   },
   chartEmpty: {
     flex: 1,
@@ -452,13 +509,11 @@ const styles = StyleSheet.create({
   },
   chartEmptyText: {
     fontSize: 13,
-    color: c.mutedForeground,
     textAlign: "center",
   },
   legendRow: {
     flexDirection: "row",
     gap: 16,
-    marginTop: -4,
     paddingHorizontal: 4,
   },
   legendItem: {
@@ -473,44 +528,31 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
-    color: c.mutedForeground,
+    fontWeight: "500",
   },
 
   // Form
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: c.mutedForeground,
-    letterSpacing: 0.8,
-    marginTop: 8,
-  },
   fieldLabel: {
     fontSize: 13,
-    fontWeight: "500",
-    color: c.foreground,
+    fontWeight: "600",
     marginBottom: 4,
   },
   timingRow: {
     flexDirection: "row",
     gap: 8,
   },
-  timingBtn: {
-    flex: 1,
-  },
+  timingBtn: { flex: 1 },
 
   disclaimer: {
     fontSize: 11,
-    color: c.mutedForeground,
     fontStyle: "italic",
     textAlign: "center",
     marginTop: 4,
   },
-  saveButtonSpacer: { height: 80 },
+  saveButtonSpacer: { height: 96 },
   stickyBar: {
     padding: 16,
-    paddingBottom: 8,
-    backgroundColor: c.background,
+    paddingBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: c.border,
   },
 });

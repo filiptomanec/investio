@@ -29,7 +29,11 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     }
 
     const db = getPrismaForUser(userId);
-    const original = await db.scenario.findUnique({ where: { id } });
+    // Defense-in-depth: verify source scenario belongs to the requesting user
+    // before copying, in addition to RLS enforcement.
+    const original = await db.scenario.findFirst({
+      where: { id, user_id: userId },
+    });
     assertFound(original);
 
     const duplicate = await db.scenario.create({
