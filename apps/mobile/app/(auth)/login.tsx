@@ -1,33 +1,37 @@
 /**
- * Login screen — auth UI stub (T-014).
+ * Login screen — auth UI stub (T-014, bolder mobile pass).
  *
- * Form: email + password inputs, "Přihlásit" button, link to /signup.
- * Submit is a console.log stub — Supabase Auth wire-up arrives with
- * the real backend ticket.
- *
- * Styling via @investio/design-tokens (inline StyleSheet, no Tailwind —
- * Tailwind is web-only per project constraints).
+ *   - Hero typography "Vítej zpět" at 32px / 900
+ *   - Background radial halo behind the hero (subtle teal bloom)
+ *   - Email + password use the themed Input primitive
+ *   - Primary CTA is a full-width pill with accent glow
+ *   - Google OAuth button is an outlined pill row with the "G" mark
+ *     (no lucide RN installed — we use a small letter mark to avoid extra deps)
+ *   - Bottom link rendered with bold weight on the action verb
  */
 
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { tokens } from "@investio/design-tokens";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useTheme, radii, typo, space } from "@/lib/theme";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const c = theme.colors;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,11 +39,9 @@ export default function LoginScreen() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   function handleSubmit() {
-    // Reset errors
     setEmailError(null);
     setPasswordError(null);
 
-    // Minimal client-side validation stub
     let hasError = false;
     if (!email.trim()) {
       setEmailError(t("errors.validation"));
@@ -51,13 +53,22 @@ export default function LoginScreen() {
     }
     if (hasError) return;
 
-    // TODO: connect to Supabase Auth
-    // eslint-disable-next-line no-console
+    // TODO: connect to Supabase Auth — stub for the design pass.
     console.log("TODO: connect to Supabase Auth", { email });
   }
 
+  function handleGoogle() {
+    console.log("TODO: Google OAuth via Supabase");
+  }
+
+  const haloBg =
+    theme.mode === "dark" ? theme.teal[800] : theme.teal[200];
+
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: c.background }]}
+      edges={["top", "bottom"]}
+    >
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -66,92 +77,111 @@ export default function LoginScreen() {
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {/* Wordmark */}
+          {/* Halo behind title */}
+          <View
+            style={[styles.halo, { backgroundColor: haloBg, opacity: 0.4 }]}
+            pointerEvents="none"
+          />
+
+          {/* Brand wordmark */}
           <Text
-            style={styles.appName}
+            style={[styles.appName, { color: c.primary }]}
             accessibilityRole="header"
           >
             {t("common.appName")}
           </Text>
 
-          <Text style={styles.heading}>{t("auth.signIn")}</Text>
+          {/* Hero heading */}
+          <Text
+            style={[
+              typo.authHero,
+              { color: c.foreground, textAlign: "center" },
+            ]}
+          >
+            {t("auth.welcomeBack")}
+          </Text>
+          <Text
+            style={[styles.subtitle, { color: c.mutedForeground }]}
+          >
+            {t("auth.signInSubtitle")}
+          </Text>
 
-          {/* Email field */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>{t("auth.email")}</Text>
-            <TextInput
-              style={[
-                styles.input,
-                emailError ? styles.inputError : null,
-              ]}
+          {/* Form */}
+          <View style={styles.form}>
+            <Input
+              label={t("auth.email")}
               value={email}
               onChangeText={setEmail}
-              placeholder={t("auth.email")}
-              placeholderTextColor={tokens.colors.light.mutedForeground}
+              placeholder="vy@email.cz"
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
               textContentType="emailAddress"
               autoComplete="email"
-              accessibilityLabel={t("auth.email")}
+              error={emailError}
               accessibilityHint="Enter your e-mail address"
             />
-            {emailError ? (
-              <Text style={styles.errorText} accessibilityRole="alert">
-                {emailError}
-              </Text>
-            ) : null}
-          </View>
-
-          {/* Password field */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>{t("auth.password")}</Text>
-            <TextInput
-              style={[
-                styles.input,
-                passwordError ? styles.inputError : null,
-              ]}
+            <Input
+              label={t("auth.password")}
               value={password}
               onChangeText={setPassword}
-              placeholder={t("auth.password")}
-              placeholderTextColor={tokens.colors.light.mutedForeground}
+              placeholder="••••••••"
               secureTextEntry
               textContentType="password"
               autoComplete="current-password"
-              accessibilityLabel={t("auth.password")}
+              error={passwordError}
               accessibilityHint="Enter your password"
             />
-            {passwordError ? (
-              <Text style={styles.errorText} accessibilityRole="alert">
-                {passwordError}
-              </Text>
-            ) : null}
           </View>
 
-          {/* Submit button */}
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-            ]}
+          {/* Primary CTA */}
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            glow
             onPress={handleSubmit}
-            accessibilityRole="button"
             accessibilityLabel={t("auth.signInCta")}
           >
-            <Text style={styles.buttonText}>{t("auth.signInCta")}</Text>
-          </Pressable>
+            {t("auth.signInCta")}
+          </Button>
 
-          {/* Link to signup */}
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={[styles.dividerLine, { backgroundColor: c.border }]} />
+            <Text style={[styles.dividerText, { color: c.mutedForeground }]}>
+              {t("auth.or")}
+            </Text>
+            <View style={[styles.dividerLine, { backgroundColor: c.border }]} />
+          </View>
+
+          {/* Google OAuth */}
+          <Button
+            variant="outline"
+            size="lg"
+            fullWidth
+            onPress={handleGoogle}
+            leading={<GoogleMark />}
+            accessibilityLabel={t("auth.signInWithGoogle")}
+          >
+            {t("auth.signInWithGoogle")}
+          </Button>
+
+          {/* Bottom link */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              {/* Kept intentionally simple — no i18n key for the connector phrase
-                  since this is a scaffold screen */}
-              Nemáte účet?{" "}
+            <Text style={[styles.footerText, { color: c.mutedForeground }]}>
+              {t("auth.noAccount")}{" "}
             </Text>
             <Link href="/(auth)/signup" asChild>
-              <Pressable accessibilityRole="link" accessibilityLabel={t("auth.signUp")}>
-                <Text style={styles.link}>{t("auth.signUp")}</Text>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={t("auth.signUp")}
+              >
+                <Text style={[styles.link, { color: c.primary }]}>
+                  {t("auth.signUp")}
+                </Text>
               </Pressable>
             </Link>
           </View>
@@ -161,79 +191,97 @@ export default function LoginScreen() {
   );
 }
 
-// ── Styles ───────────────────────────────────────────────────────────────────
+/**
+ * Tiny brand-neutral "G" mark for the Google button.
+ * Using a Text glyph keeps us free of `react-native-svg` / extra deps.
+ */
+function GoogleMark() {
+  const theme = useTheme();
+  return (
+    <View
+      style={[
+        styles.googleMark,
+        {
+          backgroundColor:
+            theme.mode === "dark" ? theme.slate[700] : theme.slate[100],
+          borderRadius: radii.badge,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.googleMarkText,
+          { color: theme.mode === "dark" ? theme.slate[50] : theme.slate[900] },
+        ]}
+      >
+        G
+      </Text>
+    </View>
+  );
+}
 
-const c = tokens.colors.light;
+// ── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: c.background,
-  },
-  flex: {
-    flex: 1,
-  },
+  safe: { flex: 1 },
+  flex: { flex: 1 },
   container: {
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
-    paddingVertical: 40,
-    gap: 16,
+    paddingVertical: 32,
+    gap: 14,
+  },
+  halo: {
+    position: "absolute",
+    top: 40,
+    left: -60,
+    right: -60,
+    height: 260,
+    borderRadius: 260,
   },
   appName: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: c.primary,
+    fontSize: 18,
+    fontWeight: "800",
     textAlign: "center",
+    letterSpacing: 0.3,
     marginBottom: 4,
   },
-  heading: {
-    fontSize: 22,
-    fontWeight: "600",
-    color: c.foreground,
+  subtitle: {
+    fontSize: 14,
     textAlign: "center",
     marginBottom: 8,
+    lineHeight: 20,
   },
-  fieldGroup: {
-    gap: 6,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: c.foreground,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: c.input,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    color: c.foreground,
-    backgroundColor: c.background,
-  },
-  inputError: {
-    borderColor: c.destructive,
-  },
-  errorText: {
-    fontSize: 12,
-    color: c.destructive,
-  },
-  button: {
-    height: 48,
-    backgroundColor: c.primary,
-    borderRadius: 6,
-    justifyContent: "center",
-    alignItems: "center",
+  form: {
+    gap: 12,
     marginTop: 8,
   },
-  buttonPressed: {
-    opacity: 0.85,
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginVertical: 4,
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: c.primaryForeground,
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  googleMark: {
+    width: 22,
+    height: 22,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  googleMarkText: {
+    fontSize: 14,
+    fontWeight: "800",
   },
   footer: {
     flexDirection: "row",
@@ -243,11 +291,12 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: c.mutedForeground,
+    fontWeight: "500",
   },
   link: {
     fontSize: 14,
-    fontWeight: "600",
-    color: c.primary,
+    fontWeight: "800",
   },
 });
+
+void space;

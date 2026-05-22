@@ -1,18 +1,13 @@
 /**
- * Comparison screen — T-015.
+ * Comparison screen — T-015 (bolder mobile pass).
  *
- * Mobile layout (vertical stack per wireframe — no side-by-side on 375px):
- *   1. Header with scenario names + common horizon
- *   2. Overlay line chart (A teal / B amber)
- *   3. Winner banner
- *   4. Scenario A accordion (inputs + result)
- *   5. Scenario B accordion (inputs + result)
+ * Layout (vertical stack, mobile-first):
+ *   1. Page title
+ *   2. Two scenario header pills (A teal / B amber) with names
+ *   3. Overlay chart card (rounded 20)
+ *   4. Winner banner — bolder primary-tinted card
+ *   5. Scenario A + B accordions with inputs + result rows
  *   6. Disclaimer
- *
- * Defaults: pre-built scenarios A (compound S&P-like) + B (real-estate-like)
- * matching the wireframe examples. Full scenario picker is a post-MVP enhancement.
- *
- * Chart: Victory Native XL CartesianChart + Line (2 series overlay).
  */
 
 import { useDeferredValue, useEffect, useState } from "react";
@@ -35,14 +30,11 @@ import {
   formatPercent,
 } from "@investio/shared";
 import type { ScenarioComputed } from "@investio/shared";
-import { tokens } from "@investio/design-tokens";
 import { Card } from "@/components/ui/card";
 import { Accordion } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { useTheme, radii, typo, space, glowShadow } from "@/lib/theme";
 
-const c = tokens.colors.light;
-
-// Default scenario A: compound S&P 500-like
 const DEFAULT_A_INPUT = {
   type: "compound" as const,
   initialAmount: 1300000,
@@ -52,7 +44,6 @@ const DEFAULT_A_INPUT = {
   contributionTiming: "end" as const,
 };
 
-// Default scenario B: real estate Prague apartment
 const DEFAULT_B_INPUT = {
   type: "real_estate" as const,
   purchasePrice: 6500000,
@@ -75,6 +66,8 @@ function safeFloat(raw: string, fallback: number): number {
 
 export default function CompareScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const c = theme.colors;
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -82,21 +75,36 @@ export default function CompareScreen() {
   }, []);
 
   // Scenario A controls (compound)
-  const [aInitialStr, setAInitialStr] = useState(String(DEFAULT_A_INPUT.initialAmount));
-  const [aContribStr, setAContribStr] = useState(String(DEFAULT_A_INPUT.monthlyContribution));
+  const [aInitialStr, setAInitialStr] = useState(
+    String(DEFAULT_A_INPUT.initialAmount)
+  );
+  const [aContribStr, setAContribStr] = useState(
+    String(DEFAULT_A_INPUT.monthlyContribution)
+  );
   const [aReturnStr, setAReturnStr] = useState("7");
-  const [aHorizonStr, setAHorizonStr] = useState(String(DEFAULT_A_INPUT.horizonYears));
+  const [aHorizonStr, setAHorizonStr] = useState(
+    String(DEFAULT_A_INPUT.horizonYears)
+  );
 
   // Scenario B controls (real estate)
-  const [bPriceStr, setBPriceStr] = useState(String(DEFAULT_B_INPUT.purchasePrice));
-  const [bDownStr, setBDownStr] = useState(String(DEFAULT_B_INPUT.downPayment));
+  const [bPriceStr, setBPriceStr] = useState(
+    String(DEFAULT_B_INPUT.purchasePrice)
+  );
+  const [bDownStr, setBDownStr] = useState(
+    String(DEFAULT_B_INPUT.downPayment)
+  );
   const [bRentStr, setBRentStr] = useState(String(DEFAULT_B_INPUT.monthlyRent));
-  const [bHorizonStr, setBHorizonStr] = useState(String(DEFAULT_B_INPUT.horizonYears));
+  const [bHorizonStr, setBHorizonStr] = useState(
+    String(DEFAULT_B_INPUT.horizonYears)
+  );
 
   const aInput = {
     ...DEFAULT_A_INPUT,
     initialAmount: safeFloat(aInitialStr, DEFAULT_A_INPUT.initialAmount),
-    monthlyContribution: safeFloat(aContribStr, DEFAULT_A_INPUT.monthlyContribution),
+    monthlyContribution: safeFloat(
+      aContribStr,
+      DEFAULT_A_INPUT.monthlyContribution
+    ),
     annualReturnPct: safeFloat(aReturnStr, 7) / 100,
     horizonYears: Math.max(
       1,
@@ -127,7 +135,6 @@ export default function CompareScreen() {
     initialCapital: deferredA.initialAmount,
     result: resultA,
   };
-
   const scenarioB: ScenarioComputed = {
     kind: "real_estate",
     horizonYears: deferredB.horizonYears,
@@ -136,12 +143,8 @@ export default function CompareScreen() {
   };
 
   const comparison = compareScenarios(scenarioA, scenarioB);
-
-  // Downsample to ~60 points for chart overlay (2 lines = 120 total points)
   const chartA = downsampleTimeSeries(comparison.a.timeSeries, 60);
   const chartB = downsampleTimeSeries(comparison.b.timeSeries, 60);
-
-  // Merge into single array for CartesianChart (both series on same x)
   const chartData = mergeForChart(chartA, chartB);
 
   const winner = comparison.difference.winnerKey;
@@ -149,119 +152,182 @@ export default function CompareScreen() {
     winner === "a"
       ? t("mobile.winnerA")
       : winner === "b"
-      ? t("mobile.winnerB")
-      : t("mobile.tie");
+        ? t("mobile.winnerB")
+        : t("mobile.tie");
+
+  const aColor = c.chart[1];
+  const bColor = c.chart[2];
+
+  void reducedMotion;
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: c.background }]}
+      edges={["top"]}
+    >
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.screenTitle} accessibilityRole="header">
+        <Text
+          style={[typo.pageTitle, { color: c.foreground }]}
+          accessibilityRole="header"
+        >
           {t("comparison.title")}
         </Text>
 
-        {/* Scenario names header */}
-        <View style={styles.headerRow}>
-          <View style={[styles.scenarioPill, { backgroundColor: c.chart[1] }]}>
-            <Text style={styles.scenarioPillText}>A</Text>
-          </View>
-          <Text style={styles.headerLabel} numberOfLines={1}>
-            {t("mobile.scenarioA")} — Složené úročení
+        {/* Scenario header pills */}
+        <View style={styles.headerStack}>
+          <ScenarioHeaderRow
+            color={aColor}
+            letter="A"
+            label={`${t("mobile.scenarioA")} — ${t(
+              "dashboard.filter.compound"
+            )}`}
+          />
+          <ScenarioHeaderRow
+            color={bColor}
+            letter="B"
+            label={`${t("mobile.scenarioB")} — ${t(
+              "dashboard.filter.realEstate"
+            )}`}
+          />
+          <Text style={[styles.horizonNote, { color: c.mutedForeground }]}>
+            {t("mobile.horizonLabel")}: {comparison.horizonYears} let
           </Text>
         </View>
-        <View style={styles.headerRow}>
-          <View style={[styles.scenarioPill, { backgroundColor: c.chart[2] }]}>
-            <Text style={styles.scenarioPillText}>B</Text>
-          </View>
-          <Text style={styles.headerLabel} numberOfLines={1}>
-            {t("mobile.scenarioB")} — Nemovitost
-          </Text>
-        </View>
-        <Text style={styles.horizonNote}>
-          {t("mobile.horizonLabel")}: {comparison.horizonYears} let
-        </Text>
 
         {/* Overlay chart */}
-        <View style={styles.chartContainer} accessibilityRole="image">
-          <ComparisonChart data={chartData} />
-        </View>
-        <View style={styles.legendRow}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: c.chart[1] }]} />
-            <Text style={styles.legendLabel}>Scénář A (teal)</Text>
+        <Card tone="accent" radius={radii.panel} style={styles.chartCard}>
+          <View style={styles.chartContainer} accessibilityRole="image">
+            <ComparisonChart
+              data={chartData}
+              colorA={aColor}
+              colorB={bColor}
+              empty={c.mutedForeground}
+            />
           </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: c.chart[2] }]} />
-            <Text style={styles.legendLabel}>Scénář B (amber)</Text>
+          <View style={styles.legendRow}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: aColor }]} />
+              <Text style={[styles.legendLabel, { color: c.mutedForeground }]}>
+                {t("mobile.scenarioA")}
+              </Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: bColor }]} />
+              <Text style={[styles.legendLabel, { color: c.mutedForeground }]}>
+                {t("mobile.scenarioB")}
+              </Text>
+            </View>
           </View>
-        </View>
+        </Card>
 
         {/* Winner banner */}
-        <Card
+        <View
           style={[
-            styles.winnerCard,
-            winner !== "tie"
-              ? { borderColor: c.primary, borderWidth: 2 }
-              : undefined,
+            styles.winner,
+            {
+              backgroundColor:
+                theme.mode === "dark" ? theme.teal[900] : theme.teal[50],
+              borderColor:
+                theme.mode === "dark" ? theme.teal[600] : theme.teal[300],
+              borderRadius: radii.card,
+              ...(winner !== "tie" ? glowShadow(theme, 0.3) : {}),
+            },
           ]}
         >
-          <Text style={styles.winnerLabel}>{winnerLabel}</Text>
+          <Text
+            style={[
+              styles.winnerLabel,
+              {
+                color:
+                  theme.mode === "dark" ? theme.teal[100] : theme.teal[900],
+              },
+            ]}
+          >
+            {winnerLabel}
+          </Text>
           {winner !== "tie" ? (
             <>
-              <Text style={styles.winnerDiff}>
+              <Text
+                style={[
+                  styles.winnerDiff,
+                  {
+                    color:
+                      theme.mode === "dark"
+                        ? theme.teal[100]
+                        : theme.teal[800],
+                  },
+                ]}
+              >
                 {t("mobile.finalValueDiff")}:{" "}
-                {formatCurrency(
-                  Math.abs(comparison.difference.finalValueDelta),
-                  "CZK",
+                <Text style={styles.winnerDiffStrong}>
+                  {formatCurrency(
+                    Math.abs(comparison.difference.finalValueDelta),
+                    "CZK",
+                    "cs"
+                  )}
+                </Text>
+              </Text>
+              <Text
+                style={[
+                  styles.winnerDiffPct,
+                  {
+                    color:
+                      theme.mode === "dark"
+                        ? theme.teal[200]
+                        : theme.teal[700],
+                  },
+                ]}
+              >
+                (
+                {formatPercent(
+                  Math.abs(comparison.difference.finalValueDeltaPct),
                   "cs"
                 )}
-              </Text>
-              <Text style={styles.winnerDiffPct}>
-                ({formatPercent(Math.abs(comparison.difference.finalValueDeltaPct), "cs")})
+                )
               </Text>
             </>
           ) : null}
-        </Card>
+        </View>
 
         {/* Scenario A detail */}
-        <Accordion title={`${t("mobile.scenarioA")} — Detail`} defaultOpen={true}>
-          <Text style={styles.resultRow}>
-            Finální hodnota:{" "}
-            <Text style={styles.resultVal}>
-              {formatCurrency(comparison.a.finalValue, "CZK", "cs")}
-            </Text>
-          </Text>
-          <Text style={styles.resultRow}>
-            ROI:{" "}
-            <Text style={styles.resultVal}>
-              +{formatPercent(comparison.a.totalROI, "cs")}
-            </Text>
-          </Text>
+        <Accordion
+          title={`${t("mobile.scenarioA")} — Detail`}
+          defaultOpen={true}
+        >
+          <ResultRow
+            label={t("calc.compound.results.finalValue")}
+            value={formatCurrency(comparison.a.finalValue, "CZK", "cs")}
+          />
+          <ResultRow
+            label="ROI"
+            value={`+${formatPercent(comparison.a.totalROI, "cs")}`}
+          />
           <Input
-            label="Počáteční kapitál"
+            label={t("calc.compound.fields.initialAmount")}
             value={aInitialStr}
             onChangeText={setAInitialStr}
             keyboardType="numeric"
             unit="Kč"
           />
           <Input
-            label="Měsíční vklad"
+            label={t("calc.compound.fields.monthlyContribution")}
             value={aContribStr}
             onChangeText={setAContribStr}
             keyboardType="numeric"
             unit="Kč"
           />
           <Input
-            label="Roční výnos"
+            label={t("calc.compound.fields.annualReturnPct")}
             value={aReturnStr}
             onChangeText={setAReturnStr}
             keyboardType="decimal-pad"
             unit="%"
           />
           <Input
-            label="Horizont"
+            label={t("calc.compound.fields.horizonYears")}
             value={aHorizonStr}
             onChangeText={setAHorizonStr}
             keyboardType="number-pad"
@@ -270,42 +336,41 @@ export default function CompareScreen() {
         </Accordion>
 
         {/* Scenario B detail */}
-        <Accordion title={`${t("mobile.scenarioB")} — Detail`} defaultOpen={false}>
-          <Text style={styles.resultRow}>
-            Finální hodnota (equity + cf):{" "}
-            <Text style={styles.resultVal}>
-              {formatCurrency(comparison.b.finalValue, "CZK", "cs")}
-            </Text>
-          </Text>
-          <Text style={styles.resultRow}>
-            ROI:{" "}
-            <Text style={styles.resultVal}>
-              +{formatPercent(comparison.b.totalROI, "cs")}
-            </Text>
-          </Text>
+        <Accordion
+          title={`${t("mobile.scenarioB")} — Detail`}
+          defaultOpen={false}
+        >
+          <ResultRow
+            label={t("calc.compound.results.finalValue")}
+            value={formatCurrency(comparison.b.finalValue, "CZK", "cs")}
+          />
+          <ResultRow
+            label="ROI"
+            value={`+${formatPercent(comparison.b.totalROI, "cs")}`}
+          />
           <Input
-            label="Kupní cena"
+            label={t("calc.realEstate.fields.purchasePrice")}
             value={bPriceStr}
             onChangeText={setBPriceStr}
             keyboardType="numeric"
             unit="Kč"
           />
           <Input
-            label="Vlastní kapitál"
+            label={t("calc.realEstate.fields.downPayment")}
             value={bDownStr}
             onChangeText={setBDownStr}
             keyboardType="numeric"
             unit="Kč"
           />
           <Input
-            label="Měsíční nájem"
+            label={t("calc.realEstate.fields.monthlyRent")}
             value={bRentStr}
             onChangeText={setBRentStr}
             keyboardType="numeric"
             unit="Kč"
           />
           <Input
-            label="Horizont"
+            label={t("calc.compound.fields.horizonYears")}
             value={bHorizonStr}
             onChangeText={setBHorizonStr}
             keyboardType="number-pad"
@@ -313,33 +378,81 @@ export default function CompareScreen() {
           />
         </Accordion>
 
-        <Text style={styles.disclaimer}>
-          Nemovitost: finální hodnota = equity + kumulativní cashflow.
-          Složené úročení nezahrnuje daň z prodeje. Oba scénáře normalizovány na společný horizont.
+        <Text style={[styles.disclaimer, { color: c.mutedForeground }]}>
+          {t("mobile.comparisonDisclaimer")}
         </Text>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// ── Subcomponents ─────────────────────────────────────────────────────────────
+// ── Subcomponents ───────────────────────────────────────────────────────────
 
-// Victory Native XL requires data to satisfy Record<string, unknown>
+function ScenarioHeaderRow({
+  color,
+  letter,
+  label,
+}: {
+  color: string;
+  letter: string;
+  label: string;
+}) {
+  const theme = useTheme();
+  return (
+    <View style={styles.headerRow}>
+      <View style={[styles.scenarioPill, { backgroundColor: color }]}>
+        <Text style={styles.scenarioPillText}>{letter}</Text>
+      </View>
+      <Text
+        style={[styles.headerLabel, { color: theme.colors.foreground }]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+function ResultRow({ label, value }: { label: string; value: string }) {
+  const theme = useTheme();
+  return (
+    <View style={styles.resultRow}>
+      <Text style={[styles.resultLabel, { color: theme.colors.mutedForeground }]}>
+        {label}
+      </Text>
+      <Text style={[styles.resultValue, { color: theme.colors.primary }]}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 interface MergedPoint extends Record<string, unknown> {
   month: number;
   valueA: number;
   valueB: number;
 }
 
-function ComparisonChart({ data }: { data: MergedPoint[] }) {
+function ComparisonChart({
+  data,
+  colorA,
+  colorB,
+  empty,
+}: {
+  data: MergedPoint[];
+  colorA: string;
+  colorB: string;
+  empty: string;
+}) {
   if (data.length === 0) {
     return (
       <View style={styles.chartEmpty}>
-        <Text style={styles.chartEmptyText}>Vyplňte vstupy pro zobrazení grafu</Text>
+        <Text style={[styles.chartEmptyText, { color: empty }]}>
+          Vyplňte vstupy pro zobrazení grafu
+        </Text>
       </View>
     );
   }
-
   return (
     <CartesianChart
       data={data}
@@ -349,23 +462,15 @@ function ComparisonChart({ data }: { data: MergedPoint[] }) {
     >
       {({ points }) => (
         <>
-          <Line
-            points={points.valueA}
-            color={c.chart[1]}
-            strokeWidth={2}
-          />
-          <Line
-            points={points.valueB}
-            color={c.chart[2]}
-            strokeWidth={2}
-          />
+          <Line points={points.valueA} color={colorA} strokeWidth={2.5} />
+          <Line points={points.valueB} color={colorB} strokeWidth={2.5} />
         </>
       )}
     </CartesianChart>
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function downsampleTimeSeries(
   series: Array<{ month: number; value: number }>,
@@ -381,83 +486,76 @@ function downsampleTimeSeries(
   return result;
 }
 
-/**
- * Merge two time series (may have different lengths) into a single array
- * keyed by month, with valueA and valueB. Uses linear interpolation for
- * missing months.
- */
 function mergeForChart(
   seriesA: Array<{ month: number; value: number }>,
   seriesB: Array<{ month: number; value: number }>
 ): MergedPoint[] {
   if (seriesA.length === 0 || seriesB.length === 0) return [];
-
   const maxMonth = Math.min(
     seriesA[seriesA.length - 1]?.month ?? 0,
     seriesB[seriesB.length - 1]?.month ?? 0
   );
-
-  const mapA = new Map(seriesA.map((p) => [p.month, p.value]));
   const mapB = new Map(seriesB.map((p) => [p.month, p.value]));
-
   const result: MergedPoint[] = [];
-  // Use A months as the spine
   for (const pt of seriesA) {
     if (pt.month > maxMonth) break;
     const vB = mapB.get(pt.month);
     if (vB !== undefined) {
-      // `as MergedPoint` is safe — the object satisfies the interface shape
-      result.push({ month: pt.month, valueA: pt.value, valueB: vB } as MergedPoint);
+      result.push({
+        month: pt.month,
+        valueA: pt.value,
+        valueB: vB,
+      } as MergedPoint);
     }
   }
   return result;
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
+// ── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: c.background },
-  scroll: { padding: 16, gap: 12 },
-  screenTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: c.foreground,
-    marginBottom: 4,
-  },
+  safe: { flex: 1 },
+  scroll: { padding: space.gutter, gap: space.betweenCards },
+
+  headerStack: { gap: 8 },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
   },
   scenarioPill: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
   scenarioPillText: {
     color: "#fff",
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "800",
   },
   headerLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: c.foreground,
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: -0.1,
+    flex: 1,
   },
   horizonNote: {
     fontSize: 12,
-    color: c.mutedForeground,
-    marginBottom: 4,
+    fontWeight: "600",
+    marginTop: 4,
+    marginLeft: 4,
+  },
+
+  // Chart
+  chartCard: {
+    gap: 10,
   },
   chartContainer: {
     height: 220,
-    borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: c.card,
-    borderWidth: 1,
-    borderColor: c.border,
+    borderRadius: radii.sm,
   },
   chartEmpty: {
     flex: 1,
@@ -466,7 +564,6 @@ const styles = StyleSheet.create({
   },
   chartEmptyText: {
     fontSize: 13,
-    color: c.mutedForeground,
     textAlign: "center",
   },
   legendRow: {
@@ -486,36 +583,52 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
-    color: c.mutedForeground,
+    fontWeight: "600",
   },
-  winnerCard: {
+
+  // Winner
+  winner: {
+    padding: 20,
+    borderWidth: 1.5,
     gap: 4,
-    borderColor: c.primary,
   },
   winnerLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: c.primary,
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.3,
   },
   winnerDiff: {
     fontSize: 14,
-    color: c.foreground,
+    fontWeight: "500",
+  },
+  winnerDiffStrong: {
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
   },
   winnerDiffPct: {
     fontSize: 12,
-    color: c.mutedForeground,
+    fontWeight: "600",
   },
+
+  // Result rows in accordions
   resultRow: {
-    fontSize: 14,
-    color: c.foreground,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
   },
-  resultVal: {
-    fontWeight: "700",
-    color: c.primary,
+  resultLabel: {
+    fontSize: 13,
+    fontWeight: "600",
   },
+  resultValue: {
+    fontSize: 15,
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
+  },
+
   disclaimer: {
     fontSize: 11,
-    color: c.mutedForeground,
     fontStyle: "italic",
     textAlign: "center",
     paddingHorizontal: 8,

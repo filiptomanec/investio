@@ -1,18 +1,21 @@
 /**
  * Skeleton — loading placeholder rectangle.
- * Uses React Native Animated for the shimmer pulse.
+ *
+ * Bolder mobile pass:
+ *   - shimmer respects useColorScheme (was light only)
+ *   - SkeletonCard radius bumped to 24 to match real ScenarioCard
+ *   - hairline accent tint on pulse
  */
 import { useEffect, useRef } from "react";
 import {
+  AccessibilityInfo,
   Animated,
   StyleSheet,
   View,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { tokens } from "@investio/design-tokens";
-
-const c = tokens.colors.light;
+import { useTheme, radii } from "@/lib/theme";
 
 export interface SkeletonProps {
   width?: number | `${number}%`;
@@ -24,35 +27,45 @@ export interface SkeletonProps {
 export function Skeleton({
   width = "100%",
   height = 16,
-  borderRadius = 4,
+  borderRadius = 6,
   style,
 }: SkeletonProps) {
+  const theme = useTheme();
   const opacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 0.4,
-          duration: 700,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 700,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulse.start();
-    return () => pulse.stop();
+    let stopped = false;
+    AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+      if (stopped || reduced) {
+        // Don't animate when reduced motion is on.
+        opacity.setValue(0.7);
+        return;
+      }
+      const pulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(opacity, {
+            toValue: 0.4,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulse.start();
+    });
+    return () => {
+      stopped = true;
+    };
   }, [opacity]);
 
   return (
     <Animated.View
       style={[
-        styles.skeleton,
-        { width, height, borderRadius, opacity },
+        { width, height, borderRadius, opacity, backgroundColor: theme.colors.muted },
         style,
       ]}
       accessibilityRole="none"
@@ -63,10 +76,21 @@ export function Skeleton({
 
 // Convenience for a row of skeletons (e.g. dashboard list)
 export function SkeletonCard({ style }: { style?: StyleProp<ViewStyle> }) {
+  const theme = useTheme();
   return (
-    <View style={[styles.card, style]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.colors.card,
+          borderColor: theme.colors.border,
+          borderRadius: radii.card,
+        },
+        style,
+      ]}
+    >
       <View style={styles.cardRow}>
-        <Skeleton width={40} height={40} borderRadius={6} />
+        <Skeleton width={44} height={44} borderRadius={radii.badge} />
         <View style={styles.cardLines}>
           <Skeleton width="60%" height={14} />
           <Skeleton width="40%" height={12} />
@@ -77,19 +101,13 @@ export function SkeletonCard({ style }: { style?: StyleProp<ViewStyle> }) {
 }
 
 const styles = StyleSheet.create({
-  skeleton: {
-    backgroundColor: c.muted,
-  },
   card: {
-    backgroundColor: c.card,
-    borderRadius: 8,
     borderWidth: 1,
-    borderColor: c.border,
-    padding: 16,
+    padding: 20,
   },
   cardRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 14,
     alignItems: "center",
   },
   cardLines: {
