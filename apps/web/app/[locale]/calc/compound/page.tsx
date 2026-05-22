@@ -21,7 +21,6 @@ import { CompoundInputSchema, type CompoundInput } from "@investio/shared/schema
 import { calculateCompound, type CompoundResult } from "@investio/shared/calc";
 import { formatCurrency, formatCompact } from "@investio/shared/formatters";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -140,12 +139,14 @@ function ResultsPanel({ result, locale }: ResultsPanelProps) {
   const gainsPct = totalContributions > 0 ? totalGains / totalContributions : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Hero number */}
       <div>
-        <p className="text-sm text-muted-foreground mb-1">{t("results.finalValue")}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          {t("results.finalValue")}
+        </p>
         <p
-          className="text-3xl font-bold tabular-nums text-primary"
+          className="text-5xl md:text-6xl font-black text-finance text-gradient-teal"
           aria-live="polite"
         >
           {formatCurrency(finalValue, "CZK", loc)}
@@ -154,18 +155,22 @@ function ResultsPanel({ result, locale }: ResultsPanelProps) {
 
       {/* Breakdown grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-muted p-3">
-          <p className="text-xs text-muted-foreground mb-1">{t("results.totalContributions")}</p>
-          <p className="font-semibold tabular-nums text-sm">
+        <div className="rounded-2xl border border-border bg-muted/40 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            {t("results.totalContributions")}
+          </p>
+          <p className="text-lg font-bold text-finance text-foreground">
             {formatCurrency(totalContributions, "CZK", loc)}
           </p>
         </div>
-        <div className="rounded-lg bg-muted p-3">
-          <p className="text-xs text-muted-foreground mb-1">{t("results.totalGains")}</p>
-          <p className="font-semibold tabular-nums text-sm text-success">
+        <div className="rounded-2xl border border-success/20 bg-success/[0.06] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            {t("results.totalGains")}
+          </p>
+          <p className="text-lg font-bold text-finance text-success">
             {formatCurrency(totalGains, "CZK", loc)}
           </p>
-          <p className="text-xs text-muted-foreground tabular-nums">
+          <p className="mt-0.5 text-xs font-medium text-success/80 tabular-nums">
             +{formatCompact(gainsPct * 100, loc)} %
           </p>
         </div>
@@ -388,9 +393,13 @@ export default function CompoundCalcPage() {
     <TooltipProvider>
       <main
         id="main"
-        className="min-h-screen bg-background text-foreground"
+        className="relative min-h-screen overflow-hidden bg-background text-foreground"
         aria-label={t("title")}
       >
+        {/* Atmospheric halo + grain */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-halo-teal" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-noise mix-blend-overlay" />
+
         {/* Skip link */}
         <a
           href="#main-content"
@@ -399,25 +408,26 @@ export default function CompoundCalcPage() {
           Přeskočit na obsah
         </a>
 
-        <div className="max-w-6xl mx-auto px-4 py-8" id="main-content">
+        <div className="relative max-w-6xl mx-auto px-4 py-10 sm:py-14" id="main-content">
           {/* Page header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
+          <div className="mb-10">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-3">
+              Kalkulačka
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-foreground">
               {t("title")}
             </h1>
-            <p className="text-muted-foreground">{t("subtitle")}</p>
+            <p className="mt-3 text-lg text-muted-foreground max-w-2xl">{t("subtitle")}</p>
           </div>
 
           {/* Two-column layout: form left, results+chart right */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* ── FORM COLUMN ── */}
-            <Card className="lg:col-span-1">
-              <CardHeader>
-                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Vstupy
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="lg:col-span-1 relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-7">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-5">
+                Vstupy
+              </p>
+              <div>
                 <form className="space-y-4" noValidate aria-label="Kalkulačka vstupů">
                   {/* Initial amount */}
                   <Field
@@ -595,41 +605,36 @@ export default function CompoundCalcPage() {
                     />
                   </div>
                 </form>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* ── RESULTS + CHART COLUMN ── */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Results panel */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Výsledek
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResultsPanel result={displayResult} locale={locale} />
-                </CardContent>
-              </Card>
+              {/* Results panel — visual hero card with inner accent glow */}
+              <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card p-6 sm:p-8 glow-accent-inner-right">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-5">
+                  Výsledek
+                </p>
+                <ResultsPanel result={displayResult} locale={locale} />
+              </div>
 
               {/* Chart */}
-              <Card data-testid="compound-chart">
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    Průběh investice
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CompoundChart
-                    timeSeries={displayResult.timeSeries}
-                    locale={locale}
-                  />
-                </CardContent>
-              </Card>
+              <div
+                data-testid="compound-chart"
+                className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-8"
+              >
+                <h2 className="text-sm font-semibold text-foreground mb-5">
+                  Průběh investice
+                </h2>
+                <CompoundChart
+                  timeSeries={displayResult.timeSeries}
+                  locale={locale}
+                />
+              </div>
 
-              {/* Disclaimer */}
-              <p className="text-xs text-muted-foreground px-1">
-                ⚠ {t("disclaimer")}
+              {/* Disclaimer — accent-marked sidebar */}
+              <p className="border-l-2 border-primary/40 pl-3 text-xs text-muted-foreground">
+                {t("disclaimer")}
               </p>
             </div>
           </div>

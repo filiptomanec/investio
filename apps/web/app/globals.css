@@ -8,7 +8,7 @@
 @layer base {
   :root {
     /* sémantické barvy — light mode */
-    --background: 0 0% 100%;               /* #ffffff */
+    --background: 210 40% 99%;             /* off-white, slight cool tint */
     --foreground: 222 47% 11%;             /* slate-900 #0f172a */
 
     --card: 0 0% 100%;
@@ -195,5 +195,135 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------- Investio bolder pass ------------------------ */
+/*
+ * Reusable utilities to push the visual language toward bold + atmospheric +
+ * premium-feeling per user feedback 2026-05-22.
+ *
+ *  .bg-halo-teal              radial halo of teal accent (top-right anchored)
+ *  .bg-halo-teal-bottom-left  radial halo of teal accent (bottom-left anchored)
+ *  .bg-noise                  subtle SVG grain texture overlay (3% opacity)
+ *  .glow-accent               accent-tinted bloom shadow for cards/buttons
+ *  .glow-accent-sm            smaller bloom for icon halos
+ *  .glow-accent-inner-right   inset accent glow on the right edge (result card)
+ *  .text-display              hero display typography (text-6xl md:text-8xl black tight)
+ *  .text-display-lg           large display (text-5xl md:text-7xl)
+ *  .text-finance              tabular-nums + tight tracking for currency
+ *  .text-gradient-teal        accent gradient text fill
+ *  .ring-focus-accent         accent-tinted focus ring + halo
+ *  .accordion-trigger-bold    elevated accordion trigger style
+ */
+
+@layer utilities {
+  .bg-halo-teal {
+    background-image:
+      radial-gradient(ellipse 60% 50% at 100% 0%, hsl(174 80% 36% / 0.18), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 0% 100%, hsl(174 80% 36% / 0.07), transparent 60%);
+  }
+  .dark .bg-halo-teal {
+    background-image:
+      radial-gradient(ellipse 60% 55% at 100% 0%, hsl(173 80% 51% / 0.22), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 0% 100%, hsl(173 80% 51% / 0.10), transparent 60%);
+  }
+
+  .bg-halo-teal-bottom-left {
+    background-image:
+      radial-gradient(ellipse 60% 50% at 0% 100%, hsl(174 80% 36% / 0.16), transparent 60%);
+  }
+  .dark .bg-halo-teal-bottom-left {
+    background-image:
+      radial-gradient(ellipse 60% 50% at 0% 100%, hsl(173 80% 51% / 0.18), transparent 60%);
+  }
+
+  /* Subtle SVG grain — keeps backgrounds from feeling flat */
+  .bg-noise {
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    opacity: 0.03;
+  }
+  .dark .bg-noise {
+    opacity: 0.04;
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 60px -10px hsl(174 80% 36% / 0.30);
+  }
+  .dark .glow-accent {
+    box-shadow: 0 0 60px -10px hsl(173 80% 51% / 0.35);
+  }
+
+  .glow-accent-sm {
+    box-shadow: 0 0 24px -4px hsl(174 80% 36% / 0.40);
+  }
+  .dark .glow-accent-sm {
+    box-shadow: 0 0 24px -4px hsl(173 80% 51% / 0.45);
+  }
+
+  .glow-accent-inner-right {
+    box-shadow: inset -40px 0 60px -40px hsl(174 80% 36% / 0.35);
+  }
+  .dark .glow-accent-inner-right {
+    box-shadow: inset -40px 0 60px -40px hsl(173 80% 51% / 0.45);
+  }
+
+  .glow-accent-inner-top-left {
+    box-shadow: inset 40px 40px 60px -40px hsl(174 80% 36% / 0.20);
+  }
+  .dark .glow-accent-inner-top-left {
+    box-shadow: inset 40px 40px 60px -40px hsl(173 80% 51% / 0.25);
+  }
+
+  .text-display {
+    font-size: 3rem;            /* 48px mobile */
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+  }
+  @media (min-width: 768px) {
+    .text-display { font-size: 5rem; line-height: 1; }   /* 80px tablet */
+  }
+  @media (min-width: 1024px) {
+    .text-display { font-size: 6rem; line-height: 0.98; } /* 96px desktop */
+  }
+
+  .text-display-lg {
+    font-size: 2.5rem;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  @media (min-width: 768px) {
+    .text-display-lg { font-size: 3.75rem; line-height: 1; }
+  }
+
+  .text-finance {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .text-gradient-teal {
+    background-image: linear-gradient(135deg, hsl(174 77% 32%) 0%, hsl(174 80% 18%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dark .text-gradient-teal {
+    background-image: linear-gradient(135deg, hsl(173 80% 65%) 0%, hsl(173 80% 35%) 100%);
+  }
+
+  .ring-focus-accent:focus-visible {
+    outline: none;
+    border-color: hsl(var(--ring));
+    box-shadow:
+      0 0 0 2px hsl(var(--ring) / 0.55),
+      0 0 24px -2px hsl(174 80% 36% / 0.40);
+  }
+  .dark .ring-focus-accent:focus-visible {
+    box-shadow:
+      0 0 0 2px hsl(var(--ring) / 0.55),
+      0 0 24px -2px hsl(173 80% 51% / 0.45);
   }
 }

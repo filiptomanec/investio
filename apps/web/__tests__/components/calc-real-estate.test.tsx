@@ -139,10 +139,15 @@ describe("RealEstatePage", () => {
   it("renders results panel with result items", () => {
     render(<RealEstatePage />);
     expect(screen.getByText("Měsíční splátka")).toBeInTheDocument();
+    // Hero (avg monthly cashflow) — uppercase label per bolder-pass design
     expect(screen.getByText("Průměrný měs. cashflow")).toBeInTheDocument();
     expect(screen.getByText("Hrubý výnos")).toBeInTheDocument();
     expect(screen.getByText("Čistý výnos")).toBeInTheDocument();
-    expect(screen.getByText("IRR (roční)")).toBeInTheDocument();
+    // IRR is now an inline pill badge ("IRR · <value>") next to the hero
+    // number — match the badge by its leading "IRR ·" prefix.
+    expect(
+      screen.getByText((content) => content.trimStart().startsWith("IRR ·"))
+    ).toBeInTheDocument();
     expect(screen.getByText("Finální equity")).toBeInTheDocument();
     expect(screen.getByText("Celkový cashflow")).toBeInTheDocument();
   });
