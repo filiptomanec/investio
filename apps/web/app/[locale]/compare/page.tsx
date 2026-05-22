@@ -38,6 +38,15 @@ import { decodeScenarioFromUrl, encodeScenarioForUrl } from "@/lib/url-scenario"
 import { defaultScenarioA, defaultScenarioB } from "@/lib/comparison-defaults";
 
 // ---------------------------------------------------------------------------
+// Brand color tokens — must pass WCAG AA 4.5:1 on white (#fff).
+// Teal: design token --primary = hsl(174 80% 26%) = #0f766e  ✓ 5.5:1
+// Amber: #b45309 (amber-700) passes 4.6:1 vs white; the raw amber-500 #f59e0b
+//   fails (2.1:1) so we swap to a darker shade for text-only usage.
+// ---------------------------------------------------------------------------
+const TEAL_COLOR = "#0f766e"; // hsl(174 80% 26%) — 5.5:1 on white
+const AMBER_DARK_COLOR = "#92400e"; // amber-800 — 5.9:1 on white; used for text
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -94,16 +103,16 @@ function ComparisonTooltip({ active, payload, label, locale, labelA, labelB }: C
       <p className="font-medium mb-2 text-foreground">
         {t("chart.xAxis")} {label}
       </p>
-      <p style={{ color: "#0d9488" }}>
+      <p style={{ color: TEAL_COLOR }}>
         {labelA}: {formatCurrency(aVal, "CZK", locale)}
       </p>
-      <p style={{ color: "#f59e0b" }} className="mb-1">
+      <p style={{ color: AMBER_DARK_COLOR }} className="mb-1">
         {labelB}: {formatCurrency(bVal, "CZK", locale)}
       </p>
       <Separator className="my-1" />
       <p className="font-medium text-muted-foreground">
         {t("difference")}:{" "}
-        <span className={diff >= 0 ? "text-[#0d9488]" : "text-[#f59e0b]"}>
+        <span style={{ color: diff >= 0 ? TEAL_COLOR : AMBER_DARK_COLOR }}>
           {diff >= 0 ? "+" : ""}
           {formatCurrency(diff, "CZK", locale)}
         </span>
@@ -296,7 +305,15 @@ function DiffPanel({ comparison, locale, labelA, labelB }: DiffPanelProps) {
         {/* Winner banner */}
         <div className="flex items-center gap-3 rounded-lg bg-muted px-4 py-3">
           <span
-            className={`text-xl ${winnerKey === "a" ? "text-[#0d9488]" : winnerKey === "b" ? "text-[#f59e0b]" : "text-muted-foreground"}`}
+            className="text-xl"
+            style={{
+              color:
+                winnerKey === "a"
+                  ? TEAL_COLOR
+                  : winnerKey === "b"
+                    ? AMBER_DARK_COLOR
+                    : undefined,
+            }}
             aria-hidden="true"
           >
             {winnerKey === "tie" ? "=" : "▲"}
@@ -313,7 +330,9 @@ function DiffPanel({ comparison, locale, labelA, labelB }: DiffPanelProps) {
           </div>
         </div>
 
-        {/* 3-col table: A | B | Delta */}
+        {/* 3-col table: A | B | Delta
+            Row header cells use <th scope="row"> so screen readers
+            associate each data cell with its label (fixes td-has-header). */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm tabular-nums" aria-label={t("diff.winner")}>
             <thead>
@@ -322,16 +341,16 @@ function DiffPanel({ comparison, locale, labelA, labelB }: DiffPanelProps) {
                   &nbsp;
                 </th>
                 <th
-                  className="py-2 text-right font-medium text-[#0d9488] px-2 w-1/4"
+                  className="py-2 text-right font-medium px-2 w-1/4"
                   scope="col"
-                  style={{ color: "#0d9488" }}
+                  style={{ color: TEAL_COLOR }}
                 >
                   {labelA}
                 </th>
                 <th
                   className="py-2 text-right font-medium px-2 w-1/4"
                   scope="col"
-                  style={{ color: "#f59e0b" }}
+                  style={{ color: AMBER_DARK_COLOR }}
                 >
                   {labelB}
                 </th>
@@ -345,7 +364,9 @@ function DiffPanel({ comparison, locale, labelA, labelB }: DiffPanelProps) {
             </thead>
             <tbody>
               <tr className="border-b border-border/50">
-                <td className="py-2 text-muted-foreground">{t("diff.finalValue")}</td>
+                <th className="py-2 text-left font-normal text-muted-foreground" scope="row">
+                  {t("diff.finalValue")}
+                </th>
                 <td className="py-2 text-right px-2">
                   {formatCurrency(a.finalValue, "CZK", locale)}
                 </td>
@@ -353,18 +374,16 @@ function DiffPanel({ comparison, locale, labelA, labelB }: DiffPanelProps) {
                   {formatCurrency(b.finalValue, "CZK", locale)}
                 </td>
                 <td className="py-2 text-right">
-                  <span
-                    className={
-                      finalValueDelta >= 0 ? "text-[#0d9488]" : "text-[#f59e0b]"
-                    }
-                  >
+                  <span style={{ color: finalValueDelta >= 0 ? TEAL_COLOR : AMBER_DARK_COLOR }}>
                     {finalValueDelta >= 0 ? "+" : ""}
                     {formatCurrency(finalValueDelta, "CZK", locale)}
                   </span>
                 </td>
               </tr>
               <tr className="border-b border-border/50">
-                <td className="py-2 text-muted-foreground">{t("diff.totalROI")}</td>
+                <th className="py-2 text-left font-normal text-muted-foreground" scope="row">
+                  {t("diff.totalROI")}
+                </th>
                 <td className="py-2 text-right px-2">
                   {a.totalROI >= 0 ? "+" : ""}
                   {formatPercent(a.totalROI, locale)}
@@ -376,7 +395,9 @@ function DiffPanel({ comparison, locale, labelA, labelB }: DiffPanelProps) {
                 <td className="py-2 text-right text-muted-foreground">—</td>
               </tr>
               <tr>
-                <td className="py-2 text-muted-foreground">{t("diff.winner")}</td>
+                <th className="py-2 text-left font-normal text-muted-foreground" scope="row">
+                  {t("diff.winner")}
+                </th>
                 <td
                   className="py-2 text-right px-2 font-medium"
                   colSpan={3}

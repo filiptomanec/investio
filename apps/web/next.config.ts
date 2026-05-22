@@ -90,6 +90,11 @@ const nextConfig: NextConfig = {
     "@investio/auth",
     "@investio/design-tokens",
   ],
+  experimental: {
+    // Optimise imports for large icon/chart libraries so unused exports are
+    // tree-shaken at build time rather than shipped as unused JS.
+    optimizePackageImports: ["lucide-react", "recharts"],
+  },
   async headers() {
     return [
       {

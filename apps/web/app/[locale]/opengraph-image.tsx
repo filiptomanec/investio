@@ -141,7 +141,7 @@ export default async function Image({
                 color: "#1c1917",
               }}
             >
-              investio.app
+              investio.filiptomanec.cz
             </div>
           </div>
         </div>
