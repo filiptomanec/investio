@@ -245,12 +245,20 @@ interface ResultItemProps {
 function ResultItem({ label, value, highlighted, positive, negative }: ResultItemProps) {
   return (
     <div className={cn(
-      "flex flex-col gap-0.5 p-3 rounded-lg",
-      highlighted ? "bg-primary/5 border border-primary/20" : "bg-muted/50"
+      "flex flex-col gap-1 p-4 rounded-2xl border",
+      highlighted
+        ? "border-primary/30 bg-primary/[0.06]"
+        : positive
+        ? "border-success/20 bg-success/[0.04]"
+        : negative
+        ? "border-destructive/20 bg-destructive/[0.04]"
+        : "border-border bg-muted/40"
     )}>
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <span className={cn(
-        "text-sm font-semibold tabular-nums",
+        "text-base font-bold text-finance",
         positive && "text-success",
         negative && "text-destructive",
         !positive && !negative && "text-foreground"
@@ -353,15 +361,22 @@ export default function RealEstatePage() {
 
   return (
     <TooltipProvider>
-      <main id="main" className="min-h-screen bg-background">
+      <main id="main" className="relative min-h-screen overflow-hidden bg-background">
+        {/* Atmosphere */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-halo-teal" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-noise mix-blend-overlay" />
+
         {/* Header */}
-        <div className="border-b border-border bg-card">
-          <div className="max-w-screen-xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+        <div className="relative border-b border-border/70 bg-card/60 backdrop-blur-sm">
+          <div className="max-w-screen-xl mx-auto px-4 md:px-6 py-6 flex items-center justify-between">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                Kalkulačka
+              </p>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
                 {t("title")}
               </h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-base text-muted-foreground mt-2 max-w-2xl">
                 {t("subtitle")}
               </p>
             </div>
@@ -441,7 +456,7 @@ export default function RealEstatePage() {
           </div>
         </div>
 
-        <div className="max-w-screen-xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-6">
+        <div className="relative max-w-screen-xl mx-auto px-4 md:px-6 py-8 flex flex-col gap-6">
           {/* Two-column layout on desktop */}
           <div className="flex flex-col lg:flex-row gap-6">
             {/* --- Form panel --- */}
@@ -449,7 +464,10 @@ export default function RealEstatePage() {
               aria-label="Vstupy kalkulačky"
               className="w-full lg:w-[400px] lg:shrink-0"
             >
-              <div className="rounded-xl border border-border bg-card p-4 md:p-6">
+              <div className="rounded-3xl border border-border bg-card p-5 md:p-7">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-4">
+                  Vstupy
+                </p>
                 <form noValidate>
                   <Accordion
                     type="multiple"
@@ -731,22 +749,46 @@ export default function RealEstatePage() {
               aria-live="polite"
               className="flex-1 flex flex-col gap-6 min-w-0"
             >
-              {/* Results panel */}
-              <div className="rounded-xl border border-border bg-card p-4 md:p-6">
-                <h2 className="text-base font-semibold text-foreground mb-4">
+              {/* Results panel — visual hero card with inner accent glow */}
+              <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card p-5 md:p-7 glow-accent-inner-right">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-5">
                   Výsledky
-                </h2>
+                </p>
+
+                {/* Hero: average monthly cashflow */}
+                <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      {t("results.averageMonthlyCashflow")}
+                    </p>
+                    <p
+                      className={cn(
+                        "text-5xl md:text-6xl font-black text-finance",
+                        result.averageMonthlyCashflow >= 0
+                          ? "text-gradient-teal"
+                          : "text-destructive"
+                      )}
+                      aria-live="polite"
+                    >
+                      {fmt(result.averageMonthlyCashflow)}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+                      result.irr !== null && result.irr > 0
+                        ? "bg-success/10 text-success"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      IRR · {irrDisplay}
+                    </span>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <ResultItem
                     label={t("results.monthlyPayment")}
                     value={fmt(result.monthlyPayment)}
-                  />
-                  <ResultItem
-                    label={t("results.averageMonthlyCashflow")}
-                    value={fmt(result.averageMonthlyCashflow)}
-                    positive={result.averageMonthlyCashflow > 0}
-                    negative={result.averageMonthlyCashflow < 0}
-                    highlighted
                   />
                   <ResultItem
                     label={t("results.grossYield")}
@@ -755,11 +797,6 @@ export default function RealEstatePage() {
                   <ResultItem
                     label={t("results.netYield")}
                     value={fmtPct(result.netYield)}
-                  />
-                  <ResultItem
-                    label={t("results.irr")}
-                    value={irrDisplay}
-                    positive={result.irr !== null && result.irr > 0}
                   />
                   <ResultItem
                     label={t("results.breakEvenMonth")}
@@ -780,8 +817,8 @@ export default function RealEstatePage() {
               </div>
 
               {/* Chart 1: Monthly cashflow */}
-              <div className="rounded-xl border border-border bg-card p-4 md:p-6">
-                <h2 className="text-base font-semibold text-foreground mb-4">
+              <div className="rounded-3xl border border-border bg-card p-5 md:p-7">
+                <h2 className="text-sm font-semibold text-foreground mb-5">
                   {t("chart.cashflow")}
                 </h2>
                 <div className="h-64 md:h-72">
@@ -870,8 +907,8 @@ export default function RealEstatePage() {
               </div>
 
               {/* Chart 2: Equity build-up */}
-              <div className="rounded-xl border border-border bg-card p-4 md:p-6">
-                <h2 className="text-base font-semibold text-foreground mb-4">
+              <div className="rounded-3xl border border-border bg-card p-5 md:p-7">
+                <h2 className="text-sm font-semibold text-foreground mb-5">
                   {t("chart.equity")} & {t("chart.propertyValue")}
                 </h2>
                 <div className="h-64 md:h-72">
@@ -946,10 +983,10 @@ export default function RealEstatePage() {
           {/* Disclaimer */}
           <div
             role="note"
-            className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm text-muted-foreground"
+            className="flex items-start gap-3 rounded-2xl border-l-2 border-primary/40 bg-primary/[0.04] py-3 px-4 text-sm text-muted-foreground"
           >
             <AlertTriangle
-              className="h-4 w-4 mt-0.5 shrink-0 text-warning"
+              className="h-4 w-4 mt-0.5 shrink-0 text-primary"
               aria-hidden="true"
             />
             <p>{t("disclaimer")}</p>
