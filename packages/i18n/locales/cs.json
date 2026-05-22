@@ -24,7 +24,12 @@
     "noAccount": "Nemáte účet?",
     "hasAccount": "Již máte účet?",
     "googleDisabledTooltip": "Připoj Supabase project (T-006 README)",
-    "backendNotConfigured": "Backend není nakonfigurován — nastav NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY."
+    "backendNotConfigured": "Backend není nakonfigurován — nastav NEXT_PUBLIC_SUPABASE_URL a NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+    "welcomeBack": "Vítej zpět",
+    "createAccount": "Vytvoř účet",
+    "signInSubtitle": "Přihlas se a otevři svoje scénáře.",
+    "signUpSubtitle": "Vytvoř si účet a začni porovnávat investice.",
+    "or": "nebo"
   },
   "dashboard": {
     "title": "Moje scénáře",
@@ -299,6 +304,13 @@
     "winnerA": "Scénář A vyhrává",
     "winnerB": "Scénář B vyhrává",
     "tie": "Nerozhodně",
-    "finalValueDiff": "Rozdíl"
+    "finalValueDiff": "Rozdíl",
+    "inputsSection": "Vstupy",
+    "retry": "Zkusit znovu",
+    "dashboardGreeting": "Vítej zpět, podívej se na svoje scénáře.",
+    "longPressDelete": "Dlouhým stisknutím zobrazíš možnosti (smazat)",
+    "emptyHint": "Vytvoř první kalkulačku nebo prozkoumej šablony.",
+    "finalValueLabel": "Finální hodnota",
+    "comparisonDisclaimer": "Nemovitost: finální hodnota = equity + kumulativní cashflow. Složené úročení nezahrnuje daň z prodeje. Oba scénáře jsou normalizované na společný horizont."
   }
 }

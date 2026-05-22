@@ -24,7 +24,12 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "googleDisabledTooltip": "Connect Supabase project (T-006 README)",
-    "backendNotConfigured": "Backend not configured — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
+    "backendNotConfigured": "Backend not configured — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create account",
+    "signInSubtitle": "Sign in and pick up your scenarios.",
+    "signUpSubtitle": "Sign up and start comparing investments.",
+    "or": "or"
   },
   "dashboard": {
     "title": "My scenarios",
@@ -299,6 +304,13 @@
     "winnerA": "Scenario A wins",
     "winnerB": "Scenario B wins",
     "tie": "Tie",
-    "finalValueDiff": "Difference"
+    "finalValueDiff": "Difference",
+    "inputsSection": "Inputs",
+    "retry": "Try again",
+    "dashboardGreeting": "Welcome back — here are your scenarios.",
+    "longPressDelete": "Long-press to show options (delete)",
+    "emptyHint": "Build your first calculator or browse the templates.",
+    "finalValueLabel": "Final value",
+    "comparisonDisclaimer": "Real estate: final value = equity + cumulative cashflow. Compound interest excludes capital-gains tax. Both scenarios normalised to the common horizon."
   }
 }
