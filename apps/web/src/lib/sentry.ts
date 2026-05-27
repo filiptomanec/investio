@@ -19,5 +19,3 @@ if (dsn) {
     integrations: [],
   });
 }
-
-export { Sentry };
