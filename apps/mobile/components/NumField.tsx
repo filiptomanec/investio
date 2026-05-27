@@ -101,6 +101,12 @@ export function NumField({ label, value, onChange, locale, suffix, step = 1, col
               backgroundColor: colors.surface,
               borderColor: focused ? colors.brand : colors.border,
               color: colors.foreground,
+              // web: focus:ring-2 focus:ring-brand/40 — simulate with shadow on iOS
+              shadowColor: colors.brand,
+              shadowOpacity: focused ? 0.35 : 0,
+              shadowRadius: focused ? 4 : 0,
+              shadowOffset: { width: 0, height: 0 },
+              elevation: 0,
             },
           ]}
         />
@@ -123,6 +129,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "500",
     letterSpacing: 0.8,
+    fontFamily: "Inter_500Medium",
     marginBottom: 6,
   },
   inputWrapper: {

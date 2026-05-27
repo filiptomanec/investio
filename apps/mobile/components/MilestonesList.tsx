@@ -87,7 +87,8 @@ export function MilestonesList({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 18,
+    // web: rounded-2xl = 22px, border, overflow-hidden
+    borderRadius: 22,
     borderWidth: 1,
     overflow: "hidden",
   },

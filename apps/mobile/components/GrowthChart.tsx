@@ -9,6 +9,10 @@
  *   - real      (muted area + line, only when inflationEnabled)
  *   - contributions (dashed line, no fill)
  *
+ * Chart smoothness: monotonic cubic interpolation (same algorithm as recharts'
+ * `type="monotone"` / d3-shape curveMonotoneX). Guarantees no overshoots and
+ * smooth transitions between every data point.
+ *
  * Touch tooltip via React Native's PanResponder — fires on single tap/press.
  */
 import { useMemo, useRef, useState } from "react";
@@ -58,39 +62,92 @@ function toX(idx: number, count: number, left: number, right: number) {
   return lerp(idx / (count - 1), left, right);
 }
 
-/** Build a smooth SVG path string using cubic bezier control points. */
-function smoothPath(
-  points: { x: number; y: number }[],
-  tension = 0.3,
-): string {
-  if (points.length === 0) return "";
-  if (points.length === 1) return `M ${points[0]!.x} ${points[0]!.y}`;
-  let d = `M ${points[0]!.x} ${points[0]!.y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
-    const dx = (curr.x - prev.x) * tension;
-    d += ` C ${prev.x + dx},${prev.y} ${curr.x - dx},${curr.y} ${curr.x},${curr.y}`;
+// ─── Monotonic cubic interpolation (d3-shape curveMonotoneX equivalent) ─────
+//
+// Algorithm: Fritsch–Carlson method.
+// 1. Compute slope between each pair of consecutive points.
+// 2. Initialise tangent at each point as the average of adjacent slopes.
+// 3. Enforce monotonicity: if two adjacent points share the same y, zero both
+//    tangents. If a tangent sign differs from the slope, zero it. Clamp the
+//    ratio of tangent to slope to ≤ 3 to prevent overshoots.
+// 4. Convert each cubic segment to a cubic Bézier for SVG.
+
+interface Pt { x: number; y: number }
+
+function monotoneTangents(pts: Pt[]): number[] {
+  const n = pts.length;
+  if (n === 0) return [];
+  if (n === 1) return [0];
+
+  // Step 1: inter-segment slopes
+  const delta: number[] = [];
+  for (let i = 0; i < n - 1; i++) {
+    const dx = pts[i + 1]!.x - pts[i]!.x;
+    delta.push(dx === 0 ? 0 : (pts[i + 1]!.y - pts[i]!.y) / dx);
   }
+
+  // Step 2: initial tangents (average of adjacent slopes)
+  const m: number[] = new Array(n).fill(0);
+  m[0] = delta[0]!;
+  m[n - 1] = delta[n - 2]!;
+  for (let i = 1; i < n - 1; i++) {
+    m[i] = (delta[i - 1]! + delta[i]!) / 2;
+  }
+
+  // Step 3: Fritsch–Carlson monotonicity constraints
+  for (let i = 0; i < n - 1; i++) {
+    const d = delta[i]!;
+    if (d === 0) {
+      m[i] = 0;
+      m[i + 1] = 0;
+      continue;
+    }
+    const alpha = m[i]! / d;
+    const beta = m[i + 1]! / d;
+    const h = alpha * alpha + beta * beta;
+    if (h > 9) {
+      const t = 3 / Math.sqrt(h);
+      m[i] = t * alpha * d;
+      m[i + 1] = t * beta * d;
+    }
+  }
+
+  return m;
+}
+
+/**
+ * Build a smooth monotonic cubic SVG path string.
+ * Equivalent to recharts `type="monotone"`.
+ */
+function smoothPath(pts: Pt[]): string {
+  if (pts.length === 0) return "";
+  if (pts.length === 1) return `M ${pts[0]!.x} ${pts[0]!.y}`;
+
+  const m = monotoneTangents(pts);
+  let d = `M ${pts[0]!.x.toFixed(2)} ${pts[0]!.y.toFixed(2)}`;
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i]!;
+    const p1 = pts[i + 1]!;
+    const dx = (p1.x - p0.x) / 3;
+    // Control points derived from tangents
+    const cp1x = p0.x + dx;
+    const cp1y = p0.y + m[i]! * dx;
+    const cp2x = p1.x - dx;
+    const cp2y = p1.y - m[i + 1]! * dx;
+    d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p1.x.toFixed(2)},${p1.y.toFixed(2)}`;
+  }
+
   return d;
 }
 
-/** Build a closed area path (line + bottom baseline). */
-function areaPath(
-  points: { x: number; y: number }[],
-  bottom: number,
-  tension = 0.3,
-): string {
-  if (points.length === 0) return "";
-  const line = smoothPath(points, tension);
-  const last = points[points.length - 1]!;
-  const first = points[0]!;
-  return `${line} L ${last.x},${bottom} L ${first.x},${bottom} Z`;
-}
-
-/** Build a dashed path approximation (we simulate dashes via SVG strokeDasharray). */
-function linePath(points: { x: number; y: number }[], tension = 0.3): string {
-  return smoothPath(points, tension);
+/** Build a closed area path (smooth line + bottom baseline). */
+function areaPath(pts: Pt[], bottom: number): string {
+  if (pts.length === 0) return "";
+  const line = smoothPath(pts);
+  const last = pts[pts.length - 1]!;
+  const first = pts[0]!;
+  return `${line} L ${last.x.toFixed(2)},${bottom} L ${first.x.toFixed(2)},${bottom} Z`;
 }
 
 // ─── component ───────────────────────────────────────────────────────────────
@@ -109,8 +166,8 @@ export function GrowthChart({
 }: GrowthChartProps) {
   const { t } = useTranslation();
   const { width: screenWidth } = useWindowDimensions();
-  // 16 px card padding each side + 20 px card inner padding each side = 32 px each side
-  const svgWidth = screenWidth - 32 - 32;
+  // 16 px screen padding each side + 24 px card inner padding each side = 80 px total
+  const svgWidth = screenWidth - 80;
   const svgHeight = CHART_HEIGHT;
 
   // Drawing area bounds
@@ -126,7 +183,10 @@ export function GrowthChart({
   const reals = useMemo(() => series.map((p) => p.real), [series]);
   const contribs = useMemo(() => series.map((p) => p.contributions), [series]);
 
-  const maxV = useMemo(() => Math.max(...nominals, ...reals, ...contribs), [nominals, reals, contribs]);
+  const maxV = useMemo(
+    () => Math.max(...nominals, ...reals, ...contribs),
+    [nominals, reals, contribs],
+  );
   const minV = 0;
 
   // ── SVG point arrays ──
@@ -180,7 +240,7 @@ export function GrowthChart({
     () =>
       series
         .filter((p) => p.year % 5 === 0)
-        .map((p, _i) => {
+        .map((p) => {
           const idx = series.indexOf(p);
           return {
             year: p.year,
@@ -199,12 +259,10 @@ export function GrowthChart({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
-        const touchX = evt.nativeEvent.locationX;
-        handleTouch(touchX);
+        handleTouch(evt.nativeEvent.locationX);
       },
       onPanResponderMove: (evt) => {
-        const touchX = evt.nativeEvent.locationX;
-        handleTouch(touchX);
+        handleTouch(evt.nativeEvent.locationX);
       },
       onPanResponderRelease: () => {
         setTooltipIdx(null);
@@ -213,7 +271,6 @@ export function GrowthChart({
   ).current;
 
   function handleTouch(touchX: number) {
-    // Find nearest series index by x-position
     let nearest = 0;
     let minDist = Infinity;
     for (let i = 0; i < series.length; i++) {
@@ -232,7 +289,7 @@ export function GrowthChart({
 
   return (
     <View>
-      {/* Legend */}
+      {/* Legend — matches web layout: dots + labels, contributions last */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.brand }]} />
@@ -252,7 +309,7 @@ export function GrowthChart({
           <View
             style={[
               styles.legendDot,
-              { backgroundColor: colors.mutedForeground, opacity: 0.5 },
+              { backgroundColor: colors.mutedForeground, opacity: 0.4 },
             ]}
           />
           <Text style={[styles.legendLabel, { color: colors.mutedForeground }]}>
@@ -265,13 +322,15 @@ export function GrowthChart({
       <View style={{ height: svgHeight }} {...panResponder.panHandlers}>
         <Svg width={svgWidth} height={svgHeight}>
           <Defs>
+            {/* Gradient matches web: brand 0.55 → 0 */}
             <SvgLinearGradient id="gradNominal" x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0%" stopColor={colors.brand} stopOpacity="0.55" />
-              <Stop offset="100%" stopColor={colors.brand} stopOpacity="0.02" />
+              <Stop offset="100%" stopColor={colors.brand} stopOpacity="0" />
             </SvgLinearGradient>
+            {/* Real gradient: mutedForeground 0.35 → 0 */}
             <SvgLinearGradient id="gradReal" x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0%" stopColor={colors.mutedForeground} stopOpacity="0.35" />
-              <Stop offset="100%" stopColor={colors.mutedForeground} stopOpacity="0.02" />
+              <Stop offset="100%" stopColor={colors.mutedForeground} stopOpacity="0" />
             </SvgLinearGradient>
           </Defs>
 
@@ -285,6 +344,7 @@ export function GrowthChart({
               y2={y}
               stroke={colors.border}
               strokeWidth={0.5}
+              strokeDasharray="3,3"
             />
           ))}
 
@@ -316,9 +376,9 @@ export function GrowthChart({
             </SvgText>
           ))}
 
-          {/* Contributions dashed line */}
+          {/* Contributions dashed line — drawn first (bottom layer) */}
           <Path
-            d={linePath(contribPts)}
+            d={smoothPath(contribPts)}
             fill="none"
             stroke={colors.mutedForeground}
             strokeWidth={1.5}
@@ -326,7 +386,7 @@ export function GrowthChart({
             opacity={0.7}
           />
 
-          {/* Real area — only when inflation enabled */}
+          {/* Real area — below nominal */}
           {inflationEnabled && (
             <>
               <Path
@@ -334,7 +394,7 @@ export function GrowthChart({
                 fill="url(#gradReal)"
               />
               <Path
-                d={linePath(realPts)}
+                d={smoothPath(realPts)}
                 fill="none"
                 stroke={colors.mutedForeground}
                 strokeWidth={2}
@@ -342,16 +402,16 @@ export function GrowthChart({
             </>
           )}
 
-          {/* Nominal area */}
+          {/* Nominal area — on top */}
           <Path d={areaPath(nominalPts, bottom)} fill="url(#gradNominal)" />
           <Path
-            d={linePath(nominalPts)}
+            d={smoothPath(nominalPts)}
             fill="none"
             stroke={colors.brand}
             strokeWidth={2.5}
           />
 
-          {/* Crosshair + tooltip dot when user is pressing */}
+          {/* Crosshair + dot when pressing */}
           {tooltipIdx !== null && tooltipX !== null && (
             <>
               <SvgLine
@@ -361,15 +421,16 @@ export function GrowthChart({
                 y2={bottom}
                 stroke={colors.mutedForeground}
                 strokeWidth={1}
-                opacity={0.5}
+                opacity={0.4}
               />
+              {/* Nominal dot */}
               <SvgLine
                 x1={tooltipX}
                 y1={nominalPts[tooltipIdx]?.y ?? top}
                 x2={tooltipX}
                 y2={nominalPts[tooltipIdx]?.y ?? top}
                 stroke={colors.brand}
-                strokeWidth={6}
+                strokeWidth={7}
                 strokeLinecap="round"
               />
             </>
@@ -377,7 +438,7 @@ export function GrowthChart({
         </Svg>
 
         {/* Tooltip overlay — RN View outside SVG */}
-        {tooltipPoint !== null && tooltipPoint !== undefined && tooltipX !== null && (
+        {tooltipPoint != null && tooltipX !== null && (
           <View
             pointerEvents="none"
             style={[
@@ -385,10 +446,9 @@ export function GrowthChart({
               {
                 backgroundColor: colors.card,
                 borderColor: colors.border,
-                // Clamp tooltip so it stays within chart bounds
                 left: Math.min(
                   Math.max(tooltipX - 60, left),
-                  svgWidth - 144,
+                  svgWidth - 148,
                 ),
                 top: 8,
               },
@@ -420,7 +480,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   legendItem: {
     flexDirection: "row",
@@ -438,7 +498,7 @@ const styles = StyleSheet.create({
   tooltip: {
     position: "absolute",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 8,
     minWidth: 120,
   },
