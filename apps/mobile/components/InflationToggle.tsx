@@ -38,7 +38,12 @@ export function InflationToggle({ label, value, onChange, colors }: InflationTog
           backgroundColor: value ? colors.brand : colors.muted,
           justifyContent: "center",
           paddingHorizontal: 2,
+          // Extend the touch area to meet Apple's 44×44pt minimum without
+          // visually enlarging the pill. hitSlop distributes the extra tap
+          // area evenly above and below the 24pt switch.
+          alignSelf: "center",
         }}
+        hitSlop={{ top: 10, bottom: 10, left: 0, right: 0 }}
       >
         <View
           style={{

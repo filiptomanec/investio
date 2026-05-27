@@ -12,7 +12,8 @@ const PRIVACY_POLICY_URL = "https://investio-web.vercel.app/privacy";
 // The privacy statement is added as an inline string (no new i18n key needed per DESIGN.md §9.5).
 
 export default function MethodologyScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isCs = i18n.language?.startsWith("cs") ?? true;
   const { theme } = useTheme();
   const colors = useColors(theme);
   const insets = useSafeAreaInsets();
@@ -75,7 +76,7 @@ export default function MethodologyScreen() {
             marginBottom: 8,
           }}
         >
-          {t("header.calculator") === "Kalkulačka" ? "Soukromí" : "Privacy"}
+          {isCs ? "Soukromí" : "Privacy"}
         </Text>
         <Text
           style={{
@@ -84,7 +85,7 @@ export default function MethodologyScreen() {
             lineHeight: 22,
           }}
         >
-          {t("header.calculator") === "Kalkulačka"
+          {isCs
             ? "Investio neshromažďuje, neukládá ani nepřenáší žádné osobní údaje. Všechny výpočty probíhají na vašem zařízení."
             : "Investio doesn't collect, store, or transmit any personal data. All calculations run on your device."}
         </Text>
@@ -93,7 +94,7 @@ export default function MethodologyScreen() {
           style={{ marginTop: 12 }}
           accessibilityRole="link"
           accessibilityLabel={
-            t("header.calculator") === "Kalkulačka"
+            isCs
               ? "Otevřít zásady ochrany osobních údajů"
               : "Open full privacy policy"
           }
@@ -105,7 +106,7 @@ export default function MethodologyScreen() {
               textDecorationLine: "underline",
             }}
           >
-            {t("header.calculator") === "Kalkulačka"
+            {isCs
               ? "Číst zásady ochrany osobních údajů →"
               : "Read full privacy policy →"}
           </Text>

@@ -130,13 +130,13 @@ export function NumField({
         />
         {suffix != null && suffix.length > 0 && (
           <View
+            pointerEvents="none"
             style={{
               position: "absolute",
               right: 14,
               top: 0,
               bottom: 0,
               justifyContent: "center",
-              pointerEvents: "none",
             }}
           >
             <Text style={{ color: colors.mutedForeground, fontSize: 14 }}>{suffix}</Text>

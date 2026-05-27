@@ -8,8 +8,12 @@ export function reformatRaw(
   locale: SupportedLocale,
   maxDecimals: number,
 ): { text: string; value: number | null } {
+  // Strip scientific notation suffixes first (e.g. "1e10" → "1") so the
+  // digit-whitelist pass doesn't collapse "e10" into "10" and concatenate it
+  // onto the mantissa. This matches both "1e10" and "1E+10" styles.
+  const withoutExponent = raw.replace(/[eE][+\-]?\d*/g, "");
   // Whitelist: digits, separators, sign. Anything else is dropped (handles paste of "$1,234.5").
-  const cleaned = raw.replace(/[^\d.,\-]/g, "");
+  const cleaned = withoutExponent.replace(/[^\d.,\-]/g, "");
   const sign = cleaned.startsWith("-") ? "-" : "";
   const body = cleaned.replace(/-/g, "");
 
