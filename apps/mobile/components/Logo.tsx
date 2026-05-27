@@ -1,17 +1,49 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
-export function Logo() {
+interface LogoProps {
+  colors: {
+    brand: string;
+    foreground: string;
+    background: string;
+  };
+}
+
+export function Logo({ colors }: LogoProps) {
   return (
-    <View className="flex-row items-center gap-2">
-      <View className="w-8 h-8 bg-brand rounded-lg items-center justify-center">
-        <View
-          className="w-4 h-4 bg-background rounded-sm"
-          style={{ transform: [{ rotate: "45deg" }] }}
-        />
+    <View style={styles.row}>
+      <View style={[styles.icon, { backgroundColor: colors.brand }]}>
+        <View style={[styles.diamond, { backgroundColor: colors.background }]} />
       </View>
-      <Text className="text-xl font-bold tracking-tight text-foreground font-sans">
-        INVEST<Text className="text-brand">IO</Text>
+      <Text style={[styles.wordmark, { color: colors.foreground }]}>
+        INVEST<Text style={{ color: colors.brand }}>IO</Text>
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  diamond: {
+    width: 14,
+    height: 14,
+    borderRadius: 3,
+    transform: [{ rotate: "45deg" }],
+  },
+  wordmark: {
+    fontSize: 18,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+    fontFamily: "Inter_700Bold",
+  },
+});

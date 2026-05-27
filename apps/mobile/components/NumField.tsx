@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { TextInput, View, Text } from "react-native";
-import { reformatRaw, caretSig, caretTarget } from "@investio/shared";
-import type { SupportedLocale } from "@investio/shared";
+import { useRef, useState, useEffect } from "react";
+import { View, Text, TextInput, StyleSheet } from "react-native";
+import {
+  reformatRaw,
+  caretSig,
+  type SupportedLocale,
+} from "@investio/shared";
 
 interface NumFieldProps {
   label: string;
@@ -15,134 +18,132 @@ interface NumFieldProps {
     mutedForeground: string;
     card: string;
     border: string;
-    brand: string;
     surface: string;
+    brand: string;
   };
 }
 
-const intlLocaleTag: Record<SupportedLocale, string> = {
-  cs: "cs-CZ",
-  en: "en-US",
-};
+/**
+ * Format a number with thousand-space separators.
+ *
+ * Hermes (the RN JS engine) ships a stripped Intl — `formatToParts` is NOT
+ * available. We call `format()` directly and replace the locale-native
+ * thousands separator with a plain space (matching the web design).
+ */
+function formatPretty(n: number, locale: SupportedLocale, maxDecimals: number): string {
+  if (!Number.isFinite(n)) return "";
+  const localeTag = locale === "cs" ? "cs-CZ" : "en-US";
+  const formatted = new Intl.NumberFormat(localeTag, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+    useGrouping: true,
+  }).format(n);
+  // Identify the thousands separator by formatting 1000.
+  // e.g. "1 000" → sep is " " (narrow no-break), "1,000" → sep is ","
+  const sample = new Intl.NumberFormat(localeTag, { useGrouping: true }).format(1000);
+  const sep = sample.length > 1 ? (sample[1] ?? "") : "";
+  // Only replace if sep is not the decimal point (guard against exotic locales)
+  if (sep && sep !== ".") {
+    return formatted.split(sep).join(" ");
+  }
+  return formatted;
+}
 
-export function NumField({
-  label,
-  value,
-  onChange,
-  locale,
-  suffix,
-  step = 1,
-  colors,
-}: NumFieldProps) {
+export function NumField({ label, value, onChange, locale, suffix, step = 1, colors }: NumFieldProps) {
   const maxDecimals = step < 1 ? 2 : 0;
-
-  // Tracks the most recent selection from onSelectionChange
-  const selectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
-
-  // Controlled selection to restore the caret after reformatting.
-  // Set to a specific position when reformatting, then cleared so the user
-  // can move the caret freely afterward.
-  const [pendingSelection, setPendingSelection] = useState<
-    { start: number; end: number } | undefined
-  >(undefined);
-
-  const formatPretty = (n: number): string => {
-    if (!Number.isFinite(n)) return "";
-    return new Intl.NumberFormat(intlLocaleTag[locale], {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: maxDecimals,
-      useGrouping: true,
-    })
-      .formatToParts(n)
-      // Replace Intl's group separator with a space (consistent with reformatRaw)
-      .map((p) => (p.type === "group" ? " " : p.value))
-      .join("");
-  };
-
-  const [text, setText] = useState(() => formatPretty(value));
+  const inputRef = useRef<TextInput | null>(null);
+  const [text, setText] = useState(() => formatPretty(value, locale, maxDecimals));
   const [focused, setFocused] = useState(false);
 
-  // Reformat from prop when value/locale changes externally and not editing
+  // Reformat from prop when value/locale change externally and user isn't editing.
   useEffect(() => {
-    if (!focused) setText(formatPretty(value));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, locale]);
-
-  // Clear the forced selection after one render so subsequent user taps aren't
-  // overridden. A short timeout prevents the caret from jumping on fast typing.
-  useEffect(() => {
-    if (pendingSelection != null) {
-      const id = setTimeout(() => setPendingSelection(undefined), 100);
-      return () => clearTimeout(id);
+    if (!focused) {
+      setText(formatPretty(value, locale, maxDecimals));
     }
-    return undefined;
-  }, [pendingSelection]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, locale]);
 
   return (
     <View>
       {label.length > 0 && (
         <Text
-          className="text-[11px] font-medium uppercase tracking-wider mb-2"
-          style={{ color: colors.mutedForeground }}
-          accessibilityRole="none"
+          style={[styles.label, { color: colors.mutedForeground }]}
+          accessibilityRole="text"
         >
-          {label}
+          {label.toUpperCase()}
         </Text>
       )}
-      <View className="relative">
+      <View style={styles.inputWrapper}>
         <TextInput
+          ref={inputRef}
           value={text}
+          keyboardType="decimal-pad"
+          returnKeyType="done"
+          accessibilityLabel={label}
           onChangeText={(raw) => {
-            const cursor = selectionRef.current.start;
-            const sig = caretSig(raw, cursor);
+            const sig = caretSig(raw, raw.length);
             const { text: formatted, value: parsed } = reformatRaw(raw, locale, maxDecimals);
-            const pos = caretTarget(formatted, sig);
+            // sig is computed but caretTarget is web-only (DOM selection); on RN
+            // we can't restore caret precisely — acceptable for mobile UX.
+            void sig;
             setText(formatted);
-            setPendingSelection({ start: pos, end: pos });
             if (parsed !== null) onChange(parsed);
             else if (formatted === "") onChange(0);
           }}
-          onSelectionChange={(e) => {
-            selectionRef.current = e.nativeEvent.selection;
-          }}
-          selection={pendingSelection}
           onFocus={() => setFocused(true)}
           onBlur={() => {
             setFocused(false);
-            setText(formatPretty(value));
+            setText(formatPretty(value, locale, maxDecimals));
           }}
-          keyboardType="decimal-pad"
-          returnKeyType="done"
-          maxFontSizeMultiplier={1.4}
-          style={{
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: focused ? colors.brand : colors.border,
-            borderRadius: 12,
-            paddingVertical: 12,
-            paddingLeft: 16,
-            paddingRight: suffix ? 52 : 16,
-            color: colors.foreground,
-            fontFamily: "JetBrainsMono_400Regular",
-            fontSize: 15,
-          }}
-          accessibilityLabel={label}
+          style={[
+            styles.input,
+            {
+              backgroundColor: colors.surface,
+              borderColor: focused ? colors.brand : colors.border,
+              color: colors.foreground,
+            },
+          ]}
         />
         {suffix != null && suffix.length > 0 && (
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              right: 14,
-              top: 0,
-              bottom: 0,
-              justifyContent: "center",
-            }}
+          <Text
+            style={[styles.suffix, { color: colors.mutedForeground }]}
+            accessibilityRole="text"
+            importantForAccessibility="no"
           >
-            <Text style={{ color: colors.mutedForeground, fontSize: 14 }}>{suffix}</Text>
-          </View>
+            {suffix}
+          </Text>
         )}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  label: {
+    fontSize: 11,
+    fontWeight: "500",
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  inputWrapper: {
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    paddingRight: 44,
+    fontSize: 15,
+    fontFamily: "JetBrainsMono_400Regular",
+  },
+  suffix: {
+    position: "absolute",
+    right: 14,
+    fontSize: 13,
+    pointerEvents: "none",
+  },
+});

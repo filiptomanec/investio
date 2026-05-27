@@ -1,35 +1,30 @@
-import { useState } from "react";
-import { View, Text } from "react-native";
-import { CartesianChart, Area, Line, useChartPressState } from "victory-native";
-import {
-  LinearGradient,
-  vec,
-  DashPathEffect,
-  Line as SkiaLine,
-} from "@shopify/react-native-skia";
+/**
+ * GrowthChart — SVG-only area chart using react-native-svg.
+ *
+ * No native modules, no Skia, no react-native-linear-gradient.
+ * react-native-svg is bundled in Expo Go so this works without a dev client.
+ *
+ * Draws up to 3 series:
+ *   - nominal   (teal area + line)
+ *   - real      (muted area + line, only when inflationEnabled)
+ *   - contributions (dashed line, no fill)
+ *
+ * Touch tooltip via React Native's PanResponder — fires on single tap/press.
+ */
+import { useMemo, useRef, useState } from "react";
+import { View, Text, StyleSheet, useWindowDimensions, PanResponder } from "react-native";
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Stop,
+  Line as SvgLine,
+  Text as SvgText,
+} from "react-native-svg";
 import { useTranslation } from "react-i18next";
-import { useAnimatedReaction, runOnJS } from "react-native-reanimated";
 import type { YearPoint } from "@investio/shared";
 import { formatCurrency } from "@investio/shared";
 import type { SupportedLocale } from "@investio/shared";
-
-// victory-native requires a concrete Record<string, unknown> subtype so it can
-// infer NumericalFields<T>. We declare a typed intermediate that satisfies the
-// constraint but maps 1:1 to YearPoint so there is no runtime cost.
-type ChartPoint = {
-  year: number;
-  nominal: number;
-  real: number;
-  contributions: number;
-  interest: number;
-};
-
-interface TooltipValues {
-  year: number;
-  nominal: number;
-  real: number;
-  contributions: number;
-}
 
 interface GrowthChartProps {
   series: YearPoint[];
@@ -45,192 +40,415 @@ interface GrowthChartProps {
   };
 }
 
-export function GrowthChart({ series, inflationEnabled, locale, colors }: GrowthChartProps) {
+// ─── geometry helpers ────────────────────────────────────────────────────────
+
+function lerp(t: number, a: number, b: number) {
+  return a + t * (b - a);
+}
+
+/** Map a data value to SVG y-coordinate (inverted, 0 = top). */
+function toY(val: number, minV: number, maxV: number, top: number, bottom: number) {
+  if (maxV === minV) return (top + bottom) / 2;
+  return lerp((val - minV) / (maxV - minV), bottom, top);
+}
+
+/** Map a series index to SVG x-coordinate. */
+function toX(idx: number, count: number, left: number, right: number) {
+  if (count <= 1) return (left + right) / 2;
+  return lerp(idx / (count - 1), left, right);
+}
+
+/** Build a smooth SVG path string using cubic bezier control points. */
+function smoothPath(
+  points: { x: number; y: number }[],
+  tension = 0.3,
+): string {
+  if (points.length === 0) return "";
+  if (points.length === 1) return `M ${points[0]!.x} ${points[0]!.y}`;
+  let d = `M ${points[0]!.x} ${points[0]!.y}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
+    const dx = (curr.x - prev.x) * tension;
+    d += ` C ${prev.x + dx},${prev.y} ${curr.x - dx},${curr.y} ${curr.x},${curr.y}`;
+  }
+  return d;
+}
+
+/** Build a closed area path (line + bottom baseline). */
+function areaPath(
+  points: { x: number; y: number }[],
+  bottom: number,
+  tension = 0.3,
+): string {
+  if (points.length === 0) return "";
+  const line = smoothPath(points, tension);
+  const last = points[points.length - 1]!;
+  const first = points[0]!;
+  return `${line} L ${last.x},${bottom} L ${first.x},${bottom} Z`;
+}
+
+/** Build a dashed path approximation (we simulate dashes via SVG strokeDasharray). */
+function linePath(points: { x: number; y: number }[], tension = 0.3): string {
+  return smoothPath(points, tension);
+}
+
+// ─── component ───────────────────────────────────────────────────────────────
+
+const CHART_HEIGHT = 220;
+const AXIS_LABEL_WIDTH = 44;
+const AXIS_LABEL_HEIGHT = 20;
+const PADDING_TOP = 16;
+const PADDING_RIGHT = 8;
+
+export function GrowthChart({
+  series,
+  inflationEnabled,
+  locale,
+  colors,
+}: GrowthChartProps) {
   const { t } = useTranslation();
+  const { width: screenWidth } = useWindowDimensions();
+  // 16 px card padding each side + 20 px card inner padding each side = 32 px each side
+  const svgWidth = screenWidth - 32 - 32;
+  const svgHeight = CHART_HEIGHT;
 
-  const { state, isActive } = useChartPressState<{
-    x: number;
-    y: { nominal: number; real: number; contributions: number };
-  }>({
-    x: 0,
-    y: { nominal: 0, real: 0, contributions: 0 },
-  });
-
-  // Tooltip values driven via JS-thread reaction so we can render a React View.
-  // We deliberately avoid trying to drive this from the UI thread because the
-  // tooltip is a RN View (not a Skia canvas node), so JS re-renders are fine.
-  const [tooltip, setTooltip] = useState<TooltipValues | null>(null);
-
-  useAnimatedReaction(
-    () => ({
-      active: state.isActive.value,
-      year: state.x.value.value,
-      nominal: state.y.nominal.value.value,
-      real: state.y.real.value.value,
-      contributions: state.y.contributions.value.value,
-    }),
-    (current) => {
-      "worklet";
-      if (current.active) {
-        runOnJS(setTooltip)({
-          year: Math.round(current.year),
-          nominal: current.nominal,
-          real: current.real,
-          contributions: current.contributions,
-        });
-      } else {
-        runOnJS(setTooltip)(null);
-      }
-    },
-  );
-
-  // Brand hex with opacity suffix for gradient fills
-  const brandStart = colors.brand + "8C";
-  const brandEnd = colors.brand + "00";
-  const mutedStart = colors.mutedForeground + "59";
-  const mutedEnd = colors.mutedForeground + "00";
+  // Drawing area bounds
+  const left = AXIS_LABEL_WIDTH;
+  const right = svgWidth - PADDING_RIGHT;
+  const top = PADDING_TOP;
+  const bottom = svgHeight - AXIS_LABEL_HEIGHT;
 
   const fmt = (n: number) => formatCurrency(n, locale);
 
-  // Safe cast: ChartPoint is structurally identical to YearPoint at runtime.
-  // We need this typed alias so victory-native can infer NumericalFields<T>.
-  const chartData = series as ChartPoint[];
+  // ── data extents ──
+  const nominals = useMemo(() => series.map((p) => p.nominal), [series]);
+  const reals = useMemo(() => series.map((p) => p.real), [series]);
+  const contribs = useMemo(() => series.map((p) => p.contributions), [series]);
+
+  const maxV = useMemo(() => Math.max(...nominals, ...reals, ...contribs), [nominals, reals, contribs]);
+  const minV = 0;
+
+  // ── SVG point arrays ──
+  const nominalPts = useMemo(
+    () =>
+      series.map((p, i) => ({
+        x: toX(i, series.length, left, right),
+        y: toY(p.nominal, minV, maxV, top, bottom),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [series, left, right, top, bottom, maxV],
+  );
+  const realPts = useMemo(
+    () =>
+      series.map((p, i) => ({
+        x: toX(i, series.length, left, right),
+        y: toY(p.real, minV, maxV, top, bottom),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [series, left, right, top, bottom, maxV],
+  );
+  const contribPts = useMemo(
+    () =>
+      series.map((p, i) => ({
+        x: toX(i, series.length, left, right),
+        y: toY(p.contributions, minV, maxV, top, bottom),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [series, left, right, top, bottom, maxV],
+  );
+
+  // ── Y-axis ticks ──
+  const yTicks = useMemo(() => {
+    const count = 4;
+    return Array.from({ length: count + 1 }, (_, i) => {
+      const val = (maxV / count) * i;
+      const y = toY(val, minV, maxV, top, bottom);
+      return { val, y };
+    });
+  }, [maxV, top, bottom]);
+
+  const formatYTick = (val: number) => {
+    const k = val / 1000;
+    if (k >= 1000) return `${Math.round(k / 1000)}M`;
+    if (k >= 1) return `${Math.round(k)}k`;
+    return "0";
+  };
+
+  // ── X-axis ticks (every 5 years) ──
+  const xTicks = useMemo(
+    () =>
+      series
+        .filter((p) => p.year % 5 === 0)
+        .map((p, _i) => {
+          const idx = series.indexOf(p);
+          return {
+            year: p.year,
+            x: toX(idx, series.length, left, right),
+          };
+        }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [series, left, right],
+  );
+
+  // ── Tooltip ──
+  const [tooltipIdx, setTooltipIdx] = useState<number | null>(null);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt) => {
+        const touchX = evt.nativeEvent.locationX;
+        handleTouch(touchX);
+      },
+      onPanResponderMove: (evt) => {
+        const touchX = evt.nativeEvent.locationX;
+        handleTouch(touchX);
+      },
+      onPanResponderRelease: () => {
+        setTooltipIdx(null);
+      },
+    }),
+  ).current;
+
+  function handleTouch(touchX: number) {
+    // Find nearest series index by x-position
+    let nearest = 0;
+    let minDist = Infinity;
+    for (let i = 0; i < series.length; i++) {
+      const px = toX(i, series.length, left, right);
+      const dist = Math.abs(px - touchX);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = i;
+      }
+    }
+    setTooltipIdx(nearest);
+  }
+
+  const tooltipPoint = tooltipIdx !== null ? series[tooltipIdx] : null;
+  const tooltipX = tooltipIdx !== null ? toX(tooltipIdx, series.length, left, right) : null;
 
   return (
-    <View style={{ height: 320 }}>
-      <CartesianChart<ChartPoint, "year", "nominal" | "real" | "contributions">
-        data={chartData}
-        xKey="year"
-        yKeys={["nominal", "real", "contributions"]}
-        domainPadding={{ top: 20 }}
-        axisOptions={{
-          formatXLabel: (v) => `${String(v)}${t("units.yearShort")}`,
-          formatYLabel: (v) => `${Math.round((v as number) / 1000)}k`,
-          labelColor: colors.mutedForeground,
-          lineColor: colors.border,
-          tickCount: { x: 5, y: 5 },
-          axisSide: { x: "bottom", y: "left" },
-        }}
-        chartPressState={state}
-      >
-        {({ points, chartBounds }) => (
-          <>
-            {/* Contributions — dashed line (no fill) */}
-            <Line
-              points={points.contributions}
-              color={colors.mutedForeground}
-              strokeWidth={1.5}
-              curveType="monotoneX"
-            >
-              <DashPathEffect intervals={[4, 4]} />
-            </Line>
+    <View>
+      {/* Legend */}
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: colors.brand }]} />
+          <Text style={[styles.legendLabel, { color: colors.mutedForeground }]}>
+            {t("chart.legendNominal")}
+          </Text>
+        </View>
+        {inflationEnabled && (
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: colors.mutedForeground }]} />
+            <Text style={[styles.legendLabel, { color: colors.mutedForeground }]}>
+              {t("chart.legendReal")}
+            </Text>
+          </View>
+        )}
+        <View style={styles.legendItem}>
+          <View
+            style={[
+              styles.legendDot,
+              { backgroundColor: colors.mutedForeground, opacity: 0.5 },
+            ]}
+          />
+          <Text style={[styles.legendLabel, { color: colors.mutedForeground }]}>
+            {t("chart.legendContributions")}
+          </Text>
+        </View>
+      </View>
 
-            {/* Real area — only rendered when inflation is enabled */}
-            {inflationEnabled && (
-              <>
-                <Area
-                  points={points.real}
-                  y0={chartBounds.bottom}
-                  curveType="monotoneX"
-                >
-                  <LinearGradient
-                    start={vec(0, 0)}
-                    end={vec(0, chartBounds.bottom)}
-                    colors={[mutedStart, mutedEnd]}
-                  />
-                </Area>
-                <Line
-                  points={points.real}
-                  color={colors.mutedForeground}
-                  strokeWidth={2}
-                  curveType="monotoneX"
-                />
-              </>
-            )}
+      {/* SVG Chart */}
+      <View style={{ height: svgHeight }} {...panResponder.panHandlers}>
+        <Svg width={svgWidth} height={svgHeight}>
+          <Defs>
+            <SvgLinearGradient id="gradNominal" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor={colors.brand} stopOpacity="0.55" />
+              <Stop offset="100%" stopColor={colors.brand} stopOpacity="0.02" />
+            </SvgLinearGradient>
+            <SvgLinearGradient id="gradReal" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor={colors.mutedForeground} stopOpacity="0.35" />
+              <Stop offset="100%" stopColor={colors.mutedForeground} stopOpacity="0.02" />
+            </SvgLinearGradient>
+          </Defs>
 
-            {/* Nominal area */}
-            <Area
-              points={points.nominal}
-              y0={chartBounds.bottom}
-              curveType="monotoneX"
-            >
-              <LinearGradient
-                start={vec(0, 0)}
-                end={vec(0, chartBounds.bottom)}
-                colors={[brandStart, brandEnd]}
-              />
-            </Area>
-            <Line
-              points={points.nominal}
-              color={colors.brand}
-              strokeWidth={2.5}
-              curveType="monotoneX"
+          {/* Grid lines */}
+          {yTicks.map(({ y }, i) => (
+            <SvgLine
+              key={i}
+              x1={left}
+              y1={y}
+              x2={right}
+              y2={y}
+              stroke={colors.border}
+              strokeWidth={0.5}
             />
+          ))}
 
-            {/* Vertical crosshair when the user is pressing */}
-            {isActive && (
-              <SkiaLine
-                p1={vec(state.x.position.value, chartBounds.top)}
-                p2={vec(state.x.position.value, chartBounds.bottom)}
-                color={colors.mutedForeground}
+          {/* Y-axis labels */}
+          {yTicks.map(({ val, y }, i) => (
+            <SvgText
+              key={i}
+              x={left - 4}
+              y={y + 4}
+              fontSize={10}
+              fill={colors.mutedForeground}
+              textAnchor="end"
+            >
+              {formatYTick(val)}
+            </SvgText>
+          ))}
+
+          {/* X-axis labels */}
+          {xTicks.map(({ year, x }) => (
+            <SvgText
+              key={year}
+              x={x}
+              y={svgHeight - 2}
+              fontSize={10}
+              fill={colors.mutedForeground}
+              textAnchor="middle"
+            >
+              {`${year}${t("units.yearShort")}`}
+            </SvgText>
+          ))}
+
+          {/* Contributions dashed line */}
+          <Path
+            d={linePath(contribPts)}
+            fill="none"
+            stroke={colors.mutedForeground}
+            strokeWidth={1.5}
+            strokeDasharray="4,4"
+            opacity={0.7}
+          />
+
+          {/* Real area — only when inflation enabled */}
+          {inflationEnabled && (
+            <>
+              <Path
+                d={areaPath(realPts, bottom)}
+                fill="url(#gradReal)"
+              />
+              <Path
+                d={linePath(realPts)}
+                fill="none"
+                stroke={colors.mutedForeground}
+                strokeWidth={2}
+              />
+            </>
+          )}
+
+          {/* Nominal area */}
+          <Path d={areaPath(nominalPts, bottom)} fill="url(#gradNominal)" />
+          <Path
+            d={linePath(nominalPts)}
+            fill="none"
+            stroke={colors.brand}
+            strokeWidth={2.5}
+          />
+
+          {/* Crosshair + tooltip dot when user is pressing */}
+          {tooltipIdx !== null && tooltipX !== null && (
+            <>
+              <SvgLine
+                x1={tooltipX}
+                y1={top}
+                x2={tooltipX}
+                y2={bottom}
+                stroke={colors.mutedForeground}
                 strokeWidth={1}
                 opacity={0.5}
               />
-            )}
-          </>
-        )}
-      </CartesianChart>
-
-      {/* Tooltip overlay — RN View rendered outside the Skia canvas */}
-      {tooltip != null && (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            backgroundColor: colors.card,
-            borderWidth: 1,
-            borderColor: colors.border,
-            borderRadius: 10,
-            padding: 10,
-            minWidth: 140,
-          }}
-        >
-          <Text style={{ color: colors.mutedForeground, fontSize: 11, marginBottom: 4 }}>
-            {t("chart.tooltipYearLabel", { year: tooltip.year })}
-          </Text>
-          <Text
-            style={{
-              color: colors.brand,
-              fontSize: 12,
-              fontFamily: "JetBrainsMono_400Regular",
-            }}
-          >
-            {fmt(tooltip.nominal)} {t("breakdown.nominal")}
-          </Text>
-          {inflationEnabled && (
-            <Text
-              style={{
-                color: colors.mutedForeground,
-                fontSize: 12,
-                fontFamily: "JetBrainsMono_400Regular",
-              }}
-            >
-              {fmt(tooltip.real)} {t("breakdown.real")}
-            </Text>
+              <SvgLine
+                x1={tooltipX}
+                y1={nominalPts[tooltipIdx]?.y ?? top}
+                x2={tooltipX}
+                y2={nominalPts[tooltipIdx]?.y ?? top}
+                stroke={colors.brand}
+                strokeWidth={6}
+                strokeLinecap="round"
+              />
+            </>
           )}
-          <Text
-            style={{
-              color: colors.mutedForeground,
-              fontSize: 12,
-              fontFamily: "JetBrainsMono_400Regular",
-            }}
+        </Svg>
+
+        {/* Tooltip overlay — RN View outside SVG */}
+        {tooltipPoint !== null && tooltipPoint !== undefined && tooltipX !== null && (
+          <View
+            pointerEvents="none"
+            style={[
+              styles.tooltip,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                // Clamp tooltip so it stays within chart bounds
+                left: Math.min(
+                  Math.max(tooltipX - 60, left),
+                  svgWidth - 144,
+                ),
+                top: 8,
+              },
+            ]}
           >
-            {fmt(tooltip.contributions)} {t("breakdown.contributions")}
-          </Text>
-        </View>
-      )}
+            <Text style={[styles.tooltipYear, { color: colors.mutedForeground }]}>
+              {t("chart.tooltipYearLabel", { year: tooltipPoint.year })}
+            </Text>
+            <Text style={[styles.tooltipVal, { color: colors.brand }]}>
+              {fmt(tooltipPoint.nominal)}
+            </Text>
+            {inflationEnabled && (
+              <Text style={[styles.tooltipVal, { color: colors.mutedForeground }]}>
+                {fmt(tooltipPoint.real)} {t("breakdown.real")}
+              </Text>
+            )}
+            <Text style={[styles.tooltipVal, { color: colors.mutedForeground, opacity: 0.7 }]}>
+              {fmt(tooltipPoint.contributions)} {t("breakdown.contributions")}
+            </Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  legend: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 12,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendLabel: {
+    fontSize: 11,
+  },
+  tooltip: {
+    position: "absolute",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 8,
+    minWidth: 120,
+  },
+  tooltipYear: {
+    fontSize: 10,
+    marginBottom: 3,
+  },
+  tooltipVal: {
+    fontSize: 11,
+    fontFamily: "JetBrainsMono_400Regular",
+    lineHeight: 16,
+  },
+});

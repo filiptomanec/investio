@@ -1,48 +1,72 @@
-import { Pressable, View, Text } from "react-native";
+import { Pressable, View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import { selectionFeedback } from "../lib/haptics";
 import { changeLanguage } from "../hooks/useLanguageBootstrap";
 import type { Locale } from "@investio/i18n";
 
-export function LanguageToggle() {
+interface LanguageToggleProps {
+  colors: {
+    foreground: string;
+    mutedForeground: string;
+    card: string;
+    border: string;
+    brand: string;
+    surface?: string;
+  };
+}
+
+export function LanguageToggle({ colors }: LanguageToggleProps) {
   const { i18n } = useTranslation();
   const current = (i18n.language?.startsWith("en") ? "en" : "cs") as Locale;
 
-  const handleToggle = () => {
-    selectionFeedback();
+  async function toggle() {
     const next: Locale = current === "cs" ? "en" : "cs";
-    void changeLanguage(next);
-  };
+    await changeLanguage(next);
+  }
 
   return (
-    <Pressable
-      onPress={handleToggle}
-      accessibilityRole="button"
-      accessibilityLabel="Change language"
-      accessibilityHint={current === "cs" ? "Switch to English" : "Přepnout na češtinu"}
-      style={{ minWidth: 44, minHeight: 44 }}
-      className="items-center justify-center"
-    >
-      <View className="flex-row rounded-lg border border-border overflow-hidden">
-        <View
-          className={`px-2 py-1 ${current === "cs" ? "bg-brand" : "bg-card"}`}
+    <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      {(["cs", "en"] as Locale[]).map((lang) => (
+        <Pressable
+          key={lang}
+          onPress={() => void (lang !== current && toggle())}
+          accessibilityRole="button"
+          accessibilityLabel={lang === "cs" ? "Čeština" : "English"}
+          style={[
+            styles.pill,
+            lang === current && { backgroundColor: colors.brand },
+          ]}
         >
           <Text
-            className={`text-xs font-medium ${current === "cs" ? "text-background" : "text-muted-foreground"}`}
+            style={[
+              styles.label,
+              { color: lang === current ? "#ffffff" : colors.mutedForeground },
+            ]}
           >
-            CS
+            {lang.toUpperCase()}
           </Text>
-        </View>
-        <View
-          className={`px-2 py-1 ${current === "en" ? "bg-brand" : "bg-card"}`}
-        >
-          <Text
-            className={`text-xs font-medium ${current === "en" ? "text-background" : "text-muted-foreground"}`}
-          >
-            EN
-          </Text>
-        </View>
-      </View>
-    </Pressable>
+        </Pressable>
+      ))}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    borderRadius: 10,
+    borderWidth: 1,
+    overflow: "hidden",
+    gap: 0,
+  },
+  pill: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+});

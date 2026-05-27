@@ -1,117 +1,41 @@
-import { View, Text, ScrollView, TouchableOpacity, Linking } from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../hooks/useTheme";
 import { useColors } from "../hooks/useColors";
 
-const PRIVACY_POLICY_URL = "https://investio-web.vercel.app/privacy";
-
-// Static methodology + privacy screen.
-// Content mirrors the web's footer `footer.methodology` plus the
-// `privacy.statement` line required for the App Store privacy nutrition label.
-// The privacy statement is added as an inline string (no new i18n key needed per DESIGN.md §9.5).
-
 export default function MethodologyScreen() {
-  const { t, i18n } = useTranslation();
-  const isCs = i18n.language?.startsWith("cs") ?? true;
   const { theme } = useTheme();
   const colors = useColors(theme);
-  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingBottom: insets.bottom + 32,
-      }}
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: colors.background }]}
+      edges={["bottom", "left", "right"]}
     >
-      <Text
-        style={{
-          color: colors.foreground,
-          fontSize: 20,
-          fontWeight: "700",
-          marginBottom: 16,
-        }}
+      <ScrollView
+        contentContainerStyle={[styles.content, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
       >
-        {t("header.methodology")}
-      </Text>
-
-      <View
-        style={{
-          backgroundColor: colors.card,
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: colors.border,
-          padding: 16,
-          marginBottom: 20,
-        }}
-      >
-        <Text
-          style={{
-            color: colors.mutedForeground,
-            fontSize: 14,
-            lineHeight: 22,
-          }}
-        >
+        <Text style={[styles.body, { color: colors.mutedForeground }]}>
           {t("footer.methodology")}
         </Text>
-      </View>
-
-      {/* Privacy statement — required for App Store privacy nutrition label */}
-      <View
-        style={{
-          backgroundColor: colors.card,
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: colors.brand + "4D",
-          padding: 16,
-        }}
-      >
-        <Text
-          style={{
-            color: colors.brand,
-            fontSize: 13,
-            fontWeight: "600",
-            marginBottom: 8,
-          }}
-        >
-          {isCs ? "Soukromí" : "Privacy"}
-        </Text>
-        <Text
-          style={{
-            color: colors.mutedForeground,
-            fontSize: 14,
-            lineHeight: 22,
-          }}
-        >
-          {isCs
-            ? "Investio neshromažďuje, neukládá ani nepřenáší žádné osobní údaje. Všechny výpočty probíhají na vašem zařízení."
-            : "Investio doesn't collect, store, or transmit any personal data. All calculations run on your device."}
-        </Text>
-        <TouchableOpacity
-          onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
-          style={{ marginTop: 12 }}
-          accessibilityRole="link"
-          accessibilityLabel={
-            isCs
-              ? "Otevřít zásady ochrany osobních údajů"
-              : "Open full privacy policy"
-          }
-        >
-          <Text
-            style={{
-              color: colors.brand,
-              fontSize: 13,
-              textDecorationLine: "underline",
-            }}
-          >
-            {isCs
-              ? "Číst zásady ochrany osobních údajů →"
-              : "Read full privacy policy →"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  body: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+});

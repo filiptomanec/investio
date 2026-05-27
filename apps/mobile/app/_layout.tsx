@@ -45,6 +45,9 @@ function RootLayout() {
     }
   }, [appReady]);
 
+  // Suppress unused variable warning — toggle is passed via context in practice
+  void toggle;
+
   if (!appReady) {
     return null;
   }

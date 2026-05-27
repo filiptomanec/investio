@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { YearPoint } from "@investio/shared";
 import { formatCurrency } from "@investio/shared";
@@ -11,9 +11,10 @@ interface MilestonesListProps {
   colors: {
     foreground: string;
     mutedForeground: string;
-    brand: string;
     card: string;
     border: string;
+    brand: string;
+    surface: string;
   };
 }
 
@@ -27,55 +28,52 @@ export function MilestonesList({
   const fmt = (n: number) => formatCurrency(n, locale);
 
   return (
-    <View
-      style={{
-        backgroundColor: colors.card,
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: colors.border,
-        overflow: "hidden",
-      }}
-    >
+    <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
       {milestones.map((m, idx) => (
         <View
           key={m.year}
-          style={{
-            padding: 16,
-            borderBottomWidth: idx < milestones.length - 1 ? 1 : 0,
-            borderBottomColor: colors.border,
-          }}
+          style={[
+            styles.row,
+            { borderTopColor: colors.border },
+            idx === 0 && { borderTopWidth: 0 },
+          ]}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}>
-            <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: "600" }}>
+          <View style={styles.yearCol}>
+            <Text style={[styles.yearLabel, { color: colors.foreground }]}>
               {t("breakdown.yearOrdinal", { n: m.year })}
             </Text>
-            <Text style={{ color: colors.foreground, fontSize: 13, fontFamily: "JetBrainsMono_400Regular" }}>
-              {fmt(m.nominal)}
-            </Text>
           </View>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            <View style={{ flex: 1, minWidth: "45%" }}>
-              <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
+          <View style={styles.valCols}>
+            <View style={styles.valueRow}>
+              <Text style={[styles.colLabel, { color: colors.mutedForeground }]}>
                 {t("breakdown.contributions")}
               </Text>
-              <Text style={{ color: colors.foreground, fontSize: 12, fontFamily: "JetBrainsMono_400Regular" }}>
+              <Text style={[styles.value, { color: colors.foreground }]}>
                 {fmt(m.contributions)}
               </Text>
             </View>
-            <View style={{ flex: 1, minWidth: "45%" }}>
-              <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
+            <View style={styles.valueRow}>
+              <Text style={[styles.colLabel, { color: colors.mutedForeground }]}>
                 {t("breakdown.interest")}
               </Text>
-              <Text style={{ color: colors.foreground, fontSize: 12, fontFamily: "JetBrainsMono_400Regular" }}>
+              <Text style={[styles.value, { color: colors.foreground }]}>
                 {fmt(m.interest)}
               </Text>
             </View>
+            <View style={styles.valueRow}>
+              <Text style={[styles.colLabel, { color: colors.mutedForeground }]}>
+                {t("breakdown.nominal")}
+              </Text>
+              <Text style={[styles.value, { color: colors.foreground }]}>
+                {fmt(m.nominal)}
+              </Text>
+            </View>
             {inflationEnabled && (
-              <View style={{ flex: 1, minWidth: "45%" }}>
-                <Text style={{ color: colors.brand, fontSize: 11 }}>
+              <View style={styles.valueRow}>
+                <Text style={[styles.colLabel, { color: colors.brand }]}>
                   {t("breakdown.real")}
                 </Text>
-                <Text style={{ color: colors.brand, fontSize: 12, fontFamily: "JetBrainsMono_400Regular" }}>
+                <Text style={[styles.value, { color: colors.brand }]}>
                   {fmt(m.real)}
                 </Text>
               </View>
@@ -86,3 +84,44 @@ export function MilestonesList({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  row: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  yearCol: {
+    width: 60,
+    justifyContent: "flex-start",
+    paddingTop: 2,
+  },
+  yearLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    fontFamily: "Inter_600SemiBold",
+  },
+  valCols: {
+    flex: 1,
+    gap: 4,
+  },
+  valueRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  colLabel: {
+    fontSize: 11,
+    fontWeight: "400",
+  },
+  value: {
+    fontSize: 12,
+    fontFamily: "JetBrainsMono_400Regular",
+  },
+});

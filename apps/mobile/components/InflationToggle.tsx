@@ -1,65 +1,76 @@
-import { View, Text, Pressable } from "react-native";
-import { selectionFeedback } from "../lib/haptics";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 
 interface InflationToggleProps {
-  label: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
+  enabled: boolean;
+  onToggle: () => void;
   colors: {
     mutedForeground: string;
     brand: string;
-    background: string;
     muted: string;
+    background: string;
   };
 }
 
-export function InflationToggle({ label, value, onChange, colors }: InflationToggleProps) {
+export function InflationToggle({ enabled, onToggle, colors }: InflationToggleProps) {
+  const { t } = useTranslation();
+
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-      <Text
-        style={{ color: colors.mutedForeground, fontSize: 11, fontWeight: "500", textTransform: "uppercase", letterSpacing: 0.8 }}
-        accessibilityRole="none"
-      >
-        {label}
+    <View style={styles.row}>
+      <Text style={[styles.label, { color: colors.mutedForeground }]}>
+        {t("form.enableInflation").toUpperCase()}
       </Text>
       <Pressable
-        role="switch"
+        onPress={onToggle}
         accessibilityRole="switch"
-        accessibilityState={{ checked: value }}
-        accessibilityLabel={label}
-        onPress={() => {
-          selectionFeedback();
-          onChange(!value);
-        }}
-        style={{
-          width: 44,
-          height: 24,
-          borderRadius: 12,
-          backgroundColor: value ? colors.brand : colors.muted,
-          justifyContent: "center",
-          paddingHorizontal: 2,
-          // Extend the touch area to meet Apple's 44×44pt minimum without
-          // visually enlarging the pill. hitSlop distributes the extra tap
-          // area evenly above and below the 24pt switch.
-          alignSelf: "center",
-        }}
-        hitSlop={{ top: 10, bottom: 10, left: 0, right: 0 }}
+        accessibilityState={{ checked: enabled }}
+        accessibilityLabel={t("form.enableInflation")}
+        style={[
+          styles.track,
+          { backgroundColor: enabled ? colors.brand : colors.muted },
+        ]}
       >
         <View
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            backgroundColor: colors.background,
-            transform: [{ translateX: value ? 20 : 0 }],
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.15,
-            shadowRadius: 2,
-            elevation: 2,
-          }}
+          style={[
+            styles.thumb,
+            {
+              backgroundColor: colors.background,
+              transform: [{ translateX: enabled ? 20 : 2 }],
+            },
+          ]}
         />
       </Pressable>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: "500",
+    letterSpacing: 0.8,
+    flexShrink: 1,
+    marginRight: 8,
+  },
+  track: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+  },
+  thumb: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+    elevation: 2,
+  },
+});

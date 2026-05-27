@@ -1,55 +1,66 @@
-import { View, Text, Pressable } from "react-native";
-import { router } from "expo-router";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../hooks/useTheme";
 import { useColors } from "../hooks/useColors";
 
 export default function NotFoundScreen() {
-  const { t } = useTranslation();
   const { theme } = useTheme();
   const colors = useColors(theme);
-  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const router = useRouter();
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 24,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-      }}
-    >
-      <Text style={{ color: colors.foreground, fontSize: 72, fontWeight: "700", marginBottom: 16 }}>
-        404
-      </Text>
-      <Text style={{ color: colors.foreground, fontSize: 20, fontWeight: "600", marginBottom: 8, textAlign: "center" }}>
-        {t("errors.notFoundTitle")}
-      </Text>
-      <Text style={{ color: colors.mutedForeground, fontSize: 14, textAlign: "center", marginBottom: 32 }}>
-        {t("errors.notFoundDescription")}
-      </Text>
-      <Pressable
-        onPress={() => router.replace("/")}
-        accessibilityRole="button"
-        style={{
-          backgroundColor: colors.brand,
-          paddingHorizontal: 24,
-          paddingVertical: 12,
-          borderRadius: 10,
-          minWidth: 44,
-          minHeight: 44,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: colors.background, fontWeight: "600", fontSize: 14 }}>
-          {t("errors.notFoundBack")}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={styles.center}>
+        <Text style={[styles.title, { color: colors.foreground }]}>
+          {t("errors.notFoundTitle")}
         </Text>
-      </Pressable>
-    </View>
+        <Text style={[styles.body, { color: colors.mutedForeground }]}>
+          {t("errors.notFoundDescription")}
+        </Text>
+        <Pressable
+          onPress={() => router.replace("/")}
+          accessibilityRole="button"
+          style={[styles.btn, { backgroundColor: colors.brand }]}
+        >
+          <Text style={[styles.btnText, { color: "#ffffff" }]}>
+            {t("errors.notFoundBack")}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 32,
+    gap: 16,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  body: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  btn: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  btnText: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+});

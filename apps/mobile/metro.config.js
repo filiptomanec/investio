@@ -11,10 +11,12 @@ const config = getDefaultConfig(projectRoot);
 // Watch workspace packages so Metro picks up changes in @investio/* packages
 config.watchFolders = [workspaceRoot];
 
-// Resolve modules from workspace root first (hoisted deps), then project root
+// Resolve modules from workspace root first (hoisted deps), then project root.
+// With node-linker=hoisted and pnpm.overrides pinning react to 19.0.0, there
+// is only one copy of react in the workspace — no deduplication hacks needed.
 config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
+  path.resolve(projectRoot, "node_modules"),
 ];
 
 // Enable symlinks for pnpm workspace packages
