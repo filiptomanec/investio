@@ -27,9 +27,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "TODO: tomanec.f@gmail.com (confirm this is your Apple Developer account email)",
-        "ascAppId": "TODO: numeric App ID from App Store Connect → App Information → Apple ID",
-        "appleTeamId": "TODO: Team ID from https://developer.apple.com/account (10-char string)",
+        "appleId": "dev@filiptomanec.cz",
+        "ascAppId": "6773763234",
+        "appleTeamId": "7F2P298UGU",
         "sku": "INVESTIO_IOS_001",
         "bundleIdentifier": "com.tomanec.investio",
         "ascApiKeyPath": "$(EXPO_ASC_KEY_PATH)",

@@ -52,11 +52,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   extra: {
-    // EAS project ID — fill this in after creating the Expo project in the dashboard.
-    // Run:  eas init --id <projectId>
-    // or go to https://expo.dev/ → create project → copy the project ID here.
     eas: {
-      projectId: "TODO: replace with your Expo project ID after running `eas init`",
+      projectId: "96b2cfb6-d133-4fc4-8b32-8882c59b8c7b",
     },
   },
+  owner: "filiptomanecs-organization",
 });

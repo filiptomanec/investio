@@ -25,3 +25,5 @@ secrets/
 
 # EAS local build artifacts
 .eas/build
+
+AuthKey_*.p8

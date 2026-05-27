@@ -18,7 +18,7 @@ import {
   type SupportedLocale,
 } from "@investio/shared";
 import { NumField } from "../components/NumField";
-import { GrowthChart } from "../components/GrowthChart";
+import { SafeGrowthChart } from "../components/SafeGrowthChart";
 import { MilestonesList } from "../components/MilestonesList";
 import { InflationToggle } from "../components/InflationToggle";
 import { ThemeToggle } from "../components/ThemeToggle";
@@ -460,7 +460,7 @@ export default function CalculatorScreen() {
             </View>
           </View>
 
-          <GrowthChart
+          <SafeGrowthChart
             series={result.series}
             inflationEnabled={inflationEnabled}
             locale={locale}
