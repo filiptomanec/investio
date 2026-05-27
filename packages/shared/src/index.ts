@@ -6,3 +6,4 @@ export {
 } from "./finance";
 export { formatCurrency, formatNumber, currencyForLocale } from "./formatters";
 export type { SupportedLocale, SupportedCurrency } from "./formatters";
+export { reformatRaw, caretSig, caretTarget } from "./input-formatting";
