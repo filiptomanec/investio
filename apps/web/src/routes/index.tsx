@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -44,13 +44,93 @@ const intlLocaleTag: Record<SupportedLocale, string> = {
   en: "en-US",
 };
 
+// Live reformat the user-typed text: whitelist digits + one separator, group thousands
+// with space, and normalize the decimal separator to the active locale.
+// Returns the formatted text and the parsed numeric value (null when empty / partial).
+function reformatRaw(
+  raw: string,
+  locale: SupportedLocale,
+  maxDecimals: number,
+): { text: string; value: number | null } {
+  // Whitelist: digits, separators, sign. Anything else is dropped (handles paste of "$1,234.5").
+  const cleaned = raw.replace(/[^\d.,\-]/g, "");
+  const sign = cleaned.startsWith("-") ? "-" : "";
+  const body = cleaned.replace(/-/g, "");
+
+  // When both ',' and '.' appear (e.g. pasting "1,234.56" or "1.234,56"), the
+  // LAST separator is the decimal point; the earlier ones are thousands separators.
+  // When only one type of separator appears we still use the last occurrence as
+  // the decimal point so "1.234" in CS locale (typed as "1.234") is treated as a
+  // decimal, not as a thousands-separated integer.
+  const hasComma = body.includes(",");
+  const hasDot = body.includes(".");
+  let sepIdx: number;
+  if (hasComma && hasDot) {
+    // Mixed: last separator is the decimal
+    const lastComma = body.lastIndexOf(",");
+    const lastDot = body.lastIndexOf(".");
+    sepIdx = Math.max(lastComma, lastDot);
+  } else {
+    // Single type: last occurrence is the decimal (matches live-typing behaviour)
+    sepIdx = body.search(/[.,]/);
+    // If multiple identical separators, only the last is the decimal
+    const allSeps = [...body.matchAll(/[.,]/g)];
+    if (allSeps.length > 1) {
+      sepIdx = allSeps[allSeps.length - 1]!.index!;
+    }
+  }
+
+  let intPart = sepIdx >= 0 ? body.slice(0, sepIdx).replace(/[.,]/g, "") : body;
+  let decPart = sepIdx >= 0 ? body.slice(sepIdx + 1).replace(/[.,]/g, "") : "";
+  // Strip leading zeros (but keep a single "0" if that's all the user typed)
+  intPart = intPart.replace(/^0+(?=\d)/, "");
+  if (maxDecimals === 0) decPart = "";
+  if (decPart.length > maxDecimals) decPart = decPart.slice(0, maxDecimals);
+
+  const decimalDisplay = locale === "cs" ? "," : ".";
+  const intGrouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  const hasSep = sepIdx >= 0 && maxDecimals > 0;
+  const text = sign + intGrouped + (hasSep ? decimalDisplay : "") + decPart;
+
+  if (intPart === "" && decPart === "") return { text, value: null };
+  const numStr = sign + (intPart || "0") + (hasSep ? "." + (decPart || "0") : "");
+  const n = parseFloat(numStr);
+  return { text, value: Number.isFinite(n) ? n : null };
+}
+
+// Count digits and separators to the left of `pos` — used to map the caret from
+// the pre-format text to the post-format text after live reformatting.
+function caretSig(s: string, pos: number): { digits: number; seps: number } {
+  let digits = 0;
+  let seps = 0;
+  for (let i = 0; i < Math.min(pos, s.length); i++) {
+    const c = s[i];
+    if (c >= "0" && c <= "9") digits++;
+    else if (c === "." || c === ",") seps++;
+  }
+  return { digits, seps };
+}
+
+function caretTarget(s: string, target: { digits: number; seps: number }): number {
+  let d = 0;
+  let sp = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c >= "0" && c <= "9") d++;
+    else if (c === "." || c === ",") sp++;
+    if (d === target.digits && sp === target.seps) return i + 1;
+  }
+  return s.length;
+}
+
 function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumFieldProps) {
   const maxDecimals = step < 1 ? 2 : 0;
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  // Pending caret target to restore after React commits the new value.
+  const pendingCaret = useRef<{ digits: number; seps: number } | null>(null);
 
   const formatPretty = (n: number): string => {
     if (!Number.isFinite(n)) return "";
-    // formatToParts lets us force the thousands grouping to ASCII space in every
-    // locale (cs uses NBSP/NNBSP, en uses ","). Decimal separator stays native.
     return new Intl.NumberFormat(intlLocaleTag[locale], {
       minimumFractionDigits: 0,
       maximumFractionDigits: maxDecimals,
@@ -59,14 +139,6 @@ function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumField
       .formatToParts(n)
       .map((p) => (p.type === "group" ? " " : p.value))
       .join("");
-  };
-
-  const parse = (text: string): number | null => {
-    const cleaned = text.replace(/\s+/g, "").replace(",", ".");
-    if (!cleaned || cleaned === "-" || cleaned === ".") return null;
-    if (!/^-?\d*\.?\d*$/.test(cleaned)) return null;
-    const n = parseFloat(cleaned);
-    return Number.isFinite(n) ? n : null;
   };
 
   const [text, setText] = useState(() => formatPretty(value));
@@ -78,6 +150,15 @@ function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumField
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, locale]);
 
+  // Restore caret after a live reformat. useLayoutEffect runs before the browser paints.
+  useLayoutEffect(() => {
+    if (pendingCaret.current && inputRef.current) {
+      const pos = caretTarget(text, pendingCaret.current);
+      inputRef.current.setSelectionRange(pos, pos);
+      pendingCaret.current = null;
+    }
+  }, [text]);
+
   return (
     <div>
       {label && (
@@ -87,15 +168,19 @@ function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumField
       )}
       <div className="relative">
         <input
+          ref={inputRef}
           type="text"
           inputMode="decimal"
           value={text}
           onChange={(e) => {
             const raw = e.target.value;
-            setText(raw);
-            const n = parse(raw);
-            if (n !== null) onChange(n);
-            else if (raw.trim() === "") onChange(0);
+            const rawCursor = e.target.selectionStart ?? raw.length;
+            const sig = caretSig(raw, rawCursor);
+            const { text: formatted, value: parsed } = reformatRaw(raw, locale, maxDecimals);
+            pendingCaret.current = sig;
+            setText(formatted);
+            if (parsed !== null) onChange(parsed);
+            else if (formatted === "") onChange(0);
           }}
           onFocus={() => setFocused(true)}
           onBlur={() => {
@@ -115,12 +200,18 @@ function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumField
 }
 
 function useTheme() {
+  // SSR and first client render both default to "dark" so React hydration matches.
+  // The pre-hydration script in __root.tsx sets the html class before paint, so
+  // the visible background is already correct. We then sync this state to the
+  // actual class via useLayoutEffect — only the toggle icon briefly mismatches
+  // when light mode is saved, which is acceptable.
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
-  useEffect(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("investio-theme") : null;
-    const initial = saved === "light" || saved === "dark" ? saved : "dark";
-    setTheme(initial);
+  useLayoutEffect(() => {
+    if (typeof document === "undefined") return;
+    const actual = document.documentElement.classList.contains("dark") ? "dark" : "light";
+    if (actual !== theme) setTheme(actual);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -240,7 +331,7 @@ function Index() {
                   <NumField
                     label={t("form.annualRate")}
                     value={rate}
-                    onChange={setRate}
+                    onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
                     locale={locale}
                     suffix={t("units.pct")}
                     step={0.1}
@@ -300,7 +391,7 @@ function Index() {
                     </label>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button type="button" className="text-muted-foreground hover:text-brand">
+                        <button type="button" aria-label={t("form.withdrawalRateInfo")} className="text-muted-foreground hover:text-brand">
                           <Info className="size-3.5" />
                         </button>
                       </TooltipTrigger>
@@ -329,7 +420,7 @@ function Index() {
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   {t("results.nominalLabel")}
                 </p>
-                <p className="text-3xl font-bold text-foreground font-mono">
+                <p className="text-3xl font-bold text-foreground font-mono break-words">
                   {fmt(result.finalNominal)}
                 </p>
                 <p className="text-xs text-brand mt-2 flex items-center gap-1">
@@ -346,7 +437,7 @@ function Index() {
                   <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                     {t("results.realLabel")}
                   </p>
-                  <p className="text-3xl font-bold text-foreground font-mono">
+                  <p className="text-3xl font-bold text-foreground font-mono break-words">
                     {fmt(result.finalReal)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
@@ -390,7 +481,7 @@ function Index() {
                   <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                     {t("results.monthlyNominal")}
                   </p>
-                  <p className="text-2xl font-bold text-foreground font-mono">
+                  <p className="text-2xl font-bold text-foreground font-mono break-words">
                     {fmt(monthlyWithdrawalNominal)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -402,7 +493,7 @@ function Index() {
                     <p className="text-[11px] font-medium text-brand uppercase tracking-wider mb-1">
                       {t("results.monthlyReal")}
                     </p>
-                    <p className="text-2xl font-bold text-foreground font-mono">
+                    <p className="text-2xl font-bold text-foreground font-mono break-words">
                       {fmt(monthlyWithdrawalReal)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -435,7 +526,7 @@ function Index() {
                       <span className="text-xs text-muted-foreground">{t("chart.legendReal")}</span>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button type="button" className="text-muted-foreground hover:text-brand">
+                          <button type="button" aria-label={t("chart.realExplainerInfo")} className="text-muted-foreground hover:text-brand">
                             <Info className="size-3" />
                           </button>
                         </TooltipTrigger>

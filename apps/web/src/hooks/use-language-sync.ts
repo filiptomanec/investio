@@ -24,6 +24,9 @@ function detectBrowserLocale(): Locale {
  * Client-side language bootstrap. On first mount it reads the persisted
  * preference (or falls back to the browser language) and tells i18next to
  * switch. Keeps SSR free of `window`/`navigator` access.
+ *
+ * Also keeps `document.documentElement.lang` in sync so that screen readers
+ * and search engines always see the correct language code.
  */
 export function useLanguageSync(): void {
   const { i18n } = useTranslation();
@@ -35,4 +38,14 @@ export function useLanguageSync(): void {
       void i18n.changeLanguage(target);
     }
   }, [i18n]);
+
+  // Sync html[lang] whenever the active language changes.
+  useEffect(() => {
+    const lang = supportedLocales.includes(i18n.language as Locale)
+      ? i18n.language
+      : defaultLocale;
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+    }
+  }, [i18n.language]);
 }

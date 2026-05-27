@@ -15,7 +15,8 @@
     "enableInflation": "Account for inflation",
     "expectedInflation": "Expected inflation",
     "withdrawalRate": "Annual withdrawal (pension)",
-    "withdrawalRateTooltip": "For perpetual withdrawals the safe ceiling is roughly 4 % per year (the 4 % rule)."
+    "withdrawalRateTooltip": "For perpetual withdrawals the safe ceiling is roughly 4 % per year (the 4 % rule).",
+    "withdrawalRateInfo": "Annual withdrawal information"
   },
   "units": {
     "pct": "%",
@@ -45,6 +46,7 @@
     "legendReal": "Real",
     "legendContributions": "Contributions",
     "realExplainer": "Real value = nominal value adjusted for inflation. Shows how much purchasing power the money will have in today's prices.",
+    "realExplainerInfo": "Real value explainer",
     "tooltipYearLabel": "Year {{year}}"
   },
   "breakdown": {

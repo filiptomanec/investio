@@ -95,6 +95,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      {
+        // Inline SVG favicon — eliminates the 404 console error from browsers
+        // requesting /favicon.ico when no public/favicon.ico is present.
+        rel: "icon",
+        type: "image/svg+xml",
+        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><rect x='9' y='9' width='14' height='14' rx='2' fill='white' transform='rotate(45 16 16)'/></svg>",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -103,11 +110,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+// Synchronous pre-hydration script: applies the saved theme to <html> before the
+// browser paints so dark/light mode never flickers on reload. Falls back to dark
+// when no preference is stored (matches the in-app useTheme default).
+const themeBootstrap = `(function(){try{var t=localStorage.getItem('investio-theme');if(t==='dark'||(!t))document.documentElement.classList.add('dark');}catch(e){}})();`;
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="cs">
+    // suppressHydrationWarning: the pre-hydration script mutates className to set
+    // the dark/light class before React hydrates; lang is updated by useLanguageSync.
+    // Both are intentional post-SSR mutations — suppress the mismatch warning.
+    <html lang="cs" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body>
         {children}

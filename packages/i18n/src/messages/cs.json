@@ -15,7 +15,8 @@
     "enableInflation": "Započítat inflaci",
     "expectedInflation": "Očekávaná inflace",
     "withdrawalRate": "Roční výběr (renta)",
-    "withdrawalRateTooltip": "Pro nekonečnou rentu se doporučuje vybírat max. 4 % ročně (pravidlo 4 %)."
+    "withdrawalRateTooltip": "Pro nekonečnou rentu se doporučuje vybírat max. 4 % ročně (pravidlo 4 %).",
+    "withdrawalRateInfo": "Informace o ročním výběru"
   },
   "units": {
     "pct": "%",
@@ -45,6 +46,7 @@
     "legendReal": "Reálná",
     "legendContributions": "Vklady",
     "realExplainer": "Reálná hodnota = nominální hodnota očištěná o inflaci. Ukazuje, jakou kupní sílu budou peníze mít v dnešních cenách.",
+    "realExplainerInfo": "Vysvětlení reálné hodnoty",
     "tooltipYearLabel": "Rok {{year}}"
   },
   "breakdown": {
