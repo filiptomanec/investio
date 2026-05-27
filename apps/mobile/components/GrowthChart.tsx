@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import type { YearPoint } from "@investio/shared";
 import { formatCurrency } from "@investio/shared";
 import type { SupportedLocale } from "@investio/shared";
+import { InfoTooltip } from "./InfoTooltip";
 
 interface GrowthChartProps {
   series: YearPoint[];
@@ -303,6 +304,17 @@ export function GrowthChart({
             <Text style={[styles.legendLabel, { color: colors.mutedForeground }]}>
               {t("chart.legendReal")}
             </Text>
+            <InfoTooltip
+              text={t("chart.realExplainer")}
+              size={12}
+              colors={{
+                mutedForeground: colors.mutedForeground,
+                card: colors.card,
+                border: colors.border,
+                foreground: colors.foreground,
+              }}
+              accessibilityLabel={t("chart.realExplainerInfo")}
+            />
           </View>
         )}
         <View style={styles.legendItem}>

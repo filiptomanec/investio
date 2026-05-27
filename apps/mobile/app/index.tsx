@@ -16,7 +16,6 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { Info } from "lucide-react-native";
 import {
   calculateInvestment,
   formatCurrency,
@@ -32,6 +31,7 @@ import { LanguageToggle } from "../components/LanguageToggle";
 import { Logo } from "../components/Logo";
 import { GrowthChart } from "../components/GrowthChart";
 import { MilestonesList } from "../components/MilestonesList";
+import { InfoTooltip } from "../components/InfoTooltip";
 
 export default function CalculatorScreen() {
   const { theme, toggle } = useTheme();
@@ -96,6 +96,13 @@ export default function CalculatorScreen() {
   const borderColor = theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   // brand at ~31% opacity for the inflation-related borders
   const brandBorder = colors.brand + "50";
+
+  const tooltipColors = {
+    mutedForeground: colors.mutedForeground,
+    card: colors.card,
+    border: colors.border,
+    foreground: colors.foreground,
+  };
 
   return (
     <SafeAreaView
@@ -224,15 +231,14 @@ export default function CalculatorScreen() {
                   <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>
                     {t("form.withdrawalRate").toUpperCase()}
                   </Text>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t("form.withdrawalRateInfo")}
-                    accessibilityHint={t("form.withdrawalRateTooltip")}
-                    style={{ marginLeft: 6 }}
-                    onPress={() => undefined}
-                  >
-                    <Info size={14} color={colors.mutedForeground} />
-                  </Pressable>
+                  <View style={{ marginLeft: 6 }}>
+                    <InfoTooltip
+                      text={t("form.withdrawalRateTooltip")}
+                      size={14}
+                      colors={tooltipColors}
+                      accessibilityLabel={t("form.withdrawalRateInfo")}
+                    />
+                  </View>
                 </View>
                 <NumField
                   label=""
@@ -309,21 +315,20 @@ export default function CalculatorScreen() {
                   {t("results.passiveIncomeDescription", { pct: fmtPct(withdrawalRate), years })}
                 </Text>
               </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("results.rule4Pct")}
-                accessibilityHint={t("results.rule4PctTooltip")}
-                style={styles.infoButton}
-                onPress={() => undefined}
-              >
-                <Info size={14} color={colors.mutedForeground} />
+              <View style={styles.infoButton}>
+                <InfoTooltip
+                  text={t("results.rule4PctTooltip")}
+                  size={14}
+                  colors={tooltipColors}
+                  accessibilityLabel={t("results.rule4Pct")}
+                />
                 <Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>
                   {t("results.rule4Pct")}
                 </Text>
-              </Pressable>
+              </View>
             </View>
 
-            <View style={[inflationEnabled ? styles.twoCol : styles.singleCol, { marginTop: 16 }]}>
+            <View style={[styles.singleCol, { marginTop: 16 }]}>
               {/* Nominal withdrawal sub-card — bg-surface rounded-xl */}
               <View
                 style={[styles.withdrawalBox, { flex: 1, backgroundColor: colors.surface, borderColor }]}
