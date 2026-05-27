@@ -34,13 +34,50 @@ interface NumFieldProps {
   label: string;
   value: number;
   onChange: (v: number) => void;
+  locale: SupportedLocale;
   suffix?: string;
   step?: number;
-  min?: number;
-  max?: number;
 }
 
-function NumField({ label, value, onChange, suffix, step = 1, min = 0, max }: NumFieldProps) {
+const intlLocaleTag: Record<SupportedLocale, string> = {
+  cs: "cs-CZ",
+  en: "en-US",
+};
+
+function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumFieldProps) {
+  const maxDecimals = step < 1 ? 2 : 0;
+
+  const formatPretty = (n: number): string => {
+    if (!Number.isFinite(n)) return "";
+    // formatToParts lets us force the thousands grouping to ASCII space in every
+    // locale (cs uses NBSP/NNBSP, en uses ","). Decimal separator stays native.
+    return new Intl.NumberFormat(intlLocaleTag[locale], {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: maxDecimals,
+      useGrouping: true,
+    })
+      .formatToParts(n)
+      .map((p) => (p.type === "group" ? " " : p.value))
+      .join("");
+  };
+
+  const parse = (text: string): number | null => {
+    const cleaned = text.replace(/\s+/g, "").replace(",", ".");
+    if (!cleaned || cleaned === "-" || cleaned === ".") return null;
+    if (!/^-?\d*\.?\d*$/.test(cleaned)) return null;
+    const n = parseFloat(cleaned);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const [text, setText] = useState(() => formatPretty(value));
+  const [focused, setFocused] = useState(false);
+
+  // Reformat from prop when value/locale change externally and user isn't editing.
+  useEffect(() => {
+    if (!focused) setText(formatPretty(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, locale]);
+
   return (
     <div>
       {label && (
@@ -50,15 +87,20 @@ function NumField({ label, value, onChange, suffix, step = 1, min = 0, max }: Nu
       )}
       <div className="relative">
         <input
-          type="number"
+          type="text"
           inputMode="decimal"
-          value={Number.isFinite(value) ? value : 0}
-          step={step}
-          min={min}
-          max={max}
+          value={text}
           onChange={(e) => {
-            const n = parseFloat(e.target.value);
-            onChange(Number.isFinite(n) ? n : 0);
+            const raw = e.target.value;
+            setText(raw);
+            const n = parse(raw);
+            if (n !== null) onChange(n);
+            else if (raw.trim() === "") onChange(0);
+          }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => {
+            setFocused(false);
+            setText(formatPretty(value));
           }}
           className="w-full bg-surface border border-border rounded-xl py-3 pl-4 pr-12 text-foreground font-mono focus:ring-2 focus:ring-brand/40 focus:border-brand outline-none transition-all"
         />
@@ -97,6 +139,11 @@ function Index() {
   const locale = (i18n.language?.startsWith("en") ? "en" : "cs") as SupportedLocale;
   const fmt = (n: number) => formatCurrency(n, locale);
   const fmtNum = (n: number) => formatNumber(n, locale);
+  const fmtPct = (n: number) =>
+    new Intl.NumberFormat(locale === "cs" ? "cs-CZ" : "en-US", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(Number.isFinite(n) ? n : 0);
 
   const { theme, toggle } = useTheme();
   const [initial, setInitial] = useState(100000);
@@ -176,6 +223,7 @@ function Index() {
                   label={t("form.initialDeposit")}
                   value={initial}
                   onChange={setInitial}
+                  locale={locale}
                   suffix={locale === "cs" ? "Kč" : "$"}
                   step={1000}
                 />
@@ -183,6 +231,7 @@ function Index() {
                   label={t("form.monthlyContribution")}
                   value={monthly}
                   onChange={setMonthly}
+                  locale={locale}
                   suffix={locale === "cs" ? "Kč" : "$"}
                   step={500}
                 />
@@ -192,6 +241,7 @@ function Index() {
                     label={t("form.annualRate")}
                     value={rate}
                     onChange={setRate}
+                    locale={locale}
                     suffix={t("units.pct")}
                     step={0.1}
                   />
@@ -199,10 +249,9 @@ function Index() {
                     label={t("form.duration")}
                     value={years}
                     onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
+                    locale={locale}
                     suffix={t("units.years")}
                     step={1}
-                    min={1}
-                    max={60}
                   />
                 </div>
 
@@ -237,6 +286,7 @@ function Index() {
                       label={t("form.expectedInflation")}
                       value={inflation}
                       onChange={setInflation}
+                      locale={locale}
                       suffix={t("units.pct")}
                       step={0.1}
                     />
@@ -263,6 +313,7 @@ function Index() {
                     label=""
                     value={withdrawalRate}
                     onChange={(v) => setWithdrawalRate(Math.max(0, Math.min(20, v)))}
+                    locale={locale}
                     suffix={t("units.pctPerYear")}
                     step={0.1}
                   />
@@ -299,7 +350,7 @@ function Index() {
                     {fmt(result.finalReal)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {t("results.realDescription", { pct: inflation.toFixed(1) })}
+                    {t("results.realDescription", { pct: fmtPct(inflation) })}
                   </p>
                 </div>
               )}
@@ -314,7 +365,7 @@ function Index() {
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {t("results.passiveIncomeDescription", {
-                      pct: withdrawalRate.toFixed(1),
+                      pct: fmtPct(withdrawalRate),
                       years,
                     })}
                   </p>
