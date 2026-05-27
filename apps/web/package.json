@@ -7,12 +7,21 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:spa": "vite build --config vite.spa.config.ts",
     "preview": "vite preview",
+    "cap:sync": "cap sync ios",
+    "cap:open": "cap open ios",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@investio/i18n": "workspace:*",
     "@investio/shared": "workspace:*",
     "@radix-ui/react-tooltip": "^1.2.8",

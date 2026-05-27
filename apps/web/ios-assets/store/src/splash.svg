@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Splash screen — iPhone 14 Pro Max resolution (1284 x 2778).
+  Teal background with centered diamond at ~30% of short side (≈ 385px).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1284 2778" width="1284" height="2778">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#14b8a6" />
+      <stop offset="55%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#0b7a70" />
+    </radialGradient>
+    <linearGradient id="diamond" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#eaf7f5" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="22" />
+      <feOffset dx="0" dy="14" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.35" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1284" height="2778" fill="url(#bg)" />
+
+  <!-- Halo behind diamond -->
+  <circle cx="642" cy="1389" r="500" fill="url(#halo)" />
+
+  <!-- Diamond — short side is 1284, 30% = ~385px side -->
+  <g transform="translate(642 1389) rotate(45)" filter="url(#shadow)">
+    <rect x="-192" y="-192" width="384" height="384" rx="56" ry="56" fill="url(#diamond)" />
+    <rect x="-192" y="-192" width="384" height="384" rx="56" ry="56"
+          fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="2" />
+  </g>
+
+  <!-- Wordmark — small, low-emphasis, far below the diamond.
+       Inter is approximated by SVG default sans-serif here; rasterized once. -->
+  <g transform="translate(642 1840)" text-anchor="middle">
+    <text font-family="Inter, -apple-system, system-ui, sans-serif"
+          font-size="64" font-weight="700" letter-spacing="6" fill="#ffffff" fill-opacity="0.95">
+      INVESTIO
+    </text>
+  </g>
+</svg>

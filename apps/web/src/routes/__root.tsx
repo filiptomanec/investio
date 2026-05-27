@@ -8,7 +8,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { I18nextProvider, useTranslation } from "react-i18next";
+import { useEffect } from "react";
 import { i18n } from "@investio/i18n";
+import { hideSplashScreen } from "@/lib/native";
 
 import "@/lib/sentry";
 
@@ -135,6 +137,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Hide the Capacitor splash screen once the React tree is mounted.
+  // On web this is a no-op (see lib/native.ts).
+  useEffect(() => {
+    hideSplashScreen();
+  }, []);
 
   return (
     <I18nextProvider i18n={i18n}>

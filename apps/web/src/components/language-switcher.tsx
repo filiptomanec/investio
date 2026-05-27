@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { STORAGE_KEY, supportedLocales, type Locale } from "@investio/i18n";
+import { hapticLight } from "@/lib/native";
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -9,6 +10,8 @@ export function LanguageSwitcher() {
   const next: Locale = current === "cs" ? "en" : "cs";
 
   const onClick = () => {
+    // Haptic feedback on iOS (no-op on web)
+    hapticLight();
     void i18n.changeLanguage(next);
     if (typeof window !== "undefined") {
       try {

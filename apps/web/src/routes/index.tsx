@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { hapticLight, syncStatusBarStyle } from "@/lib/native";
 import {
   Area,
   AreaChart,
@@ -144,9 +145,17 @@ function useTheme() {
     if (theme === "dark") root.classList.add("dark");
     else root.classList.remove("dark");
     localStorage.setItem("investio-theme", theme);
+    // Sync iOS status bar style with app theme (no-op on web)
+    syncStatusBarStyle(theme);
   }, [theme]);
 
-  return { theme, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) };
+  const toggle = useCallback(() => {
+    // Fire haptic feedback on iOS (no-op on web)
+    hapticLight();
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  }, []);
+
+  return { theme, toggle };
 }
 
 function Index() {

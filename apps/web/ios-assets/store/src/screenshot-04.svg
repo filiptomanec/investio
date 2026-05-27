@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Screenshot 04 — Passive income card, LIGHT mode, EN.
+  Shows how the corpus generates monthly passive income at retirement.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1290 2796" width="1290" height="2796">
+  <defs>
+    <radialGradient id="bgGrad" cx="60%" cy="20%" r="90%">
+      <stop offset="0%" stop-color="#14b8a6" />
+      <stop offset="55%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#0b6b62" />
+    </radialGradient>
+    <linearGradient id="screenBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f9fafc" />
+      <stop offset="100%" stop-color="#eef2f7" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <radialGradient id="brandGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0d9488" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#0d9488" stop-opacity="0" />
+    </radialGradient>
+    <filter id="phoneShadow" x="-10%" y="-5%" width="120%" height="115%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="30" />
+      <feOffset dx="0" dy="30" />
+      <feComponentTransfer><feFuncA type="linear" slope="0.45" /></feComponentTransfer>
+      <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1290" height="2796" fill="url(#bgGrad)" />
+
+  <g font-family="-apple-system, system-ui, Inter, sans-serif" fill="#ffffff" text-anchor="middle">
+    <text x="645" y="280" font-size="92" font-weight="800" letter-spacing="-2">Calculate your</text>
+    <text x="645" y="400" font-size="92" font-weight="800" letter-spacing="-2">pension income</text>
+    <text x="645" y="500" font-size="40" font-weight="500" fill="#d6f5ef" opacity="0.92">
+      How much passive income does your nest egg yield?
+    </text>
+  </g>
+
+  <g transform="translate(160 650)" filter="url(#phoneShadow)">
+    <rect x="0" y="0" width="970" height="2010" rx="84" ry="84" fill="#0a0c18" />
+    <rect x="14" y="14" width="942" height="1982" rx="74" ry="74" fill="#1f2237" />
+    <g transform="translate(28 28)">
+      <clipPath id="screenClip04"><rect x="0" y="0" width="914" height="1954" rx="62" ry="62" /></clipPath>
+      <g clip-path="url(#screenClip04)">
+        <rect x="0" y="0" width="914" height="1954" fill="url(#screenBg)" />
+
+        <text x="60" y="56" font-family="-apple-system, sans-serif" font-size="28" font-weight="600" fill="#1d1e32">9:41</text>
+        <g transform="translate(800 36)" fill="#1d1e32">
+          <rect x="0" y="6" width="6" height="14" rx="1" />
+          <rect x="10" y="2" width="6" height="18" rx="1" />
+          <rect x="20" y="-2" width="6" height="22" rx="1" />
+          <rect x="40" y="0" width="40" height="20" rx="4" fill="none" stroke="#1d1e32" stroke-width="2" />
+          <rect x="44" y="4" width="28" height="12" rx="2" fill="#0d9488" />
+        </g>
+
+        <!-- Header -->
+        <g transform="translate(40 110)">
+          <rect x="0" y="0" width="56" height="56" rx="14" fill="#0d9488" />
+          <g transform="translate(28 28) rotate(45)"><rect x="-14" y="-14" width="28" height="28" rx="5" fill="#ffffff" /></g>
+          <text x="80" y="38" font-family="-apple-system, Inter, sans-serif" font-size="32" font-weight="800" fill="#1d1e32">
+            INVEST<tspan fill="#0d9488">IO</tspan>
+          </text>
+          <g transform="translate(694 12)">
+            <rect width="64" height="32" rx="16" fill="#eef0f6" />
+            <text x="32" y="22" font-size="18" font-weight="700" fill="#1d1e32" text-anchor="middle">EN</text>
+          </g>
+          <g transform="translate(770 6)">
+            <rect width="44" height="44" rx="12" fill="#eef0f6" />
+            <circle cx="22" cy="22" r="8" fill="none" stroke="#1d1e32" stroke-width="2" />
+          </g>
+        </g>
+
+        <text x="40" y="260" font-family="-apple-system, Inter, sans-serif"
+              font-size="48" font-weight="800" fill="#1d1e32">Passive income</text>
+        <text x="40" y="304" font-size="24" font-weight="500" fill="#6b7089">
+          From your $2.34M nest egg
+        </text>
+
+        <!-- Hero passive income card -->
+        <g transform="translate(40 360)">
+          <circle cx="417" cy="200" r="380" fill="url(#brandGlow)" />
+          <rect width="834" height="420" rx="28" fill="url(#cardGrad)" stroke="#0d948830" />
+          <text x="40" y="74" font-size="24" font-weight="700" fill="#6b7089">Monthly passive income</text>
+          <text x="40" y="76" font-size="22" font-weight="600" fill="#6b7089" />
+          <text x="40" y="208" font-family="Menlo, monospace" font-size="120" font-weight="900" fill="#0d9488">$9,758</text>
+          <text x="40" y="252" font-size="22" font-weight="500" fill="#6b7089">
+            assuming a 5% safe withdrawal rate
+          </text>
+          <g transform="translate(40 296)">
+            <rect width="180" height="50" rx="25" fill="#0d948814" stroke="#0d948840" />
+            <text x="90" y="33" font-size="20" font-weight="700" fill="#0d9488" text-anchor="middle">≈ 4× avg rent</text>
+          </g>
+          <text x="40" y="382" font-size="22" font-weight="600" fill="#1d1e32">
+            Annual: $117,094 • Tax-deferred basis
+          </text>
+        </g>
+
+        <!-- Comparison row -->
+        <g transform="translate(40 820)">
+          <text font-size="22" font-weight="700" fill="#6b7089">Compare withdrawal strategies</text>
+
+          <g transform="translate(0 40)">
+            <rect width="403" height="220" rx="24" fill="#ffffff" stroke="#0d948830" />
+            <text x="28" y="50" font-size="20" font-weight="700" fill="#6b7089">3% safe</text>
+            <text x="28" y="140" font-family="Menlo, monospace" font-size="44" font-weight="800" fill="#1d1e32">$5,855</text>
+            <text x="28" y="180" font-size="18" font-weight="500" fill="#6b7089">per month</text>
+            <g transform="translate(28 192)">
+              <rect width="80" height="22" rx="11" fill="#0d948820" />
+              <text x="40" y="16" font-size="14" font-weight="700" fill="#0d9488" text-anchor="middle">CONSERVATIVE</text>
+            </g>
+          </g>
+          <g transform="translate(431 40)">
+            <rect width="403" height="220" rx="24" fill="#ffffff" stroke="#0d948860" stroke-width="2" />
+            <text x="28" y="50" font-size="20" font-weight="700" fill="#0d9488">4% rule</text>
+            <text x="28" y="140" font-family="Menlo, monospace" font-size="44" font-weight="800" fill="#0d9488">$7,806</text>
+            <text x="28" y="180" font-size="18" font-weight="500" fill="#6b7089">per month</text>
+            <g transform="translate(28 192)">
+              <rect width="100" height="22" rx="11" fill="#0d948840" />
+              <text x="50" y="16" font-size="14" font-weight="700" fill="#0d9488" text-anchor="middle">RECOMMENDED</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Tip card -->
+        <g transform="translate(40 1140)">
+          <rect width="834" height="200" rx="24" fill="#0d948810" stroke="#0d948840" />
+          <text x="36" y="58" font-size="22" font-weight="700" fill="#0d9488">FIRE-friendly</text>
+          <text x="36" y="108" font-size="24" font-weight="600" fill="#1d1e32">
+            Reach financial independence
+          </text>
+          <text x="36" y="142" font-size="24" font-weight="600" fill="#1d1e32">
+            5 years earlier with 4% rule
+          </text>
+          <text x="36" y="176" font-size="18" font-weight="500" fill="#6b7089">
+            Adjust your inputs to find your number
+          </text>
+        </g>
+
+        <rect x="307" y="1900" width="300" height="8" rx="4" fill="#1d1e32" opacity="0.3" />
+      </g>
+    </g>
+    <rect x="385" y="56" width="200" height="50" rx="25" fill="#000000" />
+  </g>
+</svg>
