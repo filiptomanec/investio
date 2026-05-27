@@ -80,7 +80,7 @@ _The app uses no cryptographic algorithms beyond standard HTTPS provided by the 
 |---|---|
 | Support URL | https://github.com/filiptomanec/investio |
 | Marketing URL | https://investio-web.vercel.app |
-| Privacy Policy URL | https://investio-web.vercel.app/privacy _(devops must wire this route before submission — see BACKLOG)_ |
+| Privacy Policy URL | https://investio-web.vercel.app/privacy |
 
 ## Review notes for Apple
 

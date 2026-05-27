@@ -1,27 +1,40 @@
 {
   "cli": {
-    "version": ">= 12.0.0"
+    "version": ">= 12.0.0",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "ios": {
+        "simulator": true
+      }
     },
     "production": {
-      "channel": "production",
-      "autoIncrement": true
+      "distribution": "store",
+      "ios": {
+        "autoIncrement": true
+      }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "${APPLE_ID}",
-        "ascAppId": "${ASC_APP_ID}",
-        "appleTeamId": "${APPLE_TEAM_ID}"
+        "appleId": "TODO: tomanec.f@gmail.com (confirm this is your Apple Developer account email)",
+        "ascAppId": "TODO: numeric App ID from App Store Connect → App Information → Apple ID",
+        "appleTeamId": "TODO: Team ID from https://developer.apple.com/account (10-char string)",
+        "sku": "INVESTIO_IOS_001",
+        "bundleIdentifier": "com.tomanec.investio",
+        "ascApiKeyPath": "$(EXPO_ASC_KEY_PATH)",
+        "ascApiKeyIssuerId": "$(EXPO_ASC_API_KEY_ISSUER_ID)",
+        "ascApiKeyId": "$(EXPO_ASC_API_KEY_ID)"
       }
     }
   }

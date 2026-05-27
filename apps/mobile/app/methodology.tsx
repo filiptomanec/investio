@@ -1,8 +1,10 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Linking } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../hooks/useTheme";
 import { useColors } from "../hooks/useColors";
+
+const PRIVACY_POLICY_URL = "https://investio-web.vercel.app/privacy";
 
 // Static methodology + privacy screen.
 // Content mirrors the web's footer `footer.methodology` plus the
@@ -86,6 +88,28 @@ export default function MethodologyScreen() {
             ? "Investio neshromažďuje, neukládá ani nepřenáší žádné osobní údaje. Všechny výpočty probíhají na vašem zařízení."
             : "Investio doesn't collect, store, or transmit any personal data. All calculations run on your device."}
         </Text>
+        <TouchableOpacity
+          onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+          style={{ marginTop: 12 }}
+          accessibilityRole="link"
+          accessibilityLabel={
+            t("header.calculator") === "Kalkulačka"
+              ? "Otevřít zásady ochrany osobních údajů"
+              : "Open full privacy policy"
+          }
+        >
+          <Text
+            style={{
+              color: colors.brand,
+              fontSize: 13,
+              textDecorationLine: "underline",
+            }}
+          >
+            {t("header.calculator") === "Kalkulačka"
+              ? "Číst zásady ochrany osobních údajů →"
+              : "Read full privacy policy →"}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

@@ -1,0 +1,88 @@
+# Mobile EAS Build — Investio
+#
+# Triggers: manual workflow_dispatch only.
+# This workflow builds the iOS app via EAS Build (cloud build on Expo's servers).
+#
+# ─── REQUIRED SETUP BEFORE FIRST RUN ────────────────────────────────────────
+# 1. Create an Expo account at https://expo.dev/ and link the project:
+#      eas init   (or fill in the projectId in app.config.ts manually)
+#
+# 2. Create a long-lived Expo token:
+#      expo.dev → Account Settings → Access Tokens → Create
+#    Add it to GitHub:
+#      Settings → Secrets and variables → Actions → New repository secret
+#      Name: EXPO_TOKEN   Value: <your token>
+#
+# 3. Apple credentials (for production profile only):
+#    EAS will prompt for Apple credentials on the first production build OR you
+#    can pre-configure them via eas credentials. The token approach used here
+#    means EAS handles the signing certificate and provisioning profile lifecycle
+#    automatically via Managed credentials.
+#
+# ─── PRODUCTION SUBMISSION ───────────────────────────────────────────────────
+# Submitting to App Store Connect is intentionally NOT automated here.
+# Per workspace policy: production deploys require explicit human approval.
+# After a successful production build, run locally:
+#   pnpm --filter @investio/mobile submit:ios
+# (or: eas submit --platform ios --profile production --latest)
+# This requires ASC API key env vars set up as eas secrets (see eas.json header).
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Mobile — EAS Build (iOS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "EAS build profile"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - production
+
+jobs:
+  build:
+    name: EAS Build — ${{ inputs.profile }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        # pinned to actions/checkout@v4.2.2 by SHA — no `latest` tags in production
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        # pinned to pnpm/action-setup@v4.1.0 by SHA
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
+        # pinned to actions/setup-node@v4.1.0 by SHA
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@b9ebb0e4a2f8a8fd27bfb8c89fc6a6c68d9e2cc3
+        # pinned to expo/expo-github-action@v8 by SHA
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Run EAS Build
+        # --non-interactive: no prompts; required for CI
+        # --no-wait: fire-and-forget; EAS build runs on Expo's servers, not this runner.
+        #   The build URL is printed to the log. Poll with `eas build:list` or watch
+        #   the Expo dashboard: https://expo.dev/
+        working-directory: apps/mobile
+        run: |
+          eas build \
+            --platform ios \
+            --profile ${{ inputs.profile }} \
+            --non-interactive \
+            --no-wait

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
@@ -614,6 +614,14 @@ function Index() {
         >
           <p className="max-w-3xl">
             {t("footer.copyright", { year: new Date().getFullYear() })} — {t("footer.methodology")}
+          </p>
+          <p className="mt-3">
+            <Link
+              to="/privacy"
+              className="hover:text-brand transition-colors underline underline-offset-2"
+            >
+              {i18n.language?.startsWith("en") ? "Privacy Policy" : "Zásady ochrany osobních údajů"}
+            </Link>
           </p>
         </footer>
       </div>

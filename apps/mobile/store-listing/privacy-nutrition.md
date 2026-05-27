@@ -58,4 +58,4 @@ The workspace memory policy states: "Sentry only for projects with real traffic 
 
 **https://investio-web.vercel.app/privacy**
 
-This URL must resolve before App Store review submission. The devops agent is responsible for wiring the `/privacy` route to render `store-listing/privacy-policy.md` content. See BACKLOG for the open ticket.
+Route is live. The `/privacy` page is rendered by `apps/web/src/routes/privacy.tsx` and deployed to Vercel. URL is stable — do not change it.
