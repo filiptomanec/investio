@@ -13,11 +13,16 @@ node_modules
 # Build outputs
 dist
 dist-ssr
+dist-spa
 .output
 .vinxi
 .tanstack/**
 .nitro
 .turbo
+
+# Capacitor iOS — generated public dir and Xcode DerivedData
+apps/web/ios/App/App/public/
+apps/web/ios/App/DerivedData/
 
 # Local env
 .env
