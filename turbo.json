@@ -1,25 +1,22 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".output/**", "dist/**", ".vinxi/**"],
+      "env": ["NODE_ENV", "VITE_*", "SENTRY_*"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^build"],
+      "outputs": []
     },
-    "test": {
-      "dependsOn": ["^build"]
-    },
-    "check-parity": {
-      "cache": false
+    "lint": {
+      "outputs": []
     }
   }
 }

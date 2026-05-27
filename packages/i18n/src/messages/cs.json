@@ -1,0 +1,71 @@
+{
+  "header": {
+    "calculator": "Kalkulačka",
+    "methodology": "Metodika",
+    "toggleTheme": "Přepnout téma",
+    "toggleLanguage": "Změnit jazyk"
+  },
+  "form": {
+    "title": "Parametry investice",
+    "subtitle": "Složené úročení s měsíční kapitalizací",
+    "initialDeposit": "Počáteční vklad",
+    "monthlyContribution": "Měsíční vklad",
+    "annualRate": "Roční úrok",
+    "duration": "Doba",
+    "enableInflation": "Započítat inflaci",
+    "expectedInflation": "Očekávaná inflace",
+    "withdrawalRate": "Roční výběr (renta)",
+    "withdrawalRateTooltip": "Pro nekonečnou rentu se doporučuje vybírat max. 4 % ročně (pravidlo 4 %)."
+  },
+  "units": {
+    "pct": "%",
+    "years": "let",
+    "yearShort": "r",
+    "pctPerYear": "% / rok"
+  },
+  "results": {
+    "nominalLabel": "Budoucí hodnota (nominální)",
+    "profitSuffix": "zisk",
+    "realLabel": "Reálná kupní síla",
+    "realDescription": "V dnešních cenách při {{pct}}% inflaci",
+    "inflationAdjustedBadge": "Očištěno o inflaci",
+    "passiveIncomeTitle": "Pasivní příjem z investic",
+    "passiveIncomeDescription": "Při ročním výběru {{pct}} % z portfolia po {{years}} letech",
+    "rule4Pct": "Pravidlo 4 %",
+    "rule4PctTooltip": "Pro téměř nekonečnou rentu (portfolio se nevyčerpá) se doporučuje vybírat maximálně 4 % ročně.",
+    "monthlyNominal": "Měsíčně (nominálně)",
+    "monthlyReal": "Měsíčně (v dnešních cenách)",
+    "annuallySuffix": "ročně"
+  },
+  "chart": {
+    "title": "Projekce růstu portfolia",
+    "descriptionWithInflation": "Srovnání nominální a reálné hodnoty v čase",
+    "descriptionWithoutInflation": "Vývoj nominální hodnoty v čase",
+    "legendNominal": "Nominální",
+    "legendReal": "Reálná",
+    "legendContributions": "Vklady",
+    "realExplainer": "Reálná hodnota = nominální hodnota očištěná o inflaci. Ukazuje, jakou kupní sílu budou peníze mít v dnešních cenách.",
+    "tooltipYearLabel": "Rok {{year}}"
+  },
+  "breakdown": {
+    "year": "Rok",
+    "yearOrdinal": "{{n}}. rok",
+    "contributions": "Vklady",
+    "interest": "Úroky",
+    "nominal": "Nominální",
+    "real": "Reálná"
+  },
+  "footer": {
+    "copyright": "© {{year}} Investio",
+    "methodology": "Výpočet používá složené úročení s měsíční kapitalizací: měsíční sazba rm = (1+r)^(1/12) − 1, zůstatek B(n+1) = Bn · (1+rm) + vklad. Reálná hodnota = nominální / (1+inflace)^let. Vklad je připisován na konci měsíce. Pasivní příjem = portfolio × roční výběr %. Kalkulačka neslouží jako investiční doporučení."
+  },
+  "errors": {
+    "notFoundTitle": "Stránka nenalezena",
+    "notFoundDescription": "Stránka, kterou hledáte, neexistuje nebo byla přesunuta.",
+    "notFoundBack": "Zpět na kalkulačku",
+    "loadFailedTitle": "Stránka se nenačetla",
+    "loadFailedDescription": "Něco se na naší straně pokazilo. Zkuste obnovit stránku, nebo se vraťte na úvod.",
+    "tryAgain": "Zkusit znovu",
+    "goHome": "Zpět na úvod"
+  }
+}

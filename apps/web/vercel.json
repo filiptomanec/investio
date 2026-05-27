@@ -1,5 +1,0 @@
-{
-  "buildCommand": "pnpm turbo run build --filter=@investio/web",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": "nextjs"
-}

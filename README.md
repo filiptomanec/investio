@@ -1,92 +1,48 @@
 # Investio
 
-Investiční kalkulačka pro porovnání nemovitostí a akciových investic. Web + native mobile, CZ + EN.
+Kalkulačka složeného úročení — webová aplikace (responzivní), CZ + EN.
 
-## Co je Investio
+Mobilní RN aplikace přijde v další fázi se stejným designem.
 
-Tři kalkulačky v jedné aplikaci:
-- **Složené úročení** — konečná hodnota investice při pravidelných vkladech
-- **Nemovitost + cashflow** — IRR, yield, equity build-up hypoteční investice
-- **Porovnání** — side-by-side srovnání akciové vs nemovitostní investice
+## Stack
 
-Více viz [PROJECT.md](./PROJECT.md) a [BACKLOG.md](./BACKLOG.md).
+- **Monorepo**: pnpm workspaces + Turborepo
+- **Web** (`apps/web`): Vite + TanStack Start (SSR via Nitro) + React 19 + Tailwind v4 + shadcn/ui + Recharts
+- **Shared logic** (`packages/shared`): Pure-TS compound interest math + locale-aware formatters
+- **i18n** (`packages/i18n`): react-i18next + CZ/EN message catalogs
+- **Monitoring**: Sentry (`@sentry/react`, opt-in via `VITE_SENTRY_DSN`)
+- **Hosting**: Vercel (TanStack Start + Nitro Vercel preset)
 
-## Tech stack
-
-- **Monorepo**: Turborepo + pnpm workspaces
-- **Web**: Next.js 16 App Router + Tailwind + shadcn/ui
-- **Mobile**: Expo SDK 53 + React Native + Expo Router
-- **Backend**: Supabase (Postgres + Auth) + Prisma
-- **Shared**: `@investio/shared` (calc + Zod), `@investio/i18n`, `@investio/auth`, `@investio/design-tokens`
-
-Architektura: [docs/decisions/ADR-0001-stack.md](./docs/decisions/ADR-0001-stack.md)
-
-## Lokální setup
-
-### Prerekvizity
-
-- Node.js >= 20
-- pnpm >= 9
-
-### Instalace
+## Local setup
 
 ```bash
-# 1. Naklonuj repo
-git clone https://github.com/filiptomanec/investio.git
-cd investio
-
-# 2. Nainstaluj závislosti
+# Requires Node 20+ and pnpm 9+
 pnpm install
-
-# 3. Nastav environment variables
-cp .env.example .env.local
-# Edituj .env.local — doplň Supabase URL + klíče z https://app.supabase.com
-
-# 4. Spusť dev server (web)
-pnpm dev
+cp .env.example .env.local      # fill VITE_SENTRY_DSN if you want client errors reported
+pnpm dev                         # runs apps/web on http://localhost:3000
 ```
 
-Web app bude dostupná na `http://localhost:3000`.
+## Scripts
 
-### Spuštění jen webu
+| Command | What it does |
+| --- | --- |
+| `pnpm dev` | Vite dev server for web app |
+| `pnpm build` | Build all workspaces (production) |
+| `pnpm typecheck` | Type-check all workspaces |
+| `pnpm lint` | ESLint across all workspaces |
+| `pnpm format` | Prettier write across the repo |
 
-```bash
-pnpm --filter @investio/web dev
-```
-
-### Spuštění jen mobile
-
-```bash
-pnpm --filter @investio/mobile start
-```
-
-### Build
-
-```bash
-pnpm build
-```
-
-### Typecheck + lint
-
-```bash
-pnpm typecheck
-pnpm lint
-```
-
-## Monorepo struktura
+## Monorepo layout
 
 ```
 investio/
 ├── apps/
-│   ├── web/        Next.js 16 — webová app
-│   └── mobile/     Expo SDK 53 — iOS + Android
+│   └── web/                Vite + TanStack Start app
 ├── packages/
-│   ├── shared/     Calc logika + Zod schémata (pure TS)
-│   ├── i18n/       CZ + EN message bundles
-│   ├── auth/       Supabase auth helpery
-│   ├── db/         Prisma client wrapper (web-only)
-│   ├── design-tokens/ Design tokeny (barvy, typografie, spacing)
-│   └── config/     Sdílený tsconfig + eslint
-├── docs/           Architektura, ADR, design
-└── supabase/       DB migrace + seeds
+│   ├── shared/             Compound interest math + formatters
+│   └── i18n/               i18next config + CS / EN messages
+├── package.json            workspace root
+├── pnpm-workspace.yaml
+├── turbo.json
+└── tsconfig.base.json
 ```

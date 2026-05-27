@@ -1,0 +1,71 @@
+{
+  "header": {
+    "calculator": "Calculator",
+    "methodology": "Methodology",
+    "toggleTheme": "Toggle theme",
+    "toggleLanguage": "Change language"
+  },
+  "form": {
+    "title": "Investment parameters",
+    "subtitle": "Compound interest with monthly compounding",
+    "initialDeposit": "Initial deposit",
+    "monthlyContribution": "Monthly contribution",
+    "annualRate": "Annual rate",
+    "duration": "Duration",
+    "enableInflation": "Account for inflation",
+    "expectedInflation": "Expected inflation",
+    "withdrawalRate": "Annual withdrawal (pension)",
+    "withdrawalRateTooltip": "For perpetual withdrawals the safe ceiling is roughly 4 % per year (the 4 % rule)."
+  },
+  "units": {
+    "pct": "%",
+    "years": "yr",
+    "yearShort": "y",
+    "pctPerYear": "% / yr"
+  },
+  "results": {
+    "nominalLabel": "Future value (nominal)",
+    "profitSuffix": "profit",
+    "realLabel": "Real purchasing power",
+    "realDescription": "In today's prices at {{pct}}% inflation",
+    "inflationAdjustedBadge": "Inflation-adjusted",
+    "passiveIncomeTitle": "Passive income from investments",
+    "passiveIncomeDescription": "Withdrawing {{pct}} % of the portfolio per year after {{years}} years",
+    "rule4Pct": "4 % rule",
+    "rule4PctTooltip": "For a near-perpetual pension (the portfolio is never depleted) the recommended ceiling is roughly 4 % per year.",
+    "monthlyNominal": "Monthly (nominal)",
+    "monthlyReal": "Monthly (in today's prices)",
+    "annuallySuffix": "annually"
+  },
+  "chart": {
+    "title": "Portfolio growth projection",
+    "descriptionWithInflation": "Comparison of nominal and real value over time",
+    "descriptionWithoutInflation": "Nominal value over time",
+    "legendNominal": "Nominal",
+    "legendReal": "Real",
+    "legendContributions": "Contributions",
+    "realExplainer": "Real value = nominal value adjusted for inflation. Shows how much purchasing power the money will have in today's prices.",
+    "tooltipYearLabel": "Year {{year}}"
+  },
+  "breakdown": {
+    "year": "Year",
+    "yearOrdinal": "Year {{n}}",
+    "contributions": "Contributions",
+    "interest": "Interest",
+    "nominal": "Nominal",
+    "real": "Real"
+  },
+  "footer": {
+    "copyright": "© {{year}} Investio",
+    "methodology": "The calculation uses compound interest with monthly compounding: monthly rate rm = (1+r)^(1/12) − 1, balance B(n+1) = Bn · (1+rm) + contribution. Real value = nominal / (1+inflation)^years. The contribution is credited at the end of each month. Passive income = portfolio × annual withdrawal %. This calculator is not investment advice."
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you're looking for doesn't exist or has been moved.",
+    "notFoundBack": "Back to calculator",
+    "loadFailedTitle": "This page didn't load",
+    "loadFailedDescription": "Something went wrong on our end. You can try refreshing or head back home.",
+    "tryAgain": "Try again",
+    "goHome": "Go home"
+  }
+}
