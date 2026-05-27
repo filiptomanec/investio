@@ -7,6 +7,21 @@
 import { Capacitor } from "@capacitor/core";
 
 /**
+ * Marks the <html> element with `capacitor-native` class when running inside
+ * a Capacitor WKWebView. This class gates all iOS-only CSS rules (safe-area
+ * padding, text-selection disable, zoom prevention, etc.) so the web build
+ * is completely unaffected.
+ *
+ * Call this as early as possible — ideally at module import time — so that
+ * the class is set before the first paint.
+ */
+export function markNativePlatform(): void {
+  if (Capacitor.isNativePlatform()) {
+    document.documentElement.classList.add("capacitor-native");
+  }
+}
+
+/**
  * Hides the splash screen. Call once the React app has fully mounted and is
  * ready to display (i.e. inside a useEffect with an empty dependency array).
  */

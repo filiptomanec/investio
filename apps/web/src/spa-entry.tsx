@@ -10,6 +10,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 import { getRouter } from "./router";
+// Mark native platform ASAP so CSS gates apply before first paint.
+import { markNativePlatform } from "./lib/native";
+markNativePlatform();
 
 const router = getRouter();
 

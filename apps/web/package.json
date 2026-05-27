@@ -24,6 +24,7 @@
     "@capacitor/status-bar": "^8.0.2",
     "@investio/i18n": "workspace:*",
     "@investio/shared": "workspace:*",
+    "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@sentry/react": "^8.55.0",
     "@tailwindcss/vite": "^4.2.1",

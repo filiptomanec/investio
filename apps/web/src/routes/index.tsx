@@ -11,12 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { useTranslation } from "react-i18next";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info, Moon, Sun } from "lucide-react";
 import {
   calculateInvestment,
@@ -47,7 +42,6 @@ const intlLocaleTag: Record<SupportedLocale, string> = {
   cs: "cs-CZ",
   en: "en-US",
 };
-
 
 function NumField({ label, value, onChange, locale, suffix, step = 1 }: NumFieldProps) {
   const maxDecimals = step < 1 ? 2 : 0;
@@ -206,434 +200,450 @@ function Index() {
     .filter((p): p is NonNullable<typeof p> => !!p);
 
   return (
-    <TooltipProvider delayDuration={150}>
-      <div className="min-h-screen bg-background font-sans text-foreground p-4 md:p-8">
-        <header className="max-w-6xl mx-auto flex justify-between items-center mb-10">
-          <div className="flex items-center gap-2">
-            <div className="size-8 bg-brand rounded-lg flex items-center justify-center">
-              <div className="size-4 bg-background rounded-sm rotate-45"></div>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-foreground">
-              INVEST<span className="text-brand">IO</span>
-            </span>
+    <div className="min-h-screen bg-background font-sans text-foreground p-4 md:p-8">
+      <header className="max-w-6xl mx-auto flex justify-between items-center mb-10">
+        <div className="flex items-center gap-2">
+          <div className="size-8 bg-brand rounded-lg flex items-center justify-center">
+            <div className="size-4 bg-background rounded-sm rotate-45"></div>
           </div>
-          <nav className="flex items-center gap-3 md:gap-4 text-sm font-medium text-muted-foreground">
-            <a href="#" className="hidden md:inline text-foreground hover:text-brand transition-colors">
-              {t("header.calculator")}
-            </a>
-            <a href="#metodika" className="hidden md:inline hover:text-brand transition-colors">
-              {t("header.methodology")}
-            </a>
-            <LanguageSwitcher />
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label={t("header.toggleTheme")}
-              className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted transition-colors text-foreground"
-            >
-              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </button>
-          </nav>
-        </header>
+          <span className="text-xl font-bold tracking-tight text-foreground">
+            INVEST<span className="text-brand">IO</span>
+          </span>
+        </div>
+        <nav className="flex items-center gap-3 md:gap-4 text-sm font-medium text-muted-foreground">
+          <a
+            href="#"
+            className="hidden md:inline text-foreground hover:text-brand transition-colors"
+          >
+            {t("header.calculator")}
+          </a>
+          <a href="#metodika" className="hidden md:inline hover:text-brand transition-colors">
+            {t("header.methodology")}
+          </a>
+          <LanguageSwitcher />
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={t("header.toggleTheme")}
+            className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted transition-colors text-foreground"
+          >
+            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </button>
+        </nav>
+      </header>
 
-        <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Inputs */}
-          <section className="lg:col-span-4 space-y-6">
-            <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
-              <h1 className="text-lg font-semibold text-foreground mb-1">{t("form.title")}</h1>
-              <p className="text-xs text-muted-foreground mb-6">{t("form.subtitle")}</p>
+      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Inputs */}
+        <section className="lg:col-span-4 space-y-6">
+          <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
+            <h1 className="text-lg font-semibold text-foreground mb-1">{t("form.title")}</h1>
+            <p className="text-xs text-muted-foreground mb-6">{t("form.subtitle")}</p>
 
-              <div className="space-y-5">
+            <div className="space-y-5">
+              <NumField
+                label={t("form.initialDeposit")}
+                value={initial}
+                onChange={setInitial}
+                locale={locale}
+                suffix={locale === "cs" ? "Kč" : "$"}
+                step={1000}
+              />
+              <NumField
+                label={t("form.monthlyContribution")}
+                value={monthly}
+                onChange={setMonthly}
+                locale={locale}
+                suffix={locale === "cs" ? "Kč" : "$"}
+                step={500}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
                 <NumField
-                  label={t("form.initialDeposit")}
-                  value={initial}
-                  onChange={setInitial}
+                  label={t("form.annualRate")}
+                  value={rate}
+                  onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
                   locale={locale}
-                  suffix={locale === "cs" ? "Kč" : "$"}
-                  step={1000}
+                  suffix={t("units.pct")}
+                  step={0.1}
                 />
                 <NumField
-                  label={t("form.monthlyContribution")}
-                  value={monthly}
-                  onChange={setMonthly}
+                  label={t("form.duration")}
+                  value={years}
+                  onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
                   locale={locale}
-                  suffix={locale === "cs" ? "Kč" : "$"}
-                  step={500}
+                  suffix={t("units.years")}
+                  step={1}
                 />
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
+              <div className="pt-4 border-t border-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="inflation-toggle"
+                    className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                  >
+                    {t("form.enableInflation")}
+                  </label>
+                  <button
+                    id="inflation-toggle"
+                    type="button"
+                    role="switch"
+                    aria-checked={inflationEnabled}
+                    onClick={() => setInflationEnabled((v) => !v)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      inflationEnabled ? "bg-brand" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-background shadow transition-transform ${
+                        inflationEnabled ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {inflationEnabled && (
                   <NumField
-                    label={t("form.annualRate")}
-                    value={rate}
-                    onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
+                    label={t("form.expectedInflation")}
+                    value={inflation}
+                    onChange={setInflation}
                     locale={locale}
                     suffix={t("units.pct")}
                     step={0.1}
                   />
-                  <NumField
-                    label={t("form.duration")}
-                    value={years}
-                    onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
-                    locale={locale}
-                    suffix={t("units.years")}
-                    step={1}
-                  />
-                </div>
+                )}
+              </div>
 
-                <div className="pt-4 border-t border-border space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="inflation-toggle"
-                      className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    >
-                      {t("form.enableInflation")}
-                    </label>
-                    <button
-                      id="inflation-toggle"
-                      type="button"
-                      role="switch"
-                      aria-checked={inflationEnabled}
-                      onClick={() => setInflationEnabled((v) => !v)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        inflationEnabled ? "bg-brand" : "bg-muted"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-background shadow transition-transform ${
-                          inflationEnabled ? "translate-x-6" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {inflationEnabled && (
-                    <NumField
-                      label={t("form.expectedInflation")}
-                      value={inflation}
-                      onChange={setInflation}
-                      locale={locale}
-                      suffix={t("units.pct")}
-                      step={0.1}
-                    />
-                  )}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    {t("form.withdrawalRate")}
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={t("form.withdrawalRateInfo")}
+                        className="text-muted-foreground hover:text-brand"
+                      >
+                        <Info className="size-3.5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent side="top" className="text-center">
+                      {t("form.withdrawalRateTooltip")}
+                    </PopoverContent>
+                  </Popover>
                 </div>
-
-                <div className="pt-4 border-t border-border">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                      {t("form.withdrawalRate")}
-                    </label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button type="button" aria-label={t("form.withdrawalRateInfo")} className="text-muted-foreground hover:text-brand">
-                          <Info className="size-3.5" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[240px] text-center">
-                        {t("form.withdrawalRateTooltip")}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <NumField
-                    label=""
-                    value={withdrawalRate}
-                    onChange={(v) => setWithdrawalRate(Math.max(0, Math.min(20, v)))}
-                    locale={locale}
-                    suffix={t("units.pctPerYear")}
-                    step={0.1}
-                  />
-                </div>
+                <NumField
+                  label=""
+                  value={withdrawalRate}
+                  onChange={(v) => setWithdrawalRate(Math.max(0, Math.min(20, v)))}
+                  locale={locale}
+                  suffix={t("units.pctPerYear")}
+                  step={0.1}
+                />
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Results */}
-          <section className="lg:col-span-8 space-y-6">
-            <div className={`grid grid-cols-1 gap-4 ${inflationEnabled ? "md:grid-cols-2" : ""}`}>
-              <div className="bg-card p-6 rounded-2xl border border-border">
+        {/* Results */}
+        <section className="lg:col-span-8 space-y-6">
+          <div className={`grid grid-cols-1 gap-4 ${inflationEnabled ? "md:grid-cols-2" : ""}`}>
+            <div className="bg-card p-6 rounded-2xl border border-border">
+              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                {t("results.nominalLabel")}
+              </p>
+              <p className="text-3xl font-bold text-foreground font-mono break-words">
+                {fmt(result.finalNominal)}
+              </p>
+              <p className="text-xs text-brand mt-2 flex items-center gap-1">
+                <span>▲</span> {fmt(profit)} {t("results.profitSuffix")}
+              </p>
+            </div>
+            {inflationEnabled && (
+              <div className="bg-card p-6 rounded-2xl border border-brand/30 relative overflow-hidden">
+                <div className="absolute top-3 right-3">
+                  <span className="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/30">
+                    {t("results.inflationAdjustedBadge")}
+                  </span>
+                </div>
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                  {t("results.nominalLabel")}
+                  {t("results.realLabel")}
                 </p>
                 <p className="text-3xl font-bold text-foreground font-mono break-words">
-                  {fmt(result.finalNominal)}
+                  {fmt(result.finalReal)}
                 </p>
-                <p className="text-xs text-brand mt-2 flex items-center gap-1">
-                  <span>▲</span> {fmt(profit)} {t("results.profitSuffix")}
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t("results.realDescription", { pct: fmtPct(inflation) })}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Passive income */}
+          <div className="bg-card p-6 rounded-2xl border border-border">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {t("results.passiveIncomeTitle")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("results.passiveIncomeDescription", {
+                    pct: fmtPct(withdrawalRate),
+                    years,
+                  })}
+                </p>
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-brand flex items-center gap-1 text-xs"
+                  >
+                    <Info className="size-3.5" />
+                    {t("results.rule4Pct")}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="left">{t("results.rule4PctTooltip")}</PopoverContent>
+              </Popover>
+            </div>
+            <div className={`grid grid-cols-1 gap-4 ${inflationEnabled ? "md:grid-cols-2" : ""}`}>
+              <div className="bg-surface rounded-xl p-4 border border-border">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  {t("results.monthlyNominal")}
+                </p>
+                <p className="text-2xl font-bold text-foreground font-mono break-words">
+                  {fmt(monthlyWithdrawalNominal)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {fmt(annualWithdrawalNominal)} {t("results.annuallySuffix")}
                 </p>
               </div>
               {inflationEnabled && (
-                <div className="bg-card p-6 rounded-2xl border border-brand/30 relative overflow-hidden">
-                  <div className="absolute top-3 right-3">
-                    <span className="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/30">
-                      {t("results.inflationAdjustedBadge")}
-                    </span>
-                  </div>
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                    {t("results.realLabel")}
+                <div className="bg-surface rounded-xl p-4 border border-brand/30">
+                  <p className="text-[11px] font-medium text-brand uppercase tracking-wider mb-1">
+                    {t("results.monthlyReal")}
                   </p>
-                  <p className="text-3xl font-bold text-foreground font-mono break-words">
-                    {fmt(result.finalReal)}
+                  <p className="text-2xl font-bold text-foreground font-mono break-words">
+                    {fmt(monthlyWithdrawalReal)}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {t("results.realDescription", { pct: fmtPct(inflation) })}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {fmt(annualWithdrawalReal)} {t("results.annuallySuffix")}
                   </p>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Passive income */}
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {t("results.passiveIncomeTitle")}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("results.passiveIncomeDescription", {
-                      pct: fmtPct(withdrawalRate),
-                      years,
-                    })}
-                  </p>
-                </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="text-muted-foreground hover:text-brand flex items-center gap-1 text-xs"
-                    >
-                      <Info className="size-3.5" />
-                      {t("results.rule4Pct")}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left" className="max-w-[260px]">
-                    {t("results.rule4PctTooltip")}
-                  </TooltipContent>
-                </Tooltip>
+          {/* Chart */}
+          <div className="bg-card p-6 md:p-8 rounded-2xl border border-border flex flex-col h-[420px]">
+            <div className="flex justify-between items-end mb-6 flex-wrap gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">{t("chart.title")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {inflationEnabled
+                    ? t("chart.descriptionWithInflation")
+                    : t("chart.descriptionWithoutInflation")}
+                </p>
               </div>
-              <div className={`grid grid-cols-1 gap-4 ${inflationEnabled ? "md:grid-cols-2" : ""}`}>
-                <div className="bg-surface rounded-xl p-4 border border-border">
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                    {t("results.monthlyNominal")}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground font-mono break-words">
-                    {fmt(monthlyWithdrawalNominal)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {fmt(annualWithdrawalNominal)} {t("results.annuallySuffix")}
-                  </p>
+              <div className="flex gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-brand"></div>
+                  <span className="text-xs text-muted-foreground">{t("chart.legendNominal")}</span>
                 </div>
                 {inflationEnabled && (
-                  <div className="bg-surface rounded-xl p-4 border border-brand/30">
-                    <p className="text-[11px] font-medium text-brand uppercase tracking-wider mb-1">
-                      {t("results.monthlyReal")}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground font-mono break-words">
-                      {fmt(monthlyWithdrawalReal)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {fmt(annualWithdrawalReal)} {t("results.annuallySuffix")}
-                    </p>
+                  <div className="flex items-center gap-1.5">
+                    <div className="size-2 rounded-full bg-muted-foreground"></div>
+                    <span className="text-xs text-muted-foreground">{t("chart.legendReal")}</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label={t("chart.realExplainerInfo")}
+                          className="text-muted-foreground hover:text-brand"
+                        >
+                          <Info className="size-3" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="top">{t("chart.realExplainer")}</PopoverContent>
+                    </Popover>
                   </div>
                 )}
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-foreground/30"></div>
+                  <span className="text-xs text-muted-foreground">
+                    {t("chart.legendContributions")}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Chart */}
-            <div className="bg-card p-6 md:p-8 rounded-2xl border border-border flex flex-col h-[420px]">
-              <div className="flex justify-between items-end mb-6 flex-wrap gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">{t("chart.title")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {inflationEnabled
-                      ? t("chart.descriptionWithInflation")
-                      : t("chart.descriptionWithoutInflation")}
-                  </p>
-                </div>
-                <div className="flex gap-4 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-brand"></div>
-                    <span className="text-xs text-muted-foreground">{t("chart.legendNominal")}</span>
-                  </div>
-                  {inflationEnabled && (
-                    <div className="flex items-center gap-1.5">
-                      <div className="size-2 rounded-full bg-muted-foreground"></div>
-                      <span className="text-xs text-muted-foreground">{t("chart.legendReal")}</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button type="button" aria-label={t("chart.realExplainerInfo")} className="text-muted-foreground hover:text-brand">
-                            <Info className="size-3" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[260px]">
-                          {t("chart.realExplainer")}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-foreground/30"></div>
-                    <span className="text-xs text-muted-foreground">
-                      {t("chart.legendContributions")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-1 -ml-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={result.series} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="gNom" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.55} />
-                        <stop offset="100%" stopColor="var(--color-brand)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="gReal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-muted-foreground)" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="var(--color-muted-foreground)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                    <XAxis
-                      dataKey="year"
-                      stroke="var(--color-muted-foreground)"
-                      fontSize={11}
-                      tickFormatter={(v) => `${v}${t("units.yearShort")}`}
-                    />
-                    <YAxis
-                      stroke="var(--color-muted-foreground)"
-                      fontSize={11}
-                      tickFormatter={(v) => `${fmtNum(v / 1000)}k`}
-                      width={60}
-                    />
-                    <RTooltip
-                      contentStyle={{
-                        background: "var(--color-card)",
-                        border: "1px solid var(--color-border)",
-                        borderRadius: 12,
-                        fontSize: 12,
-                        color: "var(--color-foreground)",
-                      }}
-                      labelStyle={{ color: "var(--color-muted-foreground)" }}
-                      formatter={(value: number, name) => [fmt(value), name]}
-                      labelFormatter={(l) => t("chart.tooltipYearLabel", { year: l })}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="contributions"
-                      name={t("chart.legendContributions")}
-                      stroke="var(--color-muted-foreground)"
-                      strokeDasharray="4 4"
-                      fill="none"
-                    />
-                    {inflationEnabled && (
-                      <Area
-                        type="monotone"
-                        dataKey="real"
-                        name={t("chart.legendReal")}
-                        stroke="var(--color-muted-foreground)"
-                        fill="url(#gReal)"
-                        strokeWidth={2}
+            <div className="flex-1 -ml-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={result.series} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="gNom" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.55} />
+                      <stop offset="100%" stopColor="var(--color-brand)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gReal" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor="var(--color-muted-foreground)"
+                        stopOpacity={0.35}
                       />
-                    )}
+                      <stop
+                        offset="100%"
+                        stopColor="var(--color-muted-foreground)"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                  <XAxis
+                    dataKey="year"
+                    stroke="var(--color-muted-foreground)"
+                    fontSize={11}
+                    tickFormatter={(v) => `${v}${t("units.yearShort")}`}
+                  />
+                  <YAxis
+                    stroke="var(--color-muted-foreground)"
+                    fontSize={11}
+                    tickFormatter={(v) => `${fmtNum(v / 1000)}k`}
+                    width={60}
+                  />
+                  <RTooltip
+                    trigger="click"
+                    contentStyle={{
+                      background: "var(--color-card)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: 12,
+                      fontSize: 12,
+                      color: "var(--color-foreground)",
+                    }}
+                    labelStyle={{ color: "var(--color-muted-foreground)" }}
+                    formatter={(value: number, name) => [fmt(value), name]}
+                    labelFormatter={(l) => t("chart.tooltipYearLabel", { year: l })}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="contributions"
+                    name={t("chart.legendContributions")}
+                    stroke="var(--color-muted-foreground)"
+                    strokeDasharray="4 4"
+                    fill="none"
+                  />
+                  {inflationEnabled && (
                     <Area
                       type="monotone"
-                      dataKey="nominal"
-                      name={t("chart.legendNominal")}
-                      stroke="var(--color-brand)"
-                      fill="url(#gNom)"
-                      strokeWidth={2.5}
+                      dataKey="real"
+                      name={t("chart.legendReal")}
+                      stroke="var(--color-muted-foreground)"
+                      fill="url(#gReal)"
+                      strokeWidth={2}
                     />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+                  )}
+                  <Area
+                    type="monotone"
+                    dataKey="nominal"
+                    name={t("chart.legendNominal")}
+                    stroke="var(--color-brand)"
+                    fill="url(#gNom)"
+                    strokeWidth={2.5}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
+          </div>
 
-            {/* Breakdown — table on md+, stacked cards on mobile */}
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
-              {/* Desktop / tablet table */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="text-muted-foreground border-b border-border">
-                      <th className="py-4 px-6 font-medium">{t("breakdown.year")}</th>
-                      <th className="py-4 px-6 font-medium text-right">{t("breakdown.contributions")}</th>
-                      <th className="py-4 px-6 font-medium text-right">{t("breakdown.interest")}</th>
-                      <th className="py-4 px-6 font-medium text-right text-foreground">
-                        {t("breakdown.nominal")}
+          {/* Breakdown — table on md+, stacked cards on mobile */}
+          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            {/* Desktop / tablet table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="text-muted-foreground border-b border-border">
+                    <th className="py-4 px-6 font-medium">{t("breakdown.year")}</th>
+                    <th className="py-4 px-6 font-medium text-right">
+                      {t("breakdown.contributions")}
+                    </th>
+                    <th className="py-4 px-6 font-medium text-right">{t("breakdown.interest")}</th>
+                    <th className="py-4 px-6 font-medium text-right text-foreground">
+                      {t("breakdown.nominal")}
+                    </th>
+                    {inflationEnabled && (
+                      <th className="py-4 px-6 font-medium text-right text-brand">
+                        {t("breakdown.real")}
                       </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground font-mono">
+                  {milestones.map((m) => (
+                    <tr key={m.year} className="border-b border-border last:border-0">
+                      <td className="py-4 px-6">{t("breakdown.yearOrdinal", { n: m.year })}</td>
+                      <td className="py-4 px-6 text-right">{fmt(m.contributions)}</td>
+                      <td className="py-4 px-6 text-right">{fmt(m.interest)}</td>
+                      <td className="py-4 px-6 text-right text-foreground">{fmt(m.nominal)}</td>
                       {inflationEnabled && (
-                        <th className="py-4 px-6 font-medium text-right text-brand">
-                          {t("breakdown.real")}
-                        </th>
+                        <td className="py-4 px-6 text-right text-brand">{fmt(m.real)}</td>
                       )}
                     </tr>
-                  </thead>
-                  <tbody className="text-muted-foreground font-mono">
-                    {milestones.map((m) => (
-                      <tr key={m.year} className="border-b border-border last:border-0">
-                        <td className="py-4 px-6">{t("breakdown.yearOrdinal", { n: m.year })}</td>
-                        <td className="py-4 px-6 text-right">{fmt(m.contributions)}</td>
-                        <td className="py-4 px-6 text-right">{fmt(m.interest)}</td>
-                        <td className="py-4 px-6 text-right text-foreground">{fmt(m.nominal)}</td>
-                        {inflationEnabled && (
-                          <td className="py-4 px-6 text-right text-brand">{fmt(m.real)}</td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile stacked cards */}
-              <div className="md:hidden divide-y divide-border">
-                {milestones.map((m) => (
-                  <div key={m.year} className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-semibold text-foreground">
-                        {t("breakdown.yearOrdinal", { n: m.year })}
-                      </span>
-                      <span className="text-xs text-muted-foreground font-mono">
-                        {fmt(m.nominal)}
-                      </span>
-                    </div>
-                    <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                      <dt className="text-muted-foreground">{t("breakdown.contributions")}</dt>
-                      <dd className="text-right font-mono text-foreground">{fmt(m.contributions)}</dd>
-                      <dt className="text-muted-foreground">{t("breakdown.interest")}</dt>
-                      <dd className="text-right font-mono text-foreground">{fmt(m.interest)}</dd>
-                      <dt className="text-muted-foreground">{t("breakdown.nominal")}</dt>
-                      <dd className="text-right font-mono text-foreground">{fmt(m.nominal)}</dd>
-                      {inflationEnabled && (
-                        <>
-                          <dt className="text-brand">{t("breakdown.real")}</dt>
-                          <dd className="text-right font-mono text-brand">{fmt(m.real)}</dd>
-                        </>
-                      )}
-                    </dl>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </section>
-        </main>
 
-        <footer
-          id="metodika"
-          className="max-w-6xl mx-auto mt-12 text-muted-foreground text-xs py-8 border-t border-border leading-relaxed"
-        >
-          <p className="max-w-3xl">
-            {t("footer.copyright", { year: new Date().getFullYear() })} — {t("footer.methodology")}
-          </p>
-          <p className="mt-3">
-            <Link
-              to="/privacy"
-              className="hover:text-brand transition-colors underline underline-offset-2"
-            >
-              {i18n.language?.startsWith("en") ? "Privacy Policy" : "Zásady ochrany osobních údajů"}
-            </Link>
-          </p>
-        </footer>
-      </div>
-    </TooltipProvider>
+            {/* Mobile stacked cards */}
+            <div className="md:hidden divide-y divide-border">
+              {milestones.map((m) => (
+                <div key={m.year} className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-foreground">
+                      {t("breakdown.yearOrdinal", { n: m.year })}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {fmt(m.nominal)}
+                    </span>
+                  </div>
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                    <dt className="text-muted-foreground">{t("breakdown.contributions")}</dt>
+                    <dd className="text-right font-mono text-foreground">{fmt(m.contributions)}</dd>
+                    <dt className="text-muted-foreground">{t("breakdown.interest")}</dt>
+                    <dd className="text-right font-mono text-foreground">{fmt(m.interest)}</dd>
+                    <dt className="text-muted-foreground">{t("breakdown.nominal")}</dt>
+                    <dd className="text-right font-mono text-foreground">{fmt(m.nominal)}</dd>
+                    {inflationEnabled && (
+                      <>
+                        <dt className="text-brand">{t("breakdown.real")}</dt>
+                        <dd className="text-right font-mono text-brand">{fmt(m.real)}</dd>
+                      </>
+                    )}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer
+        id="metodika"
+        className="max-w-6xl mx-auto mt-12 text-muted-foreground text-xs py-8 border-t border-border leading-relaxed"
+      >
+        <p className="max-w-3xl">
+          {t("footer.copyright", { year: new Date().getFullYear() })} — {t("footer.methodology")}
+        </p>
+        <p className="mt-3">
+          <Link
+            to="/privacy"
+            className="hover:text-brand transition-colors underline underline-offset-2"
+          >
+            {i18n.language?.startsWith("en") ? "Privacy Policy" : "Zásady ochrany osobních údajů"}
+          </Link>
+        </p>
+      </footer>
+    </div>
   );
 }

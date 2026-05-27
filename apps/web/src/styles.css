@@ -158,4 +158,44 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  /* Extend background behind the iOS status bar (safe-area-inset-top).
+     Without this the WKWebView leaves a black strip behind the notch. */
+  html {
+    background-color: var(--background);
+  }
+}
+
+/* ── Capacitor / iOS native hardening ────────────────────────────────────────
+   Applied only when JS sets class="capacitor-native" on <html>.
+   Web users are completely unaffected.
+   ─────────────────────────────────────────────────────────────────────────── */
+.capacitor-native,
+.capacitor-native body {
+  /* Disable text selection (except inputs) */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Disable long-press image save / link preview */
+  -webkit-touch-callout: none;
+  /* Remove tap flash highlight */
+  -webkit-tap-highlight-color: transparent;
+  /* Double-tap zoom prevention + smoother taps */
+  touch-action: manipulation;
+  /* No bounce scroll at edges */
+  overscroll-behavior: none;
+}
+
+/* Re-enable selection inside form inputs */
+.capacitor-native input,
+.capacitor-native textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Safe-area top padding so content starts below the status bar.
+   Applied via padding on the outermost page wrapper (see index.tsx).
+   Using env(safe-area-inset-top) here so the background colour of the
+   status bar region matches the app background automatically. */
+.capacitor-native body {
+  padding-top: env(safe-area-inset-top);
 }

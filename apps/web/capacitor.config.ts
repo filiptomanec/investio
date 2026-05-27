@@ -19,7 +19,11 @@ const config: CapacitorConfig = {
     StatusBar: {
       // Runtime: toggled between Dark/Light in useTheme() via StatusBar.setStyle()
       style: "DARK",
-      overlaysWebView: false,
+      // overlaysWebView: true lets the WKWebView extend behind the status bar so
+      // the app background colour fills that region (via env(safe-area-inset-top)
+      // padding in CSS).  With false the status bar sits outside the webview,
+      // which leaves a black strip from the native UIView background.
+      overlaysWebView: true,
     },
   },
 };
