@@ -12,8 +12,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "investio",
   splash: {
     image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#0f766e",
+    resizeMode: "cover",
+    backgroundColor: "#0d9488",
   },
   ios: {
     supportsTablet: true,
@@ -27,7 +27,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#0f766e",
+      backgroundColor: "#0d9488",
     },
     package: "com.tomanec.investio",
   },
@@ -42,7 +42,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-splash-screen",
       {
-        backgroundColor: "#0f766e",
+        backgroundColor: "#0d9488",
         image: "./assets/splash.png",
         imageWidth: 200,
       },
