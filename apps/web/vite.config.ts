@@ -14,5 +14,18 @@ export default defineConfig({
   },
   // Force Nitro on with Vercel preset so `vite build` emits a Vercel-deployable bundle.
   // Without this override the wrapper only runs Nitro inside Lovable's sandbox.
-  nitro: { preset: "vercel" },
+  //
+  // The wrapper hard-codes output.{dir,serverDir,publicDir} to `dist/*` defaults that
+  // point Nitro at the wrong layout for Vercel's Build Output API v3 — Vercel can't
+  // auto-detect `dist/`, it only auto-detects `.vercel/output/`. We re-pin to the
+  // canonical Vercel layout so Vercel sees `functions/__server.func/index.mjs` +
+  // `static/` + `config.json` exactly where it expects them.
+  nitro: {
+    preset: "vercel",
+    output: {
+      dir: ".vercel/output",
+      serverDir: ".vercel/output/functions/__server.func",
+      publicDir: ".vercel/output/static",
+    },
+  },
 });
