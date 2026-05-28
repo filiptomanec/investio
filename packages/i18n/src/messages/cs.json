@@ -5,6 +5,12 @@
     "toggleTheme": "Přepnout téma",
     "toggleLanguage": "Změnit jazyk"
   },
+  "nav": {
+    "basic": "Základní",
+    "advanced": "Rozšířená",
+    "renta": "Renta",
+    "privacy": "Zásady ochrany osobních údajů"
+  },
   "form": {
     "title": "Parametry investice",
     "subtitle": "Složené úročení s měsíční kapitalizací",
@@ -59,7 +65,8 @@
   },
   "footer": {
     "copyright": "© {{year}} Investio",
-    "methodology": "Výpočet používá složené úročení s měsíční kapitalizací: měsíční sazba rm = (1+r)^(1/12) − 1, zůstatek B(n+1) = Bn · (1+rm) + vklad. Reálná hodnota = nominální / (1+inflace)^let. Vklad je připisován na konci měsíce. Pasivní příjem = portfolio × roční výběr %. Kalkulačka neslouží jako investiční doporučení."
+    "methodology": "Výpočet používá složené úročení s měsíční kapitalizací: měsíční sazba rm = (1+r)^(1/12) − 1, zůstatek B(n+1) = Bn · (1+rm) + vklad. Reálná hodnota = nominální / (1+inflace)^let. Vklad je připisován na konci měsíce. Pasivní příjem = portfolio × roční výběr %. Kalkulačka neslouží jako investiční doporučení.",
+    "methodologyShort": "© {{year}} Investio — Složené úročení s měsíční kapitalizací: rm = (1+r)^(1/12)−1, zůstatek B(n+1) = Bn·(1+rm) + vklad. Reálná hodnota = nominální / (1+inflace)^let. Kalkulačka neslouží jako investiční doporučení."
   },
   "errors": {
     "notFoundTitle": "Stránka nenalezena",
@@ -69,5 +76,53 @@
     "loadFailedDescription": "Něco se na naší straně pokazilo. Zkuste obnovit stránku, nebo se vraťte na úvod.",
     "tryAgain": "Zkusit znovu",
     "goHome": "Zpět na úvod"
+  },
+  "basic": {
+    "metaTitle": "Investio — Základní kalkulačka složeného úročení",
+    "metaDescription": "Spočítejte budoucí nominální hodnotu vašich investic se složeným úročením a měsíční kapitalizací.",
+    "title": "Základní kalkulačka",
+    "subtitle": "Složené úročení s měsíční kapitalizací",
+    "profitDetail": "{{profit}} zisk · vloženo {{contributed}}"
+  },
+  "advanced": {
+    "metaTitle": "Investio — Rozšířená kalkulačka s inflací a rentou",
+    "metaDescription": "Pokročilá kalkulačka složeného úročení s inflací, navyšováním vkladu a výpočtem pasivní renty.",
+    "title": "Rozšířená kalkulačka",
+    "subtitle": "Inflace, indexace vkladu a pasivní renta",
+    "indexContributions": "Navyšovat vklad o inflaci",
+    "indexContributionsTooltip": "Měsíční vklad se každý rok zvýší o očekávanou inflaci, aby si zachoval kupní sílu."
+  },
+  "renta": {
+    "metaTitle": "Investio — Kalkulačka renty (kolik investovat měsíčně)",
+    "metaDescription": "Zadejte požadovanou rentu v dnešních cenách a spočítejte, kolik musíte měsíčně investovat, abyste jí dosáhli.",
+    "title": "Kalkulačka renty",
+    "subtitle": "Kolik musím měsíčně investovat, abych dosáhl požadované renty?",
+    "targetMonthly": "Cílová renta měsíčně (dnešní ceny)",
+    "targetMonthlyTooltip": "Zadejte částku, která by vám v dnešní době vyhovovala jako pasivní příjem z investic.",
+    "targetMonthlyInfo": "Vysvětlení cílové renty",
+    "yearsToRetirement": "Doba do renty",
+    "initialOptional": "Počáteční vklad (volitelné)",
+    "withdrawalRateLabel": "Bezpečná míra výběru",
+    "withdrawalRateTooltip": "Pro téměř nekonečnou rentu se doporučuje vybírat max. 4 % ročně (pravidlo 4 %).",
+    "resultBadge": "Výsledek",
+    "requiredMonthlyLabel": "Musíte investovat měsíčně",
+    "afterYears": "Po {{years}} letech získáte rentu {{target}} měsíčně v dnešní kupní síle.",
+    "nominalMonthlyLabel": "Reálně vyberete měsíčně",
+    "nominalMonthlyDesc": "V nominálních korunách za {{years}} let při {{inflation}} % inflaci.",
+    "unreachable": "Cíle dosáhnete už jen z počátečního vkladu — měsíční investice nejsou potřeba.",
+    "portfolioNominal": "Cílové portfolio (nominálně)",
+    "portfolioReal": "Cílové portfolio (dnešní ceny)",
+    "portfolioNominalDesc": "Hodnota v penězích za {{years}} let",
+    "portfolioRealDesc": "{{target}} × 12 ÷ {{withdrawal}} %",
+    "howItWorks": "Jak se to počítá",
+    "step1": "Cílová roční renta v dnešních cenách: {{value}}",
+    "step2": "Potřebné reálné portfolio = roční renta ÷ míra výběru ({{withdrawal}} %) = {{value}}",
+    "step3": "Přepočet na nominální hodnotu za {{years}} let při {{inflation}} % inflaci = {{value}}",
+    "step4": "Z budoucí hodnoty se zpětně dopočítá měsíční vklad při ročním úroku {{rate}} %."
+  },
+  "inflation": {
+    "loadButton": "Načíst průměrnou inflaci ČR za {{years}} let",
+    "source": "Průměr {{from}}–{{to}} ({{n}} let) z dat World Bank.",
+    "error": "Nepodařilo se načíst inflaci"
   }
 }

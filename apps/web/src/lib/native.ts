@@ -16,9 +16,34 @@ import { Capacitor } from "@capacitor/core";
  * the class is set before the first paint.
  */
 export function markNativePlatform(): void {
-  if (Capacitor.isNativePlatform()) {
-    document.documentElement.classList.add("capacitor-native");
-  }
+  if (!Capacitor.isNativePlatform()) return;
+  document.documentElement.classList.add("capacitor-native");
+
+  // iOS WKWebView ignores the viewport meta `user-scalable=no` flag since
+  // iOS 10 (for accessibility). Block the gesture events directly to prevent
+  // pinch-to-zoom and double-tap-to-zoom in the native app.
+  const preventGesture = (e: Event) => e.preventDefault();
+  document.addEventListener("gesturestart", preventGesture, { passive: false });
+  document.addEventListener("gesturechange", preventGesture, { passive: false });
+  document.addEventListener("gestureend", preventGesture, { passive: false });
+
+  // Double-tap-to-zoom: cancel the second tap if it lands within 350ms of the
+  // first AND the target isn't a form input (so users can still double-tap to
+  // select text in fields).
+  let lastTouchEnd = 0;
+  document.addEventListener(
+    "touchend",
+    (e) => {
+      const now = Date.now();
+      const target = e.target as HTMLElement | null;
+      const isInput = target?.matches?.("input, textarea, select");
+      if (!isInput && now - lastTouchEnd < 350) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    },
+    { passive: false },
+  );
 }
 
 /**

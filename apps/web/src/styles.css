@@ -192,6 +192,19 @@
   -webkit-user-select: text;
 }
 
+/* iOS WKWebView quirk: elements with `user-select: none` inherited from body
+   don't fire click events on tap unless they have `cursor: pointer`. Force
+   pointer on all interactive elements so taps register reliably. */
+.capacitor-native button,
+.capacitor-native a,
+.capacitor-native [role="button"],
+.capacitor-native [role="switch"],
+.capacitor-native [role="tab"],
+.capacitor-native label[for] {
+  cursor: pointer;
+  -webkit-user-select: none;
+}
+
 /* Safe-area top padding so content starts below the status bar.
    Applied via padding on the outermost page wrapper (see index.tsx).
    Using env(safe-area-inset-top) here so the background colour of the

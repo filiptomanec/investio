@@ -7,7 +7,7 @@
 
 - **Projekt**: `workspaces/investio`
 - **Aktivní fáze**: M1 — App Store submission prep (Capacitor iOS)
-- **Last sync**: 2026-05-27 (fullstack — React Native → Capacitor pivot)
+- **Last sync**: 2026-05-28 (orchestrator — grow-smart-magic UI port, 3-page nav)
 - **Repo**: `filiptomanec/investio`
 
 ## Konvence
@@ -114,8 +114,29 @@
 
 ---
 
+### T-007 — Port grow-smart-magic UI: 3 pages (basic/advanced/renta) + Layout + nav
+
+- **Owner**: orchestrator
+- **Status**: done
+- **Blocked by**: —
+- **Brief**: Mirror the UI Lovable shipped to `filiptomanec/grow-smart-magic` on 2026-05-28 into Investio 1:1, keeping Investio's i18n (CS+EN), Capacitor integration, and `packages/shared` math. Splits the single-page calculator into 3 routes: `/` basic, `/advanced` (inflation toggle, contribution indexation, withdrawal), `/renta` (solve-for-monthly given target pension). `/privacy` route preserved untouched.
+- **Acceptance criteria**:
+  - [x] `packages/shared` extended with `solveMonthlyForTargetIncome`, `fetchCzechInflation` (World Bank API), `increaseMonthlyWithInflation` flag on `calculateInvestment`
+  - [x] New shared components `Layout`, `NumField` (locale-aware caret-preserving), `ProjectionView` + `useTheme` hook
+  - [x] Routes: `/` simplified to 4-field basic, `/advanced.tsx` and `/renta.tsx` added, `/privacy.tsx` untouched
+  - [x] i18n keys added for `nav.*`, `basic.*`, `advanced.*`, `renta.*`, `inflation.*` in both CS and EN
+  - [x] Renta `targetMonthly` input has info popover explainer
+  - [x] Renta result section shows nominal monthly pension as its own card
+  - [x] Footer (in Layout) is text-centered with privacy link below methodology
+  - [x] `pnpm typecheck` and `pnpm build` green
+  - [x] Dev server smoke test: `/`, `/advanced`, `/renta`, `/privacy` all render in CS locale
+- **Hand-back**: See commit on `main`. Live URL: `https://investio-web.vercel.app/` (Vercel auto-deploys on push).
+
+---
+
 ## Activity log
 
 - `2026-05-27` — Marketing agent shipped App Store listing copy (EN + CS) + privacy policy (EN + CS) + privacy nutrition labels + shared metadata. Files at `apps/mobile/store-listing/`. Next: T-001 (devops) to unblock App Store submission.
 - `2026-05-27` — Devops: T-001 done. `/privacy` route wired at `apps/web/src/routes/privacy.tsx`. EAS Build/Submit config written (`eas.json`, `app.config.ts`, `package.json` scripts, `.github/workflows/mobile-build.yml`). Privacy link added to web footer and mobile methodology screen. Opened T-002/T-003/T-004 for remaining human-gated steps.
 - `2026-05-27` — Fullstack: React Native → Capacitor pivot. `apps/mobile/` deleted, assets preserved at `apps/web/ios-assets/`. Capacitor 8 installed, `build:spa` script added, iOS Xcode project generated at `apps/web/ios/`. Native plugins (StatusBar, SplashScreen, Haptics) wired in React code. T-002/T-003 cancelled (EAS/Expo superseded). T-005/T-006 opened.
+- `2026-05-28` — Orchestrator: Ported Lovable-generated grow-smart-magic UI 1:1 into Investio (T-007). Split single-page calc into `/` basic + `/advanced` + `/renta`, added `Layout` nav, extended `packages/shared` with `solveMonthlyForTargetIncome` and `fetchCzechInflation`. Kept CZ+EN i18n. Bundled the pending iOS gesture-prevention / tap-target hardening in `apps/web/src/lib/native.ts` and `styles.css` in the same commit.

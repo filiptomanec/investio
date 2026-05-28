@@ -8,6 +8,10 @@ export interface InvestmentInputs {
   annualRatePct: number; // annual interest rate in percent (e.g. 7 = 7%)
   years: number; // duration in years
   inflationPct: number; // expected annual inflation in percent
+  // When true, the monthly contribution is multiplied by (1+inflation)^year
+  // each year so its real value stays constant. Only meaningful when
+  // inflationPct > 0.
+  increaseMonthlyWithInflation?: boolean;
 }
 
 export interface YearPoint {
@@ -28,7 +32,14 @@ export interface InvestmentResult {
 }
 
 export function calculateInvestment(input: InvestmentInputs): InvestmentResult {
-  const { initial, monthly, annualRatePct, years, inflationPct } = input;
+  const {
+    initial,
+    monthly,
+    annualRatePct,
+    years,
+    inflationPct,
+    increaseMonthlyWithInflation = false,
+  } = input;
   const r = annualRatePct / 100;
   const i = inflationPct / 100;
   const monthlyRate = Math.pow(1 + r, 1 / 12) - 1;
@@ -36,6 +47,8 @@ export function calculateInvestment(input: InvestmentInputs): InvestmentResult {
   const series: YearPoint[] = [];
   let balance = initial;
   let contributions = initial;
+  // Active monthly contribution for the current 12-month block.
+  let currentMonthly = monthly;
 
   series.push({
     year: 0,
@@ -47,8 +60,8 @@ export function calculateInvestment(input: InvestmentInputs): InvestmentResult {
 
   const totalMonths = Math.max(0, Math.round(years * 12));
   for (let m = 1; m <= totalMonths; m++) {
-    balance = balance * (1 + monthlyRate) + monthly;
-    contributions += monthly;
+    balance = balance * (1 + monthlyRate) + currentMonthly;
+    contributions += currentMonthly;
     if (m % 12 === 0) {
       const year = m / 12;
       const real = balance / Math.pow(1 + i, year);
@@ -59,6 +72,11 @@ export function calculateInvestment(input: InvestmentInputs): InvestmentResult {
         real,
         interest: balance - contributions,
       });
+      // After closing the year, bump next year's contribution by inflation
+      // so its purchasing power stays flat.
+      if (increaseMonthlyWithInflation && year < years) {
+        currentMonthly = currentMonthly * (1 + i);
+      }
     }
   }
 
@@ -70,5 +88,76 @@ export function calculateInvestment(input: InvestmentInputs): InvestmentResult {
     finalReal: last.real,
     totalInterest: last.nominal - last.contributions,
     purchasingPowerLoss: last.nominal - last.real,
+  };
+}
+
+export interface RentaInputs {
+  // Target monthly retirement income in today's purchasing power.
+  targetMonthlyToday: number;
+  // Years until retirement (= years of accumulation).
+  years: number;
+  // Expected annual return during accumulation.
+  annualRatePct: number;
+  // Expected annual inflation.
+  inflationPct: number;
+  // Safe withdrawal rate in retirement (% per year).
+  withdrawalRatePct: number;
+  // Optional initial deposit.
+  initial: number;
+}
+
+export interface RentaResult {
+  // Portfolio needed in today's purchasing power.
+  requiredRealPortfolio: number;
+  // Portfolio needed in nominal money at the retirement date.
+  requiredNominalPortfolio: number;
+  // Monthly contribution required (can be negative if the initial deposit
+  // already overshoots the target — caller treats as "no need to contribute").
+  requiredMonthly: number;
+}
+
+// Given a desired retirement income (in today's purchasing power), solve for
+// the monthly contribution required to reach the target portfolio.
+//
+// Math:
+//   realPortfolio = annualIncomeToday / withdrawalRate
+//   nominalPortfolio = realPortfolio * (1 + inflation)^years
+//   FV = initial * (1+rm)^N + PMT * [((1+rm)^N - 1) / rm]
+//   → PMT = (FV - initial * (1+rm)^N) * rm / ((1+rm)^N - 1)
+// Where rm = (1 + annualRate)^(1/12) − 1 and N = years * 12.
+export function solveMonthlyForTargetIncome(input: RentaInputs): RentaResult {
+  const {
+    targetMonthlyToday,
+    years,
+    annualRatePct,
+    inflationPct,
+    withdrawalRatePct,
+    initial,
+  } = input;
+
+  const wr = withdrawalRatePct / 100;
+  const requiredRealPortfolio = wr > 0 ? (targetMonthlyToday * 12) / wr : 0;
+  const requiredNominalPortfolio =
+    requiredRealPortfolio * Math.pow(1 + inflationPct / 100, years);
+
+  const r = annualRatePct / 100;
+  const monthlyRate = Math.pow(1 + r, 1 / 12) - 1;
+  const n = Math.max(0, Math.round(years * 12));
+  const futureOfInitial = initial * Math.pow(1 + monthlyRate, n);
+
+  let requiredMonthly: number;
+  if (n === 0) {
+    requiredMonthly = 0;
+  } else if (Math.abs(monthlyRate) < 1e-12) {
+    requiredMonthly = (requiredNominalPortfolio - initial) / n;
+  } else {
+    const annuityFactor = (Math.pow(1 + monthlyRate, n) - 1) / monthlyRate;
+    requiredMonthly = (requiredNominalPortfolio - futureOfInitial) / annuityFactor;
+  }
+
+  return {
+    requiredRealPortfolio,
+    requiredNominalPortfolio,
+    requiredMonthly,
   };
 }

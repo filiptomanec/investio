@@ -5,6 +5,12 @@
     "toggleTheme": "Toggle theme",
     "toggleLanguage": "Change language"
   },
+  "nav": {
+    "basic": "Basic",
+    "advanced": "Advanced",
+    "renta": "Pension",
+    "privacy": "Privacy Policy"
+  },
   "form": {
     "title": "Investment parameters",
     "subtitle": "Compound interest with monthly compounding",
@@ -59,7 +65,8 @@
   },
   "footer": {
     "copyright": "© {{year}} Investio",
-    "methodology": "The calculation uses compound interest with monthly compounding: monthly rate rm = (1+r)^(1/12) − 1, balance B(n+1) = Bn · (1+rm) + contribution. Real value = nominal / (1+inflation)^years. The contribution is credited at the end of each month. Passive income = portfolio × annual withdrawal %. This calculator is not investment advice."
+    "methodology": "The calculation uses compound interest with monthly compounding: monthly rate rm = (1+r)^(1/12) − 1, balance B(n+1) = Bn · (1+rm) + contribution. Real value = nominal / (1+inflation)^years. The contribution is credited at the end of each month. Passive income = portfolio × annual withdrawal %. This calculator is not investment advice.",
+    "methodologyShort": "© {{year}} Investio — Compound interest with monthly compounding: rm = (1+r)^(1/12)−1, balance B(n+1) = Bn·(1+rm) + contribution. Real value = nominal / (1+inflation)^years. Not investment advice."
   },
   "errors": {
     "notFoundTitle": "Page not found",
@@ -69,5 +76,53 @@
     "loadFailedDescription": "Something went wrong on our end. You can try refreshing or head back home.",
     "tryAgain": "Try again",
     "goHome": "Go home"
+  },
+  "basic": {
+    "metaTitle": "Investio — Basic compound interest calculator",
+    "metaDescription": "Project the future nominal value of your investments with compound interest and monthly compounding.",
+    "title": "Basic calculator",
+    "subtitle": "Compound interest with monthly compounding",
+    "profitDetail": "{{profit}} profit · {{contributed}} contributed"
+  },
+  "advanced": {
+    "metaTitle": "Investio — Advanced calculator with inflation and pension",
+    "metaDescription": "Advanced compound interest calculator with inflation, indexed contributions and passive income projection.",
+    "title": "Advanced calculator",
+    "subtitle": "Inflation, indexed contributions and passive income",
+    "indexContributions": "Index contributions to inflation",
+    "indexContributionsTooltip": "The monthly contribution rises with the expected inflation each year, so its purchasing power stays flat."
+  },
+  "renta": {
+    "metaTitle": "Investio — Pension calculator (how much to invest monthly)",
+    "metaDescription": "Enter the pension you want in today's prices and find out how much you need to invest monthly to reach it.",
+    "title": "Pension calculator",
+    "subtitle": "How much do I need to invest monthly to reach my target pension?",
+    "targetMonthly": "Target monthly pension (today's prices)",
+    "targetMonthlyTooltip": "Enter the amount you'd be comfortable with today as passive income from your investments.",
+    "targetMonthlyInfo": "Target pension explainer",
+    "yearsToRetirement": "Years until pension",
+    "initialOptional": "Initial deposit (optional)",
+    "withdrawalRateLabel": "Safe withdrawal rate",
+    "withdrawalRateTooltip": "For a near-perpetual pension the recommended ceiling is roughly 4 % per year (the 4 % rule).",
+    "resultBadge": "Result",
+    "requiredMonthlyLabel": "You need to invest monthly",
+    "afterYears": "After {{years}} years you'll receive {{target}} per month in today's purchasing power.",
+    "nominalMonthlyLabel": "You'll actually withdraw monthly",
+    "nominalMonthlyDesc": "In nominal money in {{years}} years at {{inflation}} % inflation.",
+    "unreachable": "Your target is already covered by the initial deposit — no monthly contribution required.",
+    "portfolioNominal": "Target portfolio (nominal)",
+    "portfolioReal": "Target portfolio (today's prices)",
+    "portfolioNominalDesc": "Value in money in {{years}} years",
+    "portfolioRealDesc": "{{target}} × 12 ÷ {{withdrawal}} %",
+    "howItWorks": "How it's calculated",
+    "step1": "Target annual pension in today's prices: {{value}}",
+    "step2": "Required real portfolio = annual pension ÷ withdrawal rate ({{withdrawal}} %) = {{value}}",
+    "step3": "Translated to nominal value in {{years}} years at {{inflation}} % inflation = {{value}}",
+    "step4": "From the future value we back-solve the monthly contribution at {{rate}} % annual return."
+  },
+  "inflation": {
+    "loadButton": "Load avg. Czech inflation for the last {{years}} years",
+    "source": "Average {{from}}–{{to}} ({{n}} years) from World Bank data.",
+    "error": "Failed to load inflation"
   }
 }
