@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RentaRouteImport } from './routes/renta'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as AdvancedRouteImport } from './routes/advanced'
+import { Route as HypotekaRouteImport } from './routes/hypoteka'
 import { Route as IndexRouteImport } from './routes/index'
 
 const RentaRoute = RentaRouteImport.update({
@@ -24,9 +24,9 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdvancedRoute = AdvancedRouteImport.update({
-  id: '/advanced',
-  path: '/advanced',
+const HypotekaRoute = HypotekaRouteImport.update({
+  id: '/hypoteka',
+  path: '/hypoteka',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,34 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/advanced': typeof AdvancedRoute
+  '/hypoteka': typeof HypotekaRoute
   '/privacy': typeof PrivacyRoute
   '/renta': typeof RentaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/advanced': typeof AdvancedRoute
+  '/hypoteka': typeof HypotekaRoute
   '/privacy': typeof PrivacyRoute
   '/renta': typeof RentaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/advanced': typeof AdvancedRoute
+  '/hypoteka': typeof HypotekaRoute
   '/privacy': typeof PrivacyRoute
   '/renta': typeof RentaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/advanced' | '/privacy' | '/renta'
+  fullPaths: '/' | '/hypoteka' | '/privacy' | '/renta'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/advanced' | '/privacy' | '/renta'
-  id: '__root__' | '/' | '/advanced' | '/privacy' | '/renta'
+  to: '/' | '/hypoteka' | '/privacy' | '/renta'
+  id: '__root__' | '/' | '/hypoteka' | '/privacy' | '/renta'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdvancedRoute: typeof AdvancedRoute
+  HypotekaRoute: typeof HypotekaRoute
   PrivacyRoute: typeof PrivacyRoute
   RentaRoute: typeof RentaRoute
 }
@@ -85,11 +85,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/advanced': {
-      id: '/advanced'
-      path: '/advanced'
-      fullPath: '/advanced'
-      preLoaderRoute: typeof AdvancedRouteImport
+    '/hypoteka': {
+      id: '/hypoteka'
+      path: '/hypoteka'
+      fullPath: '/hypoteka'
+      preLoaderRoute: typeof HypotekaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,7 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdvancedRoute: AdvancedRoute,
+  HypotekaRoute: HypotekaRoute,
   PrivacyRoute: PrivacyRoute,
   RentaRoute: RentaRoute,
 }

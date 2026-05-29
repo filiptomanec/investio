@@ -161,3 +161,169 @@ export function solveMonthlyForTargetIncome(input: RentaInputs): RentaResult {
     requiredMonthly,
   };
 }
+
+// =====================================================================
+// Mortgage
+// =====================================================================
+
+export interface MortgageInput {
+  principal: number;
+  annualRatePct: number;
+  years: number;
+  extraMonthly?: number;
+}
+
+export interface MortgageYearPoint {
+  year: number;
+  month: number;
+  balance: number;
+  paidInterest: number;
+  paidPrincipal: number;
+  interestThisYear: number;
+  principalThisYear: number;
+}
+
+export interface MortgageResult {
+  monthlyPayment: number;
+  effectiveMonthly: number;
+  totalPaid: number;
+  totalInterest: number;
+  totalPrincipal: number;
+  payoffMonths: number;
+  series: MortgageYearPoint[];
+}
+
+function annuityPayment(principal: number, monthlyRate: number, months: number) {
+  if (months <= 0) return principal;
+  if (monthlyRate === 0) return principal / months;
+  const f = Math.pow(1 + monthlyRate, months);
+  return (principal * monthlyRate * f) / (f - 1);
+}
+
+export function calculateMortgage(input: MortgageInput): MortgageResult {
+  const { principal, annualRatePct, years, extraMonthly = 0 } = input;
+  const monthlyRate = annualRatePct / 100 / 12;
+  const totalMonths = Math.max(1, Math.round(years * 12));
+  const payment = annuityPayment(principal, monthlyRate, totalMonths);
+
+  let balance = principal;
+  let paidInterest = 0;
+  let paidPrincipal = 0;
+  let interestThisYear = 0;
+  let principalThisYear = 0;
+  let totalPaid = 0;
+  let m = 0;
+
+  const series: MortgageYearPoint[] = [
+    {
+      year: 0,
+      month: 0,
+      balance,
+      paidInterest: 0,
+      paidPrincipal: 0,
+      interestThisYear: 0,
+      principalThisYear: 0,
+    },
+  ];
+
+  const maxMonths = totalMonths + 12;
+  while (balance > 0.01 && m < maxMonths) {
+    m++;
+    const interest = balance * monthlyRate;
+    let principalPart = payment - interest;
+    if (principalPart < 0) principalPart = 0;
+    let cashOut = payment + extraMonthly;
+    let extraApplied = extraMonthly;
+
+    if (principalPart + extraApplied >= balance) {
+      const owed = balance + interest;
+      cashOut = owed;
+      principalPart = balance;
+      extraApplied = 0;
+    }
+    balance -= principalPart + extraApplied;
+    paidInterest += interest;
+    paidPrincipal += principalPart + extraApplied;
+    interestThisYear += interest;
+    principalThisYear += principalPart + extraApplied;
+    totalPaid += cashOut;
+
+    if (m % 12 === 0 || balance <= 0.01) {
+      series.push({
+        year: m / 12,
+        month: m,
+        balance: Math.max(0, balance),
+        paidInterest,
+        paidPrincipal,
+        interestThisYear,
+        principalThisYear,
+      });
+      interestThisYear = 0;
+      principalThisYear = 0;
+    }
+  }
+
+  return {
+    monthlyPayment: payment,
+    effectiveMonthly: payment + extraMonthly,
+    totalPaid,
+    totalInterest: paidInterest,
+    totalPrincipal: paidPrincipal,
+    payoffMonths: m,
+    series,
+  };
+}
+
+export interface MortgageCompareInput extends MortgageInput {
+  investAnnualRatePct: number;
+}
+
+export interface MortgageCompareResult {
+  payoffMonthsWithExtra: number;
+  monthsSaved: number;
+  totalInterestStandard: number;
+  totalInterestWithExtra: number;
+  interestSaved: number;
+  netExtraToMortgage: number;
+  netExtraToInvest: number;
+  difference: number;
+  investedValueAfterPayoff: number;
+  investedValueAlongside: number;
+}
+
+export function compareMortgageStrategies(
+  input: MortgageCompareInput,
+): MortgageCompareResult {
+  const standard = calculateMortgage({ ...input, extraMonthly: 0 });
+  const withExtra = calculateMortgage(input);
+
+  const totalMonths = Math.max(1, Math.round(input.years * 12));
+  const investMonthlyRate = Math.pow(1 + input.investAnnualRatePct / 100, 1 / 12) - 1;
+
+  const remainingMonths = Math.max(0, totalMonths - withExtra.payoffMonths);
+  const freedMonthly = standard.monthlyPayment + (input.extraMonthly ?? 0);
+  const fvA =
+    investMonthlyRate === 0
+      ? freedMonthly * remainingMonths
+      : freedMonthly *
+        ((Math.pow(1 + investMonthlyRate, remainingMonths) - 1) / investMonthlyRate);
+
+  const extra = input.extraMonthly ?? 0;
+  const fvB =
+    investMonthlyRate === 0
+      ? extra * totalMonths
+      : extra * ((Math.pow(1 + investMonthlyRate, totalMonths) - 1) / investMonthlyRate);
+
+  return {
+    payoffMonthsWithExtra: withExtra.payoffMonths,
+    monthsSaved: standard.payoffMonths - withExtra.payoffMonths,
+    totalInterestStandard: standard.totalInterest,
+    totalInterestWithExtra: withExtra.totalInterest,
+    interestSaved: standard.totalInterest - withExtra.totalInterest,
+    netExtraToMortgage: fvA,
+    netExtraToInvest: fvB,
+    difference: fvA - fvB,
+    investedValueAfterPayoff: fvA,
+    investedValueAlongside: fvB,
+  };
+}

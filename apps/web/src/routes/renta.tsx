@@ -10,7 +10,9 @@ import {
 } from "@investio/shared";
 import { Layout } from "@/components/layout";
 import { NumField } from "@/components/num-field";
+import { ResetButton } from "@/components/reset-button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { usePersistedState } from "@/hooks/use-persisted-state";
 
 export const Route = createFileRoute("/renta")({
   head: () => ({
@@ -31,6 +33,15 @@ export const Route = createFileRoute("/renta")({
   component: RentaCalculator,
 });
 
+const DEFAULTS = {
+  target: 40000,
+  years: 25,
+  rate: 7,
+  inflation: 3.2,
+  withdrawal: 4,
+  initial: 0,
+};
+
 function RentaCalculator() {
   const { t, i18n } = useTranslation();
   const locale: SupportedLocale = i18n.language?.startsWith("en") ? "en" : "cs";
@@ -42,16 +53,33 @@ function RentaCalculator() {
     }).format(Number.isFinite(n) ? n : 0);
   const currencySuffix = locale === "cs" ? "Kč" : "$";
 
-  const [target, setTarget] = useState(40000);
-  const [years, setYears] = useState(25);
-  const [rate, setRate] = useState(7);
-  const [inflation, setInflation] = useState(3.2);
-  const [withdrawal, setWithdrawal] = useState(4);
-  const [initial, setInitial] = useState(0);
+  const [target, setTarget] = usePersistedState("investio.renta.target", DEFAULTS.target);
+  const [years, setYears] = usePersistedState("investio.renta.years", DEFAULTS.years);
+  const [rate, setRate] = usePersistedState("investio.renta.rate", DEFAULTS.rate);
+  const [inflation, setInflation] = usePersistedState(
+    "investio.renta.inflation",
+    DEFAULTS.inflation,
+  );
+  const [withdrawal, setWithdrawal] = usePersistedState(
+    "investio.renta.withdrawal",
+    DEFAULTS.withdrawal,
+  );
+  const [initial, setInitial] = usePersistedState("investio.renta.initial", DEFAULTS.initial);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<{ from: number; to: number; n: number } | null>(null);
+
+  function reset() {
+    setTarget(DEFAULTS.target);
+    setYears(DEFAULTS.years);
+    setRate(DEFAULTS.rate);
+    setInflation(DEFAULTS.inflation);
+    setWithdrawal(DEFAULTS.withdrawal);
+    setInitial(DEFAULTS.initial);
+    setMeta(null);
+    setError(null);
+  }
 
   const result = useMemo(
     () =>
@@ -93,7 +121,10 @@ function RentaCalculator() {
       <main className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         <section className="lg:col-span-5 space-y-6">
           <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
-            <h1 className="text-lg font-semibold text-foreground mb-1">{t("renta.title")}</h1>
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <h1 className="text-lg font-semibold text-foreground">{t("renta.title")}</h1>
+              <ResetButton onClick={reset} />
+            </div>
             <p className="text-xs text-muted-foreground mb-6">{t("renta.subtitle")}</p>
 
             <div className="space-y-5">
@@ -112,9 +143,7 @@ function RentaCalculator() {
                         <Info className="size-3.5" />
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent side="top">
-                      {t("renta.targetMonthlyTooltip")}
-                    </PopoverContent>
+                    <PopoverContent side="top">{t("renta.targetMonthlyTooltip")}</PopoverContent>
                   </Popover>
                 </div>
                 <NumField
@@ -190,9 +219,7 @@ function RentaCalculator() {
                         <Info className="size-3.5" />
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent side="top">
-                      {t("renta.withdrawalRateTooltip")}
-                    </PopoverContent>
+                    <PopoverContent side="top">{t("renta.withdrawalRateTooltip")}</PopoverContent>
                   </Popover>
                 </div>
                 <NumField
@@ -260,7 +287,10 @@ function RentaCalculator() {
                 {fmt(result.requiredRealPortfolio)}
               </p>
               <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.portfolioRealDesc", { target: fmt(target), withdrawal: fmtPct(withdrawal) })}
+                {t("renta.portfolioRealDesc", {
+                  target: fmt(target),
+                  withdrawal: fmtPct(withdrawal),
+                })}
               </p>
             </div>
           </div>

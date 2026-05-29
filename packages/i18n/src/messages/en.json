@@ -3,13 +3,25 @@
     "calculator": "Calculator",
     "methodology": "Methodology",
     "toggleTheme": "Toggle theme",
-    "toggleLanguage": "Change language"
+    "toggleLanguage": "Change language",
+    "openWelcome": "What Investio can do"
   },
   "nav": {
+    "investice": "Investments",
+    "renta": "Pension",
+    "hypoteka": "Mortgage",
     "basic": "Basic",
     "advanced": "Advanced",
-    "renta": "Pension",
     "privacy": "Privacy Policy"
+  },
+  "modes": {
+    "basic": "Basic",
+    "advanced": "Advanced",
+    "ariaLabel": "Calculator mode"
+  },
+  "common": {
+    "reset": "Reset",
+    "resetTooltip": "Restore default values"
   },
   "form": {
     "title": "Investment parameters",
@@ -33,8 +45,9 @@
   "results": {
     "nominalLabel": "Future value (nominal)",
     "profitSuffix": "profit",
+    "profitDetail": "{{profit}} profit · {{contributed}} contributed",
     "realLabel": "Real purchasing power",
-    "realDescription": "In today's prices at {{pct}}% inflation",
+    "realDescription": "In today's prices at {{pct}} % inflation",
     "inflationAdjustedBadge": "Inflation-adjusted",
     "passiveIncomeTitle": "Passive income from investments",
     "passiveIncomeDescription": "Withdrawing {{pct}} % of the portfolio per year after {{years}} years",
@@ -66,7 +79,17 @@
   "footer": {
     "copyright": "© {{year}} Investio",
     "methodology": "The calculation uses compound interest with monthly compounding: monthly rate rm = (1+r)^(1/12) − 1, balance B(n+1) = Bn · (1+rm) + contribution. Real value = nominal / (1+inflation)^years. The contribution is credited at the end of each month. Passive income = portfolio × annual withdrawal %. This calculator is not investment advice.",
-    "methodologyShort": "© {{year}} Investio — Compound interest with monthly compounding: rm = (1+r)^(1/12)−1, balance B(n+1) = Bn·(1+rm) + contribution. Real value = nominal / (1+inflation)^years. Not investment advice."
+    "methodologyShort": "© {{year}} Investio — Compound interest with monthly compounding: rm = (1+r)^(1/12)−1, balance B(n+1) = Bn·(1+rm) + contribution. Not investment advice.",
+    "reportBug": "Report a bug / feature idea"
+  },
+  "feedback": {
+    "subject": "Investio — feedback / bug / idea",
+    "bodyIntro": "Hi,",
+    "bodyChoices": "[ ] Bug   [ ] Feature idea   [ ] Something else",
+    "bodyDescription": "Description:",
+    "bodyWhere": "Where it happened (URL / tab):",
+    "bodyDevice": "Device / browser:",
+    "bodyThanks": "Thanks!"
   },
   "errors": {
     "notFoundTitle": "Page not found",
@@ -76,6 +99,14 @@
     "loadFailedDescription": "Something went wrong on our end. You can try refreshing or head back home.",
     "tryAgain": "Try again",
     "goHome": "Go home"
+  },
+  "investice": {
+    "metaTitle": "Investio — Compound interest investment calculator",
+    "metaDescription": "Project your future investment value with compound interest, inflation, indexed contributions and passive income.",
+    "metaOgTitle": "Investio — Investments",
+    "metaOgDescription": "Basic and advanced modes: initial deposit, monthly contribution, rate, duration, inflation and pension.",
+    "title": "Investment calculator",
+    "subtitle": "Compound interest with monthly compounding"
   },
   "basic": {
     "metaTitle": "Investio — Basic compound interest calculator",
@@ -119,6 +150,112 @@
     "step2": "Required real portfolio = annual pension ÷ withdrawal rate ({{withdrawal}} %) = {{value}}",
     "step3": "Translated to nominal value in {{years}} years at {{inflation}} % inflation = {{value}}",
     "step4": "From the future value we back-solve the monthly contribution at {{rate}} % annual return."
+  },
+  "hypoteka": {
+    "metaTitle": "Investio — Mortgage calculator with extra payments",
+    "metaDescription": "Compute your mortgage payment, the interest vs. principal split and compare extra payments with investing.",
+    "metaOgTitle": "Investio — Mortgage",
+    "metaOgDescription": "Annuity payment, interest vs. principal over time and extra payments vs. investing.",
+    "title": "Mortgage calculator",
+    "subtitle": "Annuity payment, interest vs. principal",
+    "loanAmount": "Loan amount",
+    "duration": "Loan term",
+    "extraTitle": "Extra payment vs. investing",
+    "extraDescription": "Free monthly money — pay off the mortgage early, or invest it instead?",
+    "extraMonthly": "Extra monthly payment",
+    "extraMonthlyTooltip": "Amount you either pay on top of the mortgage each month, or invest instead.",
+    "investRate": "Expected annual investment return",
+    "monthlyPayment": "Monthly payment",
+    "monthlyPaymentExtra": "+ {{extra}} extra = {{total}}",
+    "totalInterest": "Total interest paid",
+    "totalInterestNote": "Without extra payments",
+    "totalPaid": "Total paid",
+    "totalPaidNote": "Principal + interest over {{years}} years",
+    "chartTitleStandard": "Balance and interest over time",
+    "chartTitleCompare": "Mortgage vs. investing",
+    "chartDescStandard": "Standard amortization without extra payments",
+    "chartDescCompare": "Balance with extra payments and the value of investing them instead",
+    "legendBalanceStandard": "Principal balance",
+    "legendBalanceWithExtra": "Balance (with extra)",
+    "legendBalanceStandardCompare": "Balance (standard)",
+    "legendInvested": "Investment value",
+    "legendCumulativeInterest": "Cumulative interest",
+    "legendCrossover": "Crossover at {{years}}y",
+    "compareBadge": "Strategy comparison",
+    "compareTitle": "Extra payments vs. investing",
+    "compareSubtitle": "Which pays off more with {{extra}} extra per month?",
+    "strategyA": "A) Pay down mortgage → then invest",
+    "strategyADesc": "Mortgage paid off in <strong>{{payoff}}</strong>. You save <strong>{{saved}}</strong> on interest.",
+    "strategyB": "B) Invest the whole time",
+    "strategyBDesc": "Standard amortization for {{years}} years while investing {{extra}} per month at {{rate}} % p.a.",
+    "strategyC": "C) Pay off at crossover",
+    "strategyCDesc": "If you invest instead of extra payments, after <strong>{{when}}</strong> the investment value ≥ remaining mortgage — you can pay it off in one shot.",
+    "strategyCNone": "With current parameters the investment never catches the balance over the mortgage term.",
+    "winnerMortgage": "<strong>Paying down the mortgage wins</strong> — strategy A is <strong>{{diff}}</strong> better than investing alongside.",
+    "winnerInvest": "<strong>Investing wins</strong> — strategy B is <strong>{{diff}}</strong> better than extra payments.",
+    "compareNote": "Compared at the end of the original term ({{years}} years). Ignores interest tax deductions, investment risk and the certainty of interest savings.",
+    "tableTitle": "Yearly breakdown",
+    "tableSubtitle": "How much of the yearly payment is interest vs. principal",
+    "tableYear": "Year",
+    "tableInterest": "Interest",
+    "tablePrincipal": "Principal",
+    "tableBalance": "Balance",
+    "yearRow": "Year {{n}}",
+    "yearLong": "{{n}} {{unit}}",
+    "yearUnit_one": "yr",
+    "yearUnit_few": "yrs",
+    "yearUnit_other": "yrs",
+    "monthsShort": "{{n}} mo."
+  },
+  "welcome": {
+    "kicker": "Welcome to Investio",
+    "title": "Plan your finances",
+    "titleHighlight": "with real numbers.",
+    "close": "Close",
+    "prev": "Previous",
+    "next": "Next",
+    "slideAria": "Slide {{n}}",
+    "dontShow": "Don't show again",
+    "start": "Start calculating",
+    "drawerTitle": "Welcome to Investio",
+    "slides": {
+      "investice": {
+        "kicker": "Investments",
+        "title": "Compound interest",
+        "highlight": "basic and advanced",
+        "description": "One switch — from a simple projection to inflation, indexed contributions and passive pension.",
+        "bullet1": "Basic / Advanced mode",
+        "bullet2": "Inflation and indexed contributions",
+        "bullet3": "Monthly pension from portfolio",
+        "cta": "Open investments",
+        "altDesktop": "Investments — desktop",
+        "altMobile": "Investments — mobile"
+      },
+      "renta": {
+        "kicker": "Pension",
+        "title": "How much to invest",
+        "highlight": "to reach your pension",
+        "description": "Set your target in today's prices and the calculator finds the monthly contribution required to reach it.",
+        "bullet1": "Target in today's value",
+        "bullet2": "Safe withdrawal rate",
+        "bullet3": "Step-by-step breakdown",
+        "cta": "Open pension",
+        "altDesktop": "Pension — desktop",
+        "altMobile": "Pension — mobile"
+      },
+      "hypoteka": {
+        "kicker": "Mortgage",
+        "title": "Payment, interest",
+        "highlight": "and extra payments",
+        "description": "Annuity payment, principal over time and the comparison: pay off early vs. invest the same amount.",
+        "bullet1": "Annuity calculation",
+        "bullet2": "Interest vs. principal over time",
+        "bullet3": "Pay off vs. invest",
+        "cta": "Open mortgage",
+        "altDesktop": "Mortgage — desktop",
+        "altMobile": "Mortgage — mobile"
+      }
+    }
   },
   "inflation": {
     "loadButton": "Load avg. Czech inflation for the last {{years}} years",

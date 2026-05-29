@@ -3,13 +3,25 @@
     "calculator": "Kalkulačka",
     "methodology": "Metodika",
     "toggleTheme": "Přepnout téma",
-    "toggleLanguage": "Změnit jazyk"
+    "toggleLanguage": "Změnit jazyk",
+    "openWelcome": "Co umí Investio"
   },
   "nav": {
+    "investice": "Investice",
+    "renta": "Renta",
+    "hypoteka": "Hypotéka",
     "basic": "Základní",
     "advanced": "Rozšířená",
-    "renta": "Renta",
     "privacy": "Zásady ochrany osobních údajů"
+  },
+  "modes": {
+    "basic": "Základní",
+    "advanced": "Rozšířená",
+    "ariaLabel": "Režim kalkulačky"
+  },
+  "common": {
+    "reset": "Reset",
+    "resetTooltip": "Obnovit výchozí hodnoty"
   },
   "form": {
     "title": "Parametry investice",
@@ -33,8 +45,9 @@
   "results": {
     "nominalLabel": "Budoucí hodnota (nominální)",
     "profitSuffix": "zisk",
+    "profitDetail": "{{profit}} zisk · vloženo {{contributed}}",
     "realLabel": "Reálná kupní síla",
-    "realDescription": "V dnešních cenách při {{pct}}% inflaci",
+    "realDescription": "V dnešních cenách při {{pct}} % inflaci",
     "inflationAdjustedBadge": "Očištěno o inflaci",
     "passiveIncomeTitle": "Pasivní příjem z investic",
     "passiveIncomeDescription": "Při ročním výběru {{pct}} % z portfolia po {{years}} letech",
@@ -66,7 +79,17 @@
   "footer": {
     "copyright": "© {{year}} Investio",
     "methodology": "Výpočet používá složené úročení s měsíční kapitalizací: měsíční sazba rm = (1+r)^(1/12) − 1, zůstatek B(n+1) = Bn · (1+rm) + vklad. Reálná hodnota = nominální / (1+inflace)^let. Vklad je připisován na konci měsíce. Pasivní příjem = portfolio × roční výběr %. Kalkulačka neslouží jako investiční doporučení.",
-    "methodologyShort": "© {{year}} Investio — Složené úročení s měsíční kapitalizací: rm = (1+r)^(1/12)−1, zůstatek B(n+1) = Bn·(1+rm) + vklad. Reálná hodnota = nominální / (1+inflace)^let. Kalkulačka neslouží jako investiční doporučení."
+    "methodologyShort": "© {{year}} Investio — Složené úročení s měsíční kapitalizací: rm = (1+r)^(1/12)−1, zůstatek B(n+1) = Bn·(1+rm) + vklad. Kalkulačka neslouží jako investiční doporučení.",
+    "reportBug": "Nahlásit chybu / nápad na funkci"
+  },
+  "feedback": {
+    "subject": "Investio — zpětná vazba / chyba / nápad",
+    "bodyIntro": "Ahoj,",
+    "bodyChoices": "[ ] Chyba   [ ] Nápad na funkci   [ ] Něco jiného",
+    "bodyDescription": "Popis:",
+    "bodyWhere": "Kde se to stalo (URL / tab):",
+    "bodyDevice": "Zařízení / prohlížeč:",
+    "bodyThanks": "Díky!"
   },
   "errors": {
     "notFoundTitle": "Stránka nenalezena",
@@ -76,6 +99,14 @@
     "loadFailedDescription": "Něco se na naší straně pokazilo. Zkuste obnovit stránku, nebo se vraťte na úvod.",
     "tryAgain": "Zkusit znovu",
     "goHome": "Zpět na úvod"
+  },
+  "investice": {
+    "metaTitle": "Investio — Investiční kalkulačka složeného úročení",
+    "metaDescription": "Spočítej budoucí hodnotu investic se složeným úročením, inflací, indexací vkladů a pasivní rentou.",
+    "metaOgTitle": "Investio — Investice",
+    "metaOgDescription": "Základní i rozšířený režim: počáteční vklad, měsíční vklad, úrok, doba, inflace a renta.",
+    "title": "Investiční kalkulačka",
+    "subtitle": "Složené úročení s měsíční kapitalizací"
   },
   "basic": {
     "metaTitle": "Investio — Základní kalkulačka složeného úročení",
@@ -119,6 +150,112 @@
     "step2": "Potřebné reálné portfolio = roční renta ÷ míra výběru ({{withdrawal}} %) = {{value}}",
     "step3": "Přepočet na nominální hodnotu za {{years}} let při {{inflation}} % inflaci = {{value}}",
     "step4": "Z budoucí hodnoty se zpětně dopočítá měsíční vklad při ročním úroku {{rate}} %."
+  },
+  "hypoteka": {
+    "metaTitle": "Investio — Kalkulačka hypotéky a mimořádných splátek",
+    "metaDescription": "Spočítej splátku hypotéky, podíl úroků a jistiny a porovnej mimořádné splátky vs. investování.",
+    "metaOgTitle": "Investio — Hypotéka",
+    "metaOgDescription": "Splátka, úroky vs. jistina v čase a srovnání mimořádných splátek s investováním.",
+    "title": "Kalkulačka hypotéky",
+    "subtitle": "Anuitní splátka, úroky vs. jistina",
+    "loanAmount": "Výše úvěru",
+    "duration": "Doba splácení",
+    "extraTitle": "Mimořádná splátka vs. investice",
+    "extraDescription": "Volné peníze měsíčně — doplatit hypotéku, nebo místo toho investovat?",
+    "extraMonthly": "Mimořádná splátka měsíčně",
+    "extraMonthlyTooltip": "Částka, kterou buď měsíčně doplatíš navíc k hypotéce, nebo místo toho investuješ.",
+    "investRate": "Očekávaný roční úrok investic",
+    "monthlyPayment": "Měsíční splátka",
+    "monthlyPaymentExtra": "+ {{extra}} mimořádně = {{total}}",
+    "totalInterest": "Celkem zaplaceno na úrocích",
+    "totalInterestNote": "Bez mimořádných splátek",
+    "totalPaid": "Celkem zaplaceno",
+    "totalPaidNote": "Jistina + úroky za {{years}} let",
+    "chartTitleStandard": "Vývoj zůstatku a úroků",
+    "chartTitleCompare": "Hypotéka vs. investice",
+    "chartDescStandard": "Standardní splácení bez mimořádných splátek",
+    "chartDescCompare": "Zůstatek s mimořádnými splátkami a hodnota investice místo nich",
+    "legendBalanceStandard": "Zůstatek jistiny",
+    "legendBalanceWithExtra": "Zůstatek (s extra)",
+    "legendBalanceStandardCompare": "Zůstatek (standard)",
+    "legendInvested": "Hodnota investice",
+    "legendCumulativeInterest": "Kumul. úroky",
+    "legendCrossover": "Protnutí v {{years}}r",
+    "compareBadge": "Srovnání strategií",
+    "compareTitle": "Mimořádné splátky vs. investování",
+    "compareSubtitle": "Co se vyplatí víc s {{extra}} měsíčně navíc?",
+    "strategyA": "A) Doplácet hypotéku → pak investovat",
+    "strategyADesc": "Hypotéka bude splacena za <strong>{{payoff}}</strong>. Ušetříš <strong>{{saved}}</strong> na úrocích.",
+    "strategyB": "B) Investovat celou dobu",
+    "strategyBDesc": "Splácíš standardně {{years}} let a celou dobu investuješ {{extra}} měsíčně při {{rate}} % p.a.",
+    "strategyC": "C) Splatit při protnutí",
+    "strategyCDesc": "Pokud místo extra splátek investuješ, za <strong>{{when}}</strong> bude hodnota investice ≥ zůstatek hypotéky — můžeš ji jednorázově splatit.",
+    "strategyCNone": "S aktuálními parametry investice za dobu hypotéky zůstatek nedohoní.",
+    "winnerMortgage": "<strong>Vyplatí se doplatit hypotéku</strong> — strategie A je o <strong>{{diff}}</strong> lepší než investování vedle úvěru.",
+    "winnerInvest": "<strong>Vyplatí se investovat</strong> — strategie B je o <strong>{{diff}}</strong> lepší než mimořádné splátky.",
+    "compareNote": "Srovnání je k datu konce původní doby splácení ({{years}} let). Nezohledňuje daňové odpočty úroků, riziko investic ani jistotu úspory na úrocích.",
+    "tableTitle": "Rozpis po letech",
+    "tableSubtitle": "Kolik z roční splátky tvoří úrok vs. jistina",
+    "tableYear": "Rok",
+    "tableInterest": "Úroky",
+    "tablePrincipal": "Jistina",
+    "tableBalance": "Zůstatek",
+    "yearRow": "{{n}}. rok",
+    "yearLong": "{{n}} {{unit}}",
+    "yearUnit_one": "rok",
+    "yearUnit_few": "roky",
+    "yearUnit_other": "let",
+    "monthsShort": "{{n}} měs."
+  },
+  "welcome": {
+    "kicker": "Vítej v Investiu",
+    "title": "Plánuj své finance",
+    "titleHighlight": "se skutečnými čísly.",
+    "close": "Zavřít",
+    "prev": "Předchozí",
+    "next": "Další",
+    "slideAria": "Slide {{n}}",
+    "dontShow": "Příště nezobrazovat",
+    "start": "Začít počítat",
+    "drawerTitle": "Vítej v Investiu",
+    "slides": {
+      "investice": {
+        "kicker": "Investice",
+        "title": "Složené úročení",
+        "highlight": "základní i rozšířené",
+        "description": "Jeden přepínač — od jednoduchého výpočtu po inflaci, indexaci vkladů a pasivní rentu.",
+        "bullet1": "Základní / Rozšířený režim",
+        "bullet2": "Inflace a indexace vkladů",
+        "bullet3": "Měsíční renta z portfolia",
+        "cta": "Otevřít investice",
+        "altDesktop": "Investice — desktop",
+        "altMobile": "Investice — mobil"
+      },
+      "renta": {
+        "kicker": "Renta",
+        "title": "Kolik investovat",
+        "highlight": "pro vysněnou rentu",
+        "description": "Zadej cíl v dnešních cenách a kalkulačka dopočítá potřebný měsíční vklad pro jeho dosažení.",
+        "bullet1": "Cíl v dnešní hodnotě",
+        "bullet2": "Bezpečná míra výběru",
+        "bullet3": "Krok za krokem výpočet",
+        "cta": "Otevřít rentu",
+        "altDesktop": "Renta — desktop",
+        "altMobile": "Renta — mobil"
+      },
+      "hypoteka": {
+        "kicker": "Hypotéka",
+        "title": "Splátka, úroky",
+        "highlight": "a mimořádné splátky",
+        "description": "Anuitní splátka, vývoj jistiny a porovnání: splatit dřív vs. investovat ten samý rozdíl.",
+        "bullet1": "Anuitní výpočet",
+        "bullet2": "Úroky vs. jistina v čase",
+        "bullet3": "Splatit vs. investovat",
+        "cta": "Otevřít hypotéku",
+        "altDesktop": "Hypotéka — desktop",
+        "altMobile": "Hypotéka — mobil"
+      }
+    }
   },
   "inflation": {
     "loadButton": "Načíst průměrnou inflaci ČR za {{years}} let",
