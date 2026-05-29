@@ -16,6 +16,7 @@ import {
   type SupportedLocale,
 } from "@investio/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
   result: InvestmentResult;
@@ -28,6 +29,7 @@ export function ProjectionView({ result, years, showReal }: Props) {
   const locale: SupportedLocale = i18n.language?.startsWith("en") ? "en" : "cs";
   const fmt = (n: number) => formatCurrency(n, locale);
   const fmtNum = (n: number) => formatNumber(n, locale);
+  const isMobile = useIsMobile();
 
   const milestoneYears = [1, 5, 10, 15, 20, 25, 30, 40].filter((y) => y <= years);
   const milestones = milestoneYears
@@ -105,7 +107,6 @@ export function ProjectionView({ result, years, showReal }: Props) {
                 width={60}
               />
               <RTooltip
-                trigger="click"
                 contentStyle={{
                   background: "var(--color-card)",
                   border: "1px solid var(--color-border)",
@@ -116,6 +117,9 @@ export function ProjectionView({ result, years, showReal }: Props) {
                 labelStyle={{ color: "var(--color-muted-foreground)" }}
                 formatter={(value: number, name) => [fmt(value), name]}
                 labelFormatter={(l) => t("chart.tooltipYearLabel", { year: l })}
+                position={{ y: isMobile ? -128 : 0 }}
+                allowEscapeViewBox={{ y: true }}
+                wrapperStyle={{ zIndex: 20, pointerEvents: "none" }}
               />
               <Area
                 type="monotone"

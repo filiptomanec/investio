@@ -1,25 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-// Persists state in localStorage under a stable key. SSR-safe: starts with
-// `initial`, hydrates from storage on mount.
+// Persists state in localStorage under a stable key. The first client render
+// reads the persisted value synchronously via a lazy initializer, so the
+// initial paint already shows the user's last input — no flash where the
+// SSR-default value is briefly visible before an effect swaps it in.
+// SSR has no `window`, so the server falls back to `initial`.
 export function usePersistedState<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(initial);
-  const hydrated = useRef(false);
-
-  useEffect(() => {
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === "undefined") return initial;
     try {
-      const raw = localStorage.getItem(key);
-      if (raw !== null) setValue(JSON.parse(raw) as T);
+      const raw = window.localStorage.getItem(key);
+      if (raw !== null) return JSON.parse(raw) as T;
     } catch {
       // ignore
     }
-    hydrated.current = true;
-  }, [key]);
+    return initial;
+  });
 
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      window.localStorage.setItem(key, JSON.stringify(value));
     } catch {
       // ignore
     }
