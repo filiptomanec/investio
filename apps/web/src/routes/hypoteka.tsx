@@ -499,7 +499,7 @@ function MortgageCalculator() {
                   {t("hypoteka.compareBadge")}
                 </span>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">
+              <h3 className="text-lg font-semibold text-foreground mb-1 mt-2 md:mt-0">
                 {t("hypoteka.compareTitle")}
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
