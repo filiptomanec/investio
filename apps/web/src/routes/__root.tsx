@@ -11,6 +11,7 @@ import { I18nextProvider, useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { i18n } from "@investio/i18n";
 import { hideSplashScreen } from "@/lib/native";
+import { Analytics } from "@vercel/analytics/react";
 
 import "@/lib/sentry";
 
@@ -86,8 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Investio — Kalkulačka složeného úročení" },
       {
         property: "og:description",
-        content:
-          "Spočítejte budoucí hodnotu vašich investic, pasivní příjem a započtěte inflaci.",
+        content: "Spočítejte budoucí hodnotu vašich investic, pasivní příjem a započtěte inflaci.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -130,6 +130,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );
