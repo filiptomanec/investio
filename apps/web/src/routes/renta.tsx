@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Info, Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   fetchCzechInflation,
@@ -10,8 +10,8 @@ import {
 } from "@investio/shared";
 import { Layout } from "@/components/layout";
 import { NumField } from "@/components/num-field";
+import { PageHeader, Panel, PanelHeader } from "@/components/page-header";
 import { ResetButton } from "@/components/reset-button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 
 export const Route = createFileRoute("/renta")({
@@ -116,205 +116,198 @@ function RentaCalculator() {
     }
   }
 
+  // The chain from the income you want to the contribution it takes. Each
+  // step's value feeds the next, so the ladder is the calculation itself.
+  const ladder = [
+    {
+      label: t("renta.ladderAnnual"),
+      note: t("renta.ladderAnnualNote", { target: fmt(target) }),
+      value: fmt(target * 12),
+    },
+    {
+      label: t("renta.ladderReal"),
+      note: t("renta.ladderRealNote", { withdrawal: fmtPct(withdrawal) }),
+      value: fmt(result.requiredRealPortfolio),
+    },
+    {
+      label: t("renta.ladderNominal"),
+      note: t("renta.ladderNominalNote", { inflation: fmtPct(inflation) }),
+      value: fmt(result.requiredNominalPortfolio),
+    },
+    {
+      label: t("renta.ladderMonthly"),
+      note:
+        t("renta.ladderMonthlyNote", { rate: fmtPct(rate) }) +
+        (initial > 0 ? ` · ${t("renta.ladderInitialNote", { initial: fmt(initial) })}` : ""),
+      value: fmt(required),
+      answer: true,
+    },
+  ];
+
   return (
     <Layout>
-      <main className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <section className="lg:col-span-5 space-y-6">
-          <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
-            <div className="flex items-start justify-between gap-3 mb-1">
-              <h1 className="text-lg font-semibold text-foreground">{t("renta.title")}</h1>
-              <ResetButton onClick={reset} />
-            </div>
-            <p className="text-xs text-muted-foreground mb-6">{t("renta.subtitle")}</p>
+      <PageHeader
+        title={t("renta.title")}
+        subtitle={t("renta.subtitle")}
+        actions={<ResetButton onClick={reset} />}
+      />
 
-            <div className="space-y-5">
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("renta.targetMonthly")}
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label={t("renta.targetMonthlyInfo")}
-                        className="text-muted-foreground hover:text-brand"
-                      >
-                        <Info className="size-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent side="top">{t("renta.targetMonthlyTooltip")}</PopoverContent>
-                  </Popover>
-                </div>
-                <NumField
-                  value={target}
-                  onChange={setTarget}
-                  suffix={currencySuffix}
-                  step={1000}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <NumField
-                  label={t("form.annualRate")}
-                  value={rate}
-                  onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
-                  suffix={t("units.pct")}
-                  step={0.1}
-                />
-                <NumField
-                  label={t("renta.yearsToRetirement")}
-                  value={years}
-                  onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
-                  suffix={t("units.years")}
-                  step={1}
-                  min={1}
-                  max={60}
-                />
-              </div>
+      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+        <Panel className="lg:col-span-4 lg:sticky lg:top-6 p-5">
+          <div className="space-y-4">
+            <NumField
+              label={t("renta.targetMonthly")}
+              info={t("renta.targetMonthlyTooltip")}
+              infoLabel={t("renta.targetMonthlyInfo")}
+              value={target}
+              onChange={setTarget}
+              suffix={currencySuffix}
+              step={1000}
+            />
+            <div className="grid grid-cols-2 gap-3">
               <NumField
-                label={t("renta.initialOptional")}
-                value={initial}
-                onChange={setInitial}
-                suffix={currencySuffix}
-                step={10000}
+                label={t("form.annualRate")}
+                value={rate}
+                onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
+                suffix={t("units.pct")}
+                step={0.1}
               />
+              <NumField
+                label={t("renta.yearsToRetirement")}
+                value={years}
+                onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
+                suffix={t("units.years")}
+                step={1}
+                min={1}
+                max={60}
+              />
+            </div>
+            <NumField
+              label={t("renta.initialOptional")}
+              value={initial}
+              onChange={setInitial}
+              suffix={currencySuffix}
+              step={10000}
+            />
+          </div>
 
-              <div className="pt-4 border-t border-border space-y-4">
-                <NumField
-                  label={t("form.expectedInflation")}
-                  value={inflation}
-                  onChange={setInflation}
-                  suffix={t("units.pct")}
-                  step={0.1}
-                />
-                <button
-                  type="button"
-                  onClick={loadInflation}
-                  disabled={loading}
-                  className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors disabled:opacity-60"
+          <div className="mt-5 pt-4 border-t border-border space-y-3">
+            <NumField
+              label={t("form.expectedInflation")}
+              value={inflation}
+              onChange={setInflation}
+              suffix={t("units.pct")}
+              step={0.1}
+            />
+            <button
+              type="button"
+              onClick={loadInflation}
+              disabled={loading}
+              className="w-full h-9 inline-flex items-center justify-center gap-2 text-sm font-medium px-3 rounded-md border border-input bg-card hover:bg-muted text-foreground transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5 text-muted-foreground" />
+              )}
+              {t("inflation.loadButton", { years })}
+            </button>
+            {meta && !error && (
+              <p className="text-xs text-muted-foreground">
+                {t("inflation.source", { from: meta.from, to: meta.to, n: meta.n })}
+              </p>
+            )}
+            {error && <p className="text-xs text-destructive">{error}</p>}
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-border">
+            <NumField
+              label={t("renta.withdrawalRateLabel")}
+              info={t("renta.withdrawalRateTooltip")}
+              value={withdrawal}
+              onChange={(v) => setWithdrawal(Math.max(0.5, Math.min(20, v)))}
+              suffix={t("units.pctPerYear")}
+              step={0.1}
+            />
+          </div>
+        </Panel>
+
+        <section className="lg:col-span-8 space-y-4 lg:space-y-6">
+          <Panel>
+            <div className="p-5 md:p-6">
+              <p className="text-[13px] font-medium text-muted-foreground">
+                {t("renta.requiredMonthlyLabel")}
+              </p>
+              <p
+                className={`mt-1 text-[34px] md:text-[36px] leading-none font-semibold tracking-[-0.02em] tabular-nums ${
+                  unreachable ? "text-muted-foreground" : "text-foreground"
+                }`}
+              >
+                {unreachable ? fmt(0) : fmt(required)}
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground max-w-xl">
+                {unreachable
+                  ? t("renta.unreachable")
+                  : t("renta.afterYears", { years, target: fmt(target) })}
+              </p>
+            </div>
+            {!unreachable && (
+              <dl className="border-t border-border px-5 md:px-6 py-4">
+                <dt className="text-[13px] font-medium text-muted-foreground">
+                  {t("renta.nominalMonthlyLabel")}
+                </dt>
+                <dd className="mt-1 text-[22px] leading-tight font-semibold text-foreground tabular-nums">
+                  {fmt(nominalMonthly)}
+                </dd>
+                <dd className="mt-1 text-xs text-muted-foreground">
+                  {t("renta.nominalMonthlyDesc", { years, inflation: fmtPct(inflation) })}
+                </dd>
+              </dl>
+            )}
+          </Panel>
+
+          <Panel className="p-5 md:p-6">
+            <PanelHeader title={t("renta.howItWorks")} />
+            <ol className="mt-4">
+              {ladder.map((step, i) => (
+                <li
+                  key={step.label}
+                  className="relative grid grid-cols-[20px_1fr_auto] gap-x-3 items-start py-3 first:pt-1 last:pb-0"
                 >
-                  {loading ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    <RefreshCw className="size-3.5" />
+                  {/* The rail: each step is one dot on a line, the answer in mint. */}
+                  <span
+                    aria-hidden="true"
+                    className={`relative z-10 mt-1.5 size-2.5 rounded-full justify-self-center ${
+                      step.answer ? "bg-brand" : "bg-card ring-2 ring-foreground/70"
+                    }`}
+                  />
+                  {i < ladder.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-[9px] top-[22px] -bottom-[10px] w-0.5 bg-border"
+                    />
                   )}
-                  {t("inflation.loadButton", { years })}
-                </button>
-                {meta && !error && (
-                  <p className="text-[11px] text-muted-foreground">
-                    {t("inflation.source", { from: meta.from, to: meta.to, n: meta.n })}
+                  <div className="min-w-0">
+                    <p
+                      className={`text-sm ${step.answer ? "font-semibold text-foreground" : "text-foreground"}`}
+                    >
+                      {step.label}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{step.note}</p>
+                  </div>
+                  <p
+                    className={`text-right tabular-nums whitespace-nowrap ${
+                      step.answer
+                        ? "text-lg font-semibold text-foreground"
+                        : "text-[15px] text-foreground"
+                    }`}
+                  >
+                    {step.value}
                   </p>
-                )}
-                {error && <p className="text-[11px] text-destructive">{error}</p>}
-              </div>
-
-              <div className="pt-4 border-t border-border">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("renta.withdrawalRateLabel")}
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-brand">
-                        <Info className="size-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent side="top">{t("renta.withdrawalRateTooltip")}</PopoverContent>
-                  </Popover>
-                </div>
-                <NumField
-                  value={withdrawal}
-                  onChange={(v) => setWithdrawal(Math.max(0.5, Math.min(20, v)))}
-                  suffix={t("units.pctPerYear")}
-                  step={0.1}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="lg:col-span-7 space-y-6">
-          <div className="bg-card p-6 rounded-2xl border border-brand/30 relative overflow-hidden">
-            <div className="absolute top-3 right-3">
-              <span className="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/30">
-                {t("renta.resultBadge")}
-              </span>
-            </div>
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              {t("renta.requiredMonthlyLabel")}
-            </p>
-            <p className="text-4xl md:text-5xl font-bold text-foreground font-mono break-words">
-              {unreachable ? "—" : fmt(required)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-3">
-              {unreachable
-                ? t("renta.unreachable")
-                : t("renta.afterYears", { years, target: fmt(target) })}
-            </p>
-          </div>
-
-          {!unreachable && (
-            <div className="bg-card p-6 rounded-2xl border border-brand/30">
-              <p className="text-[11px] font-medium text-brand uppercase tracking-wider mb-1">
-                {t("renta.nominalMonthlyLabel")}
-              </p>
-              <p className="text-3xl font-bold text-foreground font-mono break-words">
-                {fmt(nominalMonthly)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.nominalMonthlyDesc", { years, inflation: fmtPct(inflation) })}
-              </p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("renta.portfolioNominal")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(result.requiredNominalPortfolio)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.portfolioNominalDesc", { years })}
-              </p>
-            </div>
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("renta.portfolioReal")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(result.requiredRealPortfolio)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.portfolioRealDesc", {
-                  target: fmt(target),
-                  withdrawal: fmtPct(withdrawal),
-                })}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-card p-6 rounded-2xl border border-border text-sm text-muted-foreground leading-relaxed">
-            <h3 className="text-sm font-semibold text-foreground mb-2">{t("renta.howItWorks")}</h3>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>{t("renta.step1", { value: fmt(target * 12) })}</li>
-              <li>
-                {t("renta.step2", {
-                  withdrawal: fmtPct(withdrawal),
-                  value: fmt(result.requiredRealPortfolio),
-                })}
-              </li>
-              <li>
-                {t("renta.step3", {
-                  years,
-                  inflation: fmtPct(inflation),
-                  value: fmt(result.requiredNominalPortfolio),
-                })}
-              </li>
-              <li>{t("renta.step4", { rate: fmtPct(rate) })}</li>
+                </li>
+              ))}
             </ol>
-          </div>
+          </Panel>
         </section>
       </main>
     </Layout>

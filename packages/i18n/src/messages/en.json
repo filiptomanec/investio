@@ -55,7 +55,14 @@
     "rule4PctTooltip": "For a near-perpetual pension (the portfolio is never depleted) the recommended ceiling is roughly 4 % per year.",
     "monthlyNominal": "Monthly (nominal)",
     "monthlyReal": "Monthly (in today's prices)",
-    "annuallySuffix": "annually"
+    "annuallySuffix": "annually",
+    "finding_one": "You pay in {{contributed}}; in {{count}} year it grows to {{final}}.",
+    "finding_other": "You pay in {{contributed}}; in {{count}} years it grows to {{final}}.",
+    "growth": "Interest earned",
+    "shareOfFinal": "{{pct}} % of the total",
+    "rentMonthly": "Monthly income",
+    "rentMonthlyReal": "Income in today's money",
+    "rentNote": "{{pct}} % withdrawn a year · {{annual}} a year"
   },
   "chart": {
     "title": "Portfolio growth projection",
@@ -149,7 +156,16 @@
     "step1": "Target annual pension in today's prices: {{value}}",
     "step2": "Required real portfolio = annual pension ÷ withdrawal rate ({{withdrawal}} %) = {{value}}",
     "step3": "Translated to nominal value in {{years}} years at {{inflation}} % inflation = {{value}}",
-    "step4": "From the future value we back-solve the monthly contribution at {{rate}} % annual return."
+    "step4": "From the future value we back-solve the monthly contribution at {{rate}} % annual return.",
+    "ladderAnnual": "Annual income in today's money",
+    "ladderAnnualNote": "{{target}} × 12",
+    "ladderReal": "Portfolio in today's money",
+    "ladderRealNote": "Annual income ÷ {{withdrawal}} % withdrawal",
+    "ladderNominal": "Portfolio on retirement day",
+    "ladderNominalNote": "Converted at {{inflation}} % inflation",
+    "ladderMonthly": "Monthly contribution",
+    "ladderMonthlyNote": "At {{rate}} % a year",
+    "ladderInitialNote": "starting with {{initial}}"
   },
   "hypoteka": {
     "metaTitle": "Investio — Mortgage calculator with extra payments",
@@ -205,7 +221,9 @@
     "yearUnit_one": "yr",
     "yearUnit_few": "yrs",
     "yearUnit_other": "yrs",
-    "monthsShort": "{{n}} mo."
+    "monthsShort": "{{n}} mo.",
+    "crossoverShort": "Investment catches the balance",
+    "winnerTag": "Comes out ahead"
   },
   "welcome": {
     "kicker": "Welcome to Investio",

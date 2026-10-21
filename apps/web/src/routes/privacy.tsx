@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Logo } from "@/components/logo";
 
 // STABLE URL: https://investio-web.vercel.app/privacy
 // Do NOT change this path — App Store Connect has this URL registered.
@@ -23,17 +24,10 @@ function PrivacyPage() {
     <div className="min-h-screen bg-background font-sans text-foreground">
       {/* Header — matches main app shell */}
       <header className="max-w-3xl mx-auto px-4 md:px-8 py-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="size-8 bg-brand rounded-lg flex items-center justify-center">
-            <div className="size-4 bg-background rounded-sm rotate-45" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">
-            INVEST<span className="text-brand">IO</span>
-          </span>
-        </Link>
+        <Logo />
         <Link
           to="/"
-          className="text-sm text-muted-foreground hover:text-brand transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back to calculator
         </Link>
@@ -46,7 +40,7 @@ function PrivacyPage() {
 
           <h1 className="text-3xl font-bold text-foreground mb-4">Privacy Policy for Investio</h1>
 
-          <div className="bg-brand/10 border border-brand/30 rounded-2xl px-6 py-4 mb-8">
+          <div className="bg-muted rounded-lg px-6 py-4 mb-8">
             <p className="text-foreground font-semibold">
               Summary: Investio collects no data from you. Nothing. Ever.
             </p>
@@ -64,12 +58,12 @@ function PrivacyPage() {
             <div>
               <h2 className="text-xl font-semibold mb-3">How the app works</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Investio is an offline compound-interest calculator. Every calculation runs
-                entirely on your device using the numbers you type in. Nothing is sent to any
-                server. There is no backend. There is no database with your inputs. When you close
-                the app, your inputs are gone (only your display preferences — theme and language
-                — are saved locally on your device via your phone&apos;s own storage, and only
-                while the app is installed).
+                Investio is an offline compound-interest calculator. Every calculation runs entirely
+                on your device using the numbers you type in. Nothing is sent to any server. There
+                is no backend. There is no database with your inputs. When you close the app, your
+                inputs are gone (only your display preferences — theme and language — are saved
+                locally on your device via your phone&apos;s own storage, and only while the app is
+                installed).
               </p>
             </div>
 
@@ -79,10 +73,10 @@ function PrivacyPage() {
                 Investio ships no analytics SDKs and no crash reporting tools.
               </p>
               <p className="text-muted-foreground leading-relaxed mt-2">
-                Verification: The mobile app uses no Sentry, no Firebase, no Amplitude, no
-                Mixpanel, no AppCenter, or any equivalent SDK. This was a deliberate decision
-                consistent with the app&apos;s privacy-first design. The web version of Investio
-                is a separate product and its privacy practices are described separately.
+                Verification: The mobile app uses no Sentry, no Firebase, no Amplitude, no Mixpanel,
+                no AppCenter, or any equivalent SDK. This was a deliberate decision consistent with
+                the app&apos;s privacy-first design. The web version of Investio is a separate
+                product and its privacy practices are described separately.
               </p>
             </div>
 
@@ -98,8 +92,8 @@ function PrivacyPage() {
               <h2 className="text-xl font-semibold mb-3">Third-party SDKs that phone home</h2>
               <p className="text-muted-foreground leading-relaxed">
                 None. The runtime dependencies (Expo, React Native, victory-native, NativeWind) are
-                open-source libraries that execute locally. None of them are configured to send
-                data anywhere.
+                open-source libraries that execute locally. None of them are configured to send data
+                anywhere.
               </p>
             </div>
 
@@ -143,7 +137,7 @@ function PrivacyPage() {
                   Email:{" "}
                   <a
                     href="mailto:tomanec.f@gmail.com"
-                    className="text-brand hover:underline"
+                    className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
                   >
                     tomanec.f@gmail.com
                   </a>
@@ -152,7 +146,7 @@ function PrivacyPage() {
                   GitHub:{" "}
                   <a
                     href="https://github.com/filiptomanec/investio"
-                    className="text-brand hover:underline"
+                    className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -175,7 +169,7 @@ function PrivacyPage() {
             Zásady ochrany osobních údajů — Investio
           </h1>
 
-          <div className="bg-brand/10 border border-brand/30 rounded-2xl px-6 py-4 mb-8">
+          <div className="bg-muted rounded-lg px-6 py-4 mb-8">
             <p className="text-foreground font-semibold">
               Shrnutí: Investio neshromažďuje žádná tvoje data. Vůbec žádná. Nikdy.
             </p>
@@ -193,8 +187,8 @@ function PrivacyPage() {
             <div>
               <h2 className="text-xl font-semibold mb-3">Jak aplikace funguje</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Investio je offline kalkulačka složeného úročení. Každý výpočet probíhá výhradně
-                na tvém zařízení s čísly, která zadáš. Nic se neposílá na žádný server. Neexistuje
+                Investio je offline kalkulačka složeného úročení. Každý výpočet probíhá výhradně na
+                tvém zařízení s čísly, která zadáš. Nic se neposílá na žádný server. Neexistuje
                 žádný backend. Neexistuje žádná databáze tvých vstupů. Když aplikaci zavřeš, tvoje
                 zadané hodnoty zmizí. Jediné, co si aplikace lokálně pamatuje, jsou tvoje předvolby
                 zobrazení (téma a jazyk) — a jen tehdy, pokud je máš nainstalovanou.
@@ -207,10 +201,10 @@ function PrivacyPage() {
                 Investio neobsahuje žádné analytické SDK ani nástroje pro hlášení chyb.
               </p>
               <p className="text-muted-foreground leading-relaxed mt-2">
-                Ověření: Mobilní aplikace nepoužívá Sentry, Firebase, Amplitude, Mixpanel,
-                AppCenter ani žádný ekvivalentní nástroj. Toto bylo záměrné rozhodnutí v souladu
-                s přístupem aplikace, který staví soukromí na první místo. Webová verze Investio
-                je samostatný produkt s vlastními zásadami ochrany osobních údajů.
+                Ověření: Mobilní aplikace nepoužívá Sentry, Firebase, Amplitude, Mixpanel, AppCenter
+                ani žádný ekvivalentní nástroj. Toto bylo záměrné rozhodnutí v souladu s přístupem
+                aplikace, který staví soukromí na první místo. Webová verze Investio je samostatný
+                produkt s vlastními zásadami ochrany osobních údajů.
               </p>
             </div>
 
@@ -223,29 +217,31 @@ function PrivacyPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold mb-3">SDK třetích stran, které odesílají data</h2>
+              <h2 className="text-xl font-semibold mb-3">
+                SDK třetích stran, které odesílají data
+              </h2>
               <p className="text-muted-foreground leading-relaxed">
                 Žádné. Závislosti za běhu (Expo, React Native, victory-native, NativeWind) jsou
-                open-source knihovny, které se spouštějí lokálně. Žádná z nich není konfigurována
-                k odesílání dat kamkoli.
+                open-source knihovny, které se spouštějí lokálně. Žádná z nich není konfigurována k
+                odesílání dat kamkoli.
               </p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-3">Požadovaná oprávnění</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Žádná. Investio nepožaduje žádná oprávnění zařízení: žádnou kameru, žádný
-                mikrofon, žádnou polohu, žádné kontakty, žádná oznámení, žádná zdravotní data,
-                žádný Bluetooth, žádné sledování.
+                Žádná. Investio nepožaduje žádná oprávnění zařízení: žádnou kameru, žádný mikrofon,
+                žádnou polohu, žádné kontakty, žádná oznámení, žádná zdravotní data, žádný
+                Bluetooth, žádné sledování.
               </p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-3">Ochrana soukromí dětí</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Investio záměrně neshromažďuje data od nikoho, včetně dětí mladších 13 let.
-                Protože aplikace vůbec žádná data neshromažďuje, je bezpečná pro všechny věkové
-                skupiny (věkové hodnocení: 4+).
+                Investio záměrně neshromažďuje data od nikoho, včetně dětí mladších 13 let. Protože
+                aplikace vůbec žádná data neshromažďuje, je bezpečná pro všechny věkové skupiny
+                (věkové hodnocení: 4+).
               </p>
             </div>
 
@@ -271,7 +267,7 @@ function PrivacyPage() {
                   E-mail:{" "}
                   <a
                     href="mailto:tomanec.f@gmail.com"
-                    className="text-brand hover:underline"
+                    className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
                   >
                     tomanec.f@gmail.com
                   </a>
@@ -280,7 +276,7 @@ function PrivacyPage() {
                   GitHub:{" "}
                   <a
                     href="https://github.com/filiptomanec/investio"
-                    className="text-brand hover:underline"
+                    className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

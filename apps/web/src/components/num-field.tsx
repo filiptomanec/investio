@@ -1,11 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  caretSig,
-  caretTarget,
-  reformatRaw,
-  type SupportedLocale,
-} from "@investio/shared";
+import { caretSig, caretTarget, reformatRaw, type SupportedLocale } from "@investio/shared";
+import { FieldLabel } from "@/components/info-tip";
 
 interface NumFieldProps {
   label?: string;
@@ -15,6 +11,8 @@ interface NumFieldProps {
   step?: number;
   min?: number;
   max?: number;
+  info?: React.ReactNode;
+  infoLabel?: string;
 }
 
 const intlLocaleTag: Record<SupportedLocale, string> = {
@@ -26,8 +24,19 @@ const intlLocaleTag: Record<SupportedLocale, string> = {
 // value using the active i18n locale's number grouping, and restores the
 // caret position after each keystroke so the user can keep typing through
 // reformats without losing their place.
-export function NumField({ label, value, onChange, suffix, step = 1, min, max }: NumFieldProps) {
+export function NumField({
+  label,
+  value,
+  onChange,
+  suffix,
+  step = 1,
+  min,
+  max,
+  info,
+  infoLabel,
+}: NumFieldProps) {
   const { i18n } = useTranslation();
+  const id = useId();
   const locale: SupportedLocale = i18n.language?.startsWith("en") ? "en" : "cs";
   const maxDecimals = step < 1 ? 2 : 0;
 
@@ -72,13 +81,14 @@ export function NumField({ label, value, onChange, suffix, step = 1, min, max }:
   return (
     <div>
       {label && (
-        <label className="block text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+        <FieldLabel htmlFor={id} info={info} infoLabel={infoLabel}>
           {label}
-        </label>
+        </FieldLabel>
       )}
       <div className="relative">
         <input
           ref={inputRef}
+          id={id}
           type="text"
           inputMode="decimal"
           value={text}
@@ -98,10 +108,10 @@ export function NumField({ label, value, onChange, suffix, step = 1, min, max }:
             setFocused(false);
             setText(formatPretty(value));
           }}
-          className="w-full bg-surface border border-border rounded-xl py-3 pl-4 pr-12 text-foreground font-mono focus:ring-2 focus:ring-brand/40 focus:border-brand outline-none transition-all"
+          className="w-full h-10 bg-card border border-input rounded-md pl-3 pr-14 text-[15px] text-foreground tabular-nums hover:border-muted-foreground/50 focus:border-foreground/60 focus:ring-2 focus:ring-ring outline-none transition-colors"
         />
         {suffix && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none">
             {suffix}
           </span>
         )}

@@ -55,7 +55,16 @@
     "rule4PctTooltip": "Pro téměř nekonečnou rentu (portfolio se nevyčerpá) se doporučuje vybírat maximálně 4 % ročně.",
     "monthlyNominal": "Měsíčně (nominálně)",
     "monthlyReal": "Měsíčně (v dnešních cenách)",
-    "annuallySuffix": "ročně"
+    "annuallySuffix": "ročně",
+    "finding_one": "Vložíš {{contributed}} a za {{count}} rok z toho bude {{final}}.",
+    "finding_few": "Vložíš {{contributed}} a za {{count}} roky z toho bude {{final}}.",
+    "finding_many": "Vložíš {{contributed}} a za {{count}} let z toho bude {{final}}.",
+    "finding_other": "Vložíš {{contributed}} a za {{count}} let z toho bude {{final}}.",
+    "growth": "Výnos z úroků",
+    "shareOfFinal": "{{pct}} % konečné částky",
+    "rentMonthly": "Renta měsíčně",
+    "rentMonthlyReal": "Renta v dnešních cenách",
+    "rentNote": "Výběr {{pct}} % ročně · {{annual}} za rok"
   },
   "chart": {
     "title": "Projekce růstu portfolia",
@@ -149,7 +158,16 @@
     "step1": "Cílová roční renta v dnešních cenách: {{value}}",
     "step2": "Potřebné reálné portfolio = roční renta ÷ míra výběru ({{withdrawal}} %) = {{value}}",
     "step3": "Přepočet na nominální hodnotu za {{years}} let při {{inflation}} % inflaci = {{value}}",
-    "step4": "Z budoucí hodnoty se zpětně dopočítá měsíční vklad při ročním úroku {{rate}} %."
+    "step4": "Z budoucí hodnoty se zpětně dopočítá měsíční vklad při ročním úroku {{rate}} %.",
+    "ladderAnnual": "Roční renta v dnešních cenách",
+    "ladderAnnualNote": "{{target}} × 12",
+    "ladderReal": "Portfolio v dnešních cenách",
+    "ladderRealNote": "Roční renta ÷ {{withdrawal}} % výběru",
+    "ladderNominal": "Portfolio v den odchodu",
+    "ladderNominalNote": "Přepočet při {{inflation}} % inflaci",
+    "ladderMonthly": "Měsíční vklad",
+    "ladderMonthlyNote": "Při ročním úroku {{rate}} %",
+    "ladderInitialNote": "počáteční vklad {{initial}}"
   },
   "hypoteka": {
     "metaTitle": "Investio — Kalkulačka hypotéky a mimořádných splátek",
@@ -205,7 +223,9 @@
     "yearUnit_one": "rok",
     "yearUnit_few": "roky",
     "yearUnit_other": "let",
-    "monthsShort": "{{n}} měs."
+    "monthsShort": "{{n}} měs.",
+    "crossoverShort": "Investice dorovná dluh",
+    "winnerTag": "Vychází lépe"
   },
   "welcome": {
     "kicker": "Vítej v Investiu",

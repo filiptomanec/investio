@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import {
-  Calculator,
-  TrendingUp,
-  Home as HomeIcon,
-  Sparkles,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  type LucideIcon,
-} from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -33,37 +24,29 @@ const STORAGE_KEY = "investio-welcome-hidden";
 
 type SlideDef = {
   key: "investice" | "renta" | "hypoteka";
-  icon: LucideIcon;
   to: "/" | "/renta" | "/hypoteka";
   desktop: string;
   mobile: string;
-  gradient: string;
 };
 
 const slidesDef: SlideDef[] = [
   {
     key: "investice",
-    icon: Calculator,
     to: "/",
     desktop: basicDesktop,
     mobile: basicMobile,
-    gradient: "from-emerald-500/40 via-teal-500/20 to-transparent",
   },
   {
     key: "renta",
-    icon: TrendingUp,
     to: "/renta",
     desktop: rentaDesktop,
     mobile: rentaMobile,
-    gradient: "from-violet-500/40 via-fuchsia-500/20 to-transparent",
   },
   {
     key: "hypoteka",
-    icon: HomeIcon,
     to: "/hypoteka",
     desktop: hypotekaDesktop,
     mobile: hypotekaMobile,
-    gradient: "from-amber-500/40 via-orange-500/20 to-transparent",
   },
 ];
 
@@ -134,12 +117,12 @@ export function WelcomeOverlay({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/85 backdrop-blur-md animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="welcome-title"
     >
-      <div className="relative w-full max-w-6xl max-h-[95vh] h-[760px] overflow-hidden bg-card border border-border rounded-3xl shadow-2xl flex flex-col">
+      <div className="relative w-full max-w-6xl max-h-[95vh] h-[760px] overflow-hidden bg-card border border-border rounded-xl shadow-2xl flex flex-col">
         {body}
       </div>
     </div>
@@ -170,21 +153,17 @@ function Shell({
         type="button"
         onClick={onClose}
         aria-label={t("welcome.close")}
-        className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 size-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 size-9 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
       >
         <X className="size-4" />
       </button>
 
-      <div className="px-4 sm:px-10 pt-4 sm:pt-8 pb-2 sm:pb-4 flex-shrink-0">
-        <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-brand bg-brand/10 border border-brand/30 rounded-full px-2 py-0.5 sm:py-1 mb-1.5 sm:mb-3">
-          <Sparkles className="size-3" />
-          {t("welcome.kicker")}
-        </div>
+      <div className="px-4 sm:px-10 pt-4 sm:pt-8 pb-3 sm:pb-6 pr-12 flex-shrink-0">
         <h2
           id="welcome-title"
-          className="text-lg sm:text-3xl font-bold tracking-tight text-foreground leading-tight"
+          className="text-xl sm:text-[28px] font-semibold tracking-[-0.02em] text-foreground leading-tight"
         >
-          {t("welcome.title")} <span className="text-brand">{t("welcome.titleHighlight")}</span>
+          {t("welcome.title")} {t("welcome.titleHighlight")}
         </h2>
       </div>
 
@@ -203,7 +182,12 @@ function Shell({
                   isMobile ? "basis-full" : "basis-[80%] md:basis-[78%]",
                 )}
               >
-                <SlideCard slide={slide} onCta={onClose} isMobile={isMobile} />
+                <SlideCard
+                  slide={slide}
+                  onCta={onClose}
+                  isMobile={isMobile}
+                  active={slidesDef[current]?.key === slide.key}
+                />
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -215,7 +199,7 @@ function Shell({
           type="button"
           onClick={() => api?.scrollPrev()}
           aria-label={t("welcome.prev")}
-          className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors flex-shrink-0"
+          className="size-9 inline-flex items-center justify-center rounded-md border border-input bg-card hover:bg-muted text-foreground transition-colors flex-shrink-0"
         >
           <ChevronLeft className="size-4" />
         </button>
@@ -228,10 +212,10 @@ function Shell({
               onClick={() => api?.scrollTo(i)}
               aria-label={t("welcome.slideAria", { n: i + 1 })}
               className={cn(
-                "h-1.5 rounded-full transition-all",
+                "h-1.5 rounded-full transition-[width,background-color]",
                 i === current
-                  ? "w-6 sm:w-8 bg-brand"
-                  : "w-1.5 bg-border hover:bg-muted-foreground/40",
+                  ? "w-6 sm:w-8 bg-foreground"
+                  : "w-1.5 bg-input hover:bg-muted-foreground/60",
               )}
             />
           ))}
@@ -241,26 +225,26 @@ function Shell({
           type="button"
           onClick={() => api?.scrollNext()}
           aria-label={t("welcome.next")}
-          className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors flex-shrink-0"
+          className="size-9 inline-flex items-center justify-center rounded-md border border-input bg-card hover:bg-muted text-foreground transition-colors flex-shrink-0"
         >
           <ChevronRight className="size-4" />
         </button>
       </div>
 
       <div className="px-3 sm:px-10 py-3 sm:py-4 border-t border-border flex items-center justify-between gap-3 flex-shrink-0">
-        <label className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground cursor-pointer select-none">
+        <label className="flex items-center gap-2 text-[13px] text-muted-foreground cursor-pointer select-none">
           <input
             type="checkbox"
             checked={dontShow}
             onChange={(e) => setDontShow(e.target.checked)}
-            className="size-4 rounded border-border accent-brand"
+            className="size-4 rounded border-input accent-foreground"
           />
           {t("welcome.dontShow")}
         </label>
         <button
           type="button"
           onClick={onClose}
-          className="text-xs font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-brand text-primary-foreground hover:bg-brand-dark transition-colors whitespace-nowrap"
+          className="h-10 text-sm font-medium px-4 sm:px-5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors whitespace-nowrap"
         >
           {t("welcome.start")}
         </button>
@@ -273,47 +257,38 @@ function SlideCard({
   slide,
   onCta,
   isMobile,
+  active,
 }: {
   slide: SlideDef;
   onCta: () => void;
   isMobile: boolean;
+  active: boolean;
 }) {
   const { t } = useTranslation();
-  const Icon = slide.icon;
   const base = `welcome.slides.${slide.key}`;
   const bullets = [t(`${base}.bullet1`), t(`${base}.bullet2`), t(`${base}.bullet3`)];
 
   return (
-    <div className="relative h-full rounded-2xl border border-border bg-surface overflow-hidden">
+    <div className="relative h-full rounded-lg bg-muted overflow-hidden">
       <div
         className={cn(
-          "absolute inset-0 bg-gradient-to-br pointer-events-none opacity-90",
-          slide.gradient,
-        )}
-      />
-      <div className="absolute -top-24 -right-24 size-72 rounded-full bg-brand/15 blur-3xl pointer-events-none" />
-
-      <div
-        className={cn(
-          "relative h-full grid gap-4 sm:gap-6 md:gap-8 p-4 sm:p-6 md:p-8",
+          "relative h-full grid gap-4 sm:gap-6 md:gap-8 p-4 sm:p-6 md:p-8 transition-opacity duration-300",
           isMobile ? "grid-rows-[auto_1fr]" : "grid-cols-2",
+          // Neighbouring slides peek in as plain tiles; only the current one shows its content.
+          !active && !isMobile && "opacity-0",
         )}
       >
         <div className="flex flex-col justify-center min-w-0">
-          <div className="inline-flex w-fit items-center gap-1.5 text-[10px] uppercase tracking-wider text-brand bg-brand/10 border border-brand/30 rounded-full px-2 py-0.5 mb-2 sm:mb-3">
-            <Icon className="size-3" />
-            {t(`${base}.kicker`)}
-          </div>
-          <h3 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
-            {t(`${base}.title`)} <span className="text-brand">{t(`${base}.highlight`)}</span>
+          <h3 className="text-xl sm:text-2xl lg:text-[32px] font-semibold tracking-[-0.02em] text-foreground leading-tight">
+            {t(`${base}.title`)} {t(`${base}.highlight`)}
           </h3>
           <p className="mt-2 sm:mt-3 text-sm md:text-base text-muted-foreground leading-relaxed max-w-md">
             {t(`${base}.description`)}
           </p>
           <ul className="mt-3 sm:mt-4 space-y-1.5">
             {bullets.map((b) => (
-              <li key={b} className="flex items-center gap-2 text-xs sm:text-sm text-foreground/85">
-                <span className="size-1.5 rounded-full bg-brand flex-shrink-0" />
+              <li key={b} className="flex items-center gap-2 text-sm text-foreground">
+                <span className="size-1.5 rounded-full bg-foreground flex-shrink-0" />
                 {b}
               </li>
             ))}
@@ -322,7 +297,7 @@ function SlideCard({
             <Link
               to={slide.to}
               onClick={onCta}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-4 py-2 sm:py-2.5 rounded-xl bg-brand text-primary-foreground hover:bg-brand-dark transition-colors w-fit"
+              className="inline-flex h-10 items-center gap-1.5 text-sm font-medium px-4 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors w-fit"
             >
               {t(`${base}.cta`)}
               <ChevronRight className="size-3.5" />
@@ -331,38 +306,27 @@ function SlideCard({
         </div>
 
         {isMobile ? (
-          <div className="relative min-h-0 flex items-center justify-center [perspective:1200px]">
+          <div className="relative min-h-0 flex items-center justify-center">
             <DeviceMockup
               variant="mobile"
               src={slide.mobile}
               alt={t(`${base}.altMobile`)}
               className="h-full max-h-full w-auto aspect-[9/19] max-w-[60%] [&_img]:h-full [&_img]:w-auto [&_img]:object-contain [&>div:last-child]:h-full [&>div:last-child]:flex [&>div:last-child]:items-center [&>div:last-child]:justify-center"
-              style={{
-                transform: "rotateY(-8deg) rotateX(4deg) rotateZ(2deg)",
-              }}
             />
           </div>
         ) : (
-          <div className="relative [perspective:1400px]">
+          <div className="relative">
             <DeviceMockup
               variant="desktop"
               src={slide.desktop}
               alt={t(`${base}.altDesktop`)}
-              className="absolute top-2 left-0 w-[78%]"
-              style={{
-                transform: "rotateY(-14deg) rotateX(6deg) rotateZ(-1deg)",
-                transformOrigin: "center center",
-              }}
+              className="absolute top-6 left-0 w-[86%]"
             />
             <DeviceMockup
               variant="mobile"
               src={slide.mobile}
               alt={t(`${base}.altMobile`)}
-              className="absolute bottom-0 right-2 w-[34%]"
-              style={{
-                transform: "rotateY(-10deg) rotateX(4deg) rotateZ(3deg)",
-                transformOrigin: "center center",
-              }}
+              className="absolute bottom-0 right-0 w-[30%]"
             />
           </div>
         )}

@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip as RTooltip,
@@ -16,15 +15,23 @@ import {
   calculateMortgage,
   compareMortgageStrategies,
   formatCurrency,
-  formatNumber,
   type SupportedLocale,
 } from "@investio/shared";
 import { Layout } from "@/components/layout";
+import { ModeToggle, type Mode } from "@/components/mode-toggle";
 import { NumField } from "@/components/num-field";
+import { LegendItem, PageHeader, Panel, PanelHeader } from "@/components/page-header";
 import { ResetButton } from "@/components/reset-button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  axisProps,
+  compactFormatter,
+  gridProps,
+  tooltipContentStyle,
+  tooltipLabelStyle,
+  yearTicks,
+} from "@/lib/chart";
 
 export const Route = createFileRoute("/hypoteka")({
   head: () => ({
@@ -45,8 +52,6 @@ export const Route = createFileRoute("/hypoteka")({
   component: MortgageCalculator,
 });
 
-type Mode = "basic" | "advanced";
-
 const DEFAULTS = {
   principal: 4_500_000,
   rate: 5.2,
@@ -59,7 +64,7 @@ function MortgageCalculator() {
   const { t, i18n } = useTranslation();
   const locale: SupportedLocale = i18n.language?.startsWith("en") ? "en" : "cs";
   const fmt = (n: number) => formatCurrency(n, locale);
-  const fmtNum = (n: number) => formatNumber(n, locale);
+  const fmtAxis = compactFormatter(locale);
   const fmtPct = (n: number) =>
     new Intl.NumberFormat(locale === "cs" ? "cs-CZ" : "en-US", {
       minimumFractionDigits: 1,
@@ -133,8 +138,7 @@ function MortgageCalculator() {
       const invested =
         investMonthlyRate === 0
           ? effectiveExtra * months
-          : effectiveExtra *
-            ((Math.pow(1 + investMonthlyRate, months) - 1) / investMonthlyRate);
+          : effectiveExtra * ((Math.pow(1 + investMonthlyRate, months) - 1) / investMonthlyRate);
       out.push({
         year: y,
         balance: std ? std.balance : 0,
@@ -166,8 +170,7 @@ function MortgageCalculator() {
   const crossoverMonthsTotal = crossoverYear !== null ? Math.round(crossoverYear * 12) : null;
   const crossoverYearsPart =
     crossoverMonthsTotal !== null ? Math.floor(crossoverMonthsTotal / 12) : 0;
-  const crossoverMonthsPart =
-    crossoverMonthsTotal !== null ? crossoverMonthsTotal % 12 : 0;
+  const crossoverMonthsPart = crossoverMonthsTotal !== null ? crossoverMonthsTotal % 12 : 0;
 
   const fmtYM = (y: number, m: number) => {
     const ystr =
@@ -193,234 +196,232 @@ function MortgageCalculator() {
     return rows.filter((r) => milestoneYears.has(r.year));
   }, [base.series, years]);
 
+  const comparing = isAdvanced && effectiveExtra > 0;
+  const strategies = compare
+    ? [
+        {
+          key: "mortgage",
+          label: t("hypoteka.strategyA"),
+          value: fmt(compare.netExtraToMortgage),
+          html: t("hypoteka.strategyADesc", {
+            payoff: fmtYM(payoffYears, payoffMonths),
+            saved: fmt(compare.interestSaved),
+          }),
+        },
+        {
+          key: "invest",
+          label: t("hypoteka.strategyB"),
+          value: fmt(compare.netExtraToInvest),
+          text: t("hypoteka.strategyBDesc", {
+            years,
+            extra: fmt(effectiveExtra),
+            rate: fmtPct(investRate),
+          }),
+        },
+        {
+          key: "crossover",
+          label: t("hypoteka.strategyC"),
+          value:
+            crossoverMonthsTotal !== null ? fmtYM(crossoverYearsPart, crossoverMonthsPart) : "—",
+          muted: crossoverMonthsTotal === null,
+          html:
+            crossoverMonthsTotal !== null
+              ? t("hypoteka.strategyCDesc", {
+                  when: fmtYM(crossoverYearsPart, crossoverMonthsPart),
+                })
+              : undefined,
+          text: crossoverMonthsTotal === null ? t("hypoteka.strategyCNone") : undefined,
+        },
+      ]
+    : [];
+
+  const kpis = [
+    {
+      label: t("hypoteka.monthlyPayment"),
+      value: fmt(base.monthlyPayment),
+      note: comparing
+        ? t("hypoteka.monthlyPaymentExtra", {
+            extra: fmt(effectiveExtra),
+            total: fmt(base.monthlyPayment + effectiveExtra),
+          })
+        : null,
+      lead: true,
+    },
+    {
+      label: t("hypoteka.totalInterest"),
+      value: fmt(base.totalInterest),
+      note: t("hypoteka.totalInterestNote"),
+    },
+    {
+      label: t("hypoteka.totalPaid"),
+      value: fmt(base.totalPaid),
+      note: t("hypoteka.totalPaidNote", { years }),
+    },
+  ];
+
   return (
     <Layout>
-      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <section className="lg:col-span-4 space-y-6">
-          <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
-            <div className="flex items-start justify-between gap-3 mb-1">
-              <h1 className="text-lg font-semibold text-foreground">{t("hypoteka.title")}</h1>
-              <ResetButton onClick={reset} />
-            </div>
-            <p className="text-xs text-muted-foreground mb-5">{t("hypoteka.subtitle")}</p>
-
+      <PageHeader
+        title={t("hypoteka.title")}
+        subtitle={
+          compare
+            ? t(winner === "mortgage" ? "hypoteka.winnerMortgage" : "hypoteka.winnerInvest", {
+                diff: fmt(Math.abs(compare.difference)),
+              }).replace(/<\/?strong>/g, "")
+            : t("hypoteka.subtitle")
+        }
+        actions={
+          <>
             <ModeToggle mode={mode} onChange={setMode} />
+            <ResetButton onClick={reset} />
+          </>
+        }
+      />
 
-            <div className="space-y-5 mt-6">
+      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+        <Panel className="lg:col-span-4 lg:sticky lg:top-6 p-5">
+          <div className="space-y-4">
+            <NumField
+              label={t("hypoteka.loanAmount")}
+              value={principal}
+              onChange={setPrincipal}
+              suffix={currencySuffix}
+              step={50000}
+            />
+            <div className="grid grid-cols-2 gap-3">
               <NumField
-                label={t("hypoteka.loanAmount")}
-                value={principal}
-                onChange={setPrincipal}
-                suffix={currencySuffix}
-                step={50000}
+                label={t("form.annualRate")}
+                value={rate}
+                onChange={setRate}
+                suffix={t("units.pct")}
+                step={0.1}
               />
-              <div className="grid grid-cols-2 gap-4">
-                <NumField
-                  label={t("form.annualRate")}
-                  value={rate}
-                  onChange={setRate}
-                  suffix={t("units.pct")}
-                  step={0.1}
-                />
-                <NumField
-                  label={t("hypoteka.duration")}
-                  value={years}
-                  onChange={(v) => setYears(Math.max(1, Math.min(40, Math.round(v))))}
-                  suffix={t("units.years")}
-                  step={1}
-                  min={1}
-                  max={40}
-                />
-              </div>
-
-              {isAdvanced && (
-                <div className="pt-4 border-t border-border space-y-4">
-                  <div>
-                    <h2 className="text-sm font-semibold text-foreground mb-1">
-                      {t("hypoteka.extraTitle")}
-                    </h2>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      {t("hypoteka.extraDescription")}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                      {t("hypoteka.extraMonthly")}
-                    </label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button type="button" className="text-muted-foreground hover:text-brand">
-                          <Info className="size-3.5" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent side="top">
-                        {t("hypoteka.extraMonthlyTooltip")}
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <NumField value={extra} onChange={setExtra} suffix={currencySuffix} step={500} />
-
-                  <NumField
-                    label={t("hypoteka.investRate")}
-                    value={investRate}
-                    onChange={setInvestRate}
-                    suffix={t("units.pct")}
-                    step={0.1}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="lg:col-span-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("hypoteka.monthlyPayment")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(base.monthlyPayment)}
-              </p>
-              {isAdvanced && effectiveExtra > 0 && (
-                <p className="text-xs text-brand mt-2">
-                  {t("hypoteka.monthlyPaymentExtra", {
-                    extra: fmt(effectiveExtra),
-                    total: fmt(base.monthlyPayment + effectiveExtra),
-                  })}
-                </p>
-              )}
-            </div>
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("hypoteka.totalInterest")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(base.totalInterest)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">{t("hypoteka.totalInterestNote")}</p>
-            </div>
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("hypoteka.totalPaid")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(base.totalPaid)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("hypoteka.totalPaidNote", { years })}
-              </p>
+              <NumField
+                label={t("hypoteka.duration")}
+                value={years}
+                onChange={(v) => setYears(Math.max(1, Math.min(40, Math.round(v))))}
+                suffix={t("units.years")}
+                step={1}
+                min={1}
+                max={40}
+              />
             </div>
           </div>
 
-          {/* Chart */}
-          <div className="bg-card p-6 md:p-8 rounded-2xl border border-border h-[420px] flex flex-col">
-            <div className="flex justify-between items-end mb-4 flex-wrap gap-4">
+          {isAdvanced && (
+            <div className="mt-5 pt-4 border-t border-border space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  {isAdvanced && effectiveExtra > 0
-                    ? t("hypoteka.chartTitleCompare")
-                    : t("hypoteka.chartTitleStandard")}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {isAdvanced && effectiveExtra > 0
-                    ? t("hypoteka.chartDescCompare")
-                    : t("hypoteka.chartDescStandard")}
+                <h2 className="text-sm font-semibold text-foreground">
+                  {t("hypoteka.extraTitle")}
+                </h2>
+                <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
+                  {t("hypoteka.extraDescription")}
                 </p>
               </div>
-              <div className="flex gap-4 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-brand" />
-                  <span className="text-xs text-muted-foreground">
-                    {isAdvanced && effectiveExtra > 0
-                      ? t("hypoteka.legendBalanceWithExtra")
-                      : t("hypoteka.legendBalanceStandard")}
-                  </span>
-                </div>
-                {isAdvanced && effectiveExtra > 0 ? (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full bg-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {t("hypoteka.legendBalanceStandardCompare")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full bg-purple-500" />
-                      <span className="text-xs text-muted-foreground">
-                        {t("hypoteka.legendInvested")}
-                      </span>
-                    </div>
-                    {crossoverYear !== null && (
-                      <div className="flex items-center gap-2">
-                        <div className="size-2 rounded-full bg-destructive" />
-                        <span className="text-xs text-muted-foreground">
-                          {t("hypoteka.legendCrossover", { years: crossoverYear.toFixed(1) })}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      {t("hypoteka.legendCumulativeInterest")}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <NumField
+                label={t("hypoteka.extraMonthly")}
+                info={t("hypoteka.extraMonthlyTooltip")}
+                value={extra}
+                onChange={setExtra}
+                suffix={currencySuffix}
+                step={500}
+              />
+              <NumField
+                label={t("hypoteka.investRate")}
+                value={investRate}
+                onChange={setInvestRate}
+                suffix={t("units.pct")}
+                step={0.1}
+              />
             </div>
-            <div className="flex-1 -ml-4">
+          )}
+        </Panel>
+
+        <section className="lg:col-span-8 space-y-4 lg:space-y-6">
+          <Panel>
+            <dl className="grid grid-cols-1 sm:grid-cols-3 divide-y divide-border sm:divide-y-0 sm:divide-x">
+              {kpis.map((k) => (
+                <div key={k.label} className="px-5 md:px-6 py-5">
+                  <dt className="text-[13px] font-medium text-muted-foreground">{k.label}</dt>
+                  <dd
+                    className={`mt-1 font-semibold text-foreground tabular-nums leading-none ${
+                      k.lead ? "text-[30px] md:text-[34px] tracking-[-0.02em]" : "text-[22px] mt-2"
+                    }`}
+                  >
+                    {k.value}
+                  </dd>
+                  {k.note && (
+                    <dd className="mt-2 text-xs text-muted-foreground tabular-nums">{k.note}</dd>
+                  )}
+                </div>
+              ))}
+            </dl>
+          </Panel>
+
+          <Panel className="p-5 md:p-6">
+            <PanelHeader
+              title={comparing ? t("hypoteka.chartTitleCompare") : t("hypoteka.chartTitleStandard")}
+              subtitle={
+                comparing ? t("hypoteka.chartDescCompare") : t("hypoteka.chartDescStandard")
+              }
+              aside={
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {comparing ? (
+                    <>
+                      <LegendItem
+                        label={t("hypoteka.legendBalanceWithExtra")}
+                        color="var(--color-brand)"
+                      />
+                      <LegendItem
+                        label={t("hypoteka.legendBalanceStandardCompare")}
+                        color="var(--color-muted-foreground)"
+                        dashed
+                      />
+                      <LegendItem
+                        label={t("hypoteka.legendInvested")}
+                        color="var(--color-foreground)"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <LegendItem
+                        label={t("hypoteka.legendBalanceStandard")}
+                        color="var(--color-brand)"
+                      />
+                      <LegendItem
+                        label={t("hypoteka.legendCumulativeInterest")}
+                        color="var(--color-foreground)"
+                      />
+                    </>
+                  )}
+                </div>
+              }
+            />
+            <div className="mt-5 h-[240px] md:h-[280px] -ml-1">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gBal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.55} />
-                      <stop offset="100%" stopColor="var(--color-brand)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gInt" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor="var(--color-muted-foreground)"
-                        stopOpacity={0.35}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor="var(--color-muted-foreground)"
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                    <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#a855f7" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="#a855f7" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <LineChart data={chartData} margin={{ top: 22, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid {...gridProps} />
                   <XAxis
+                    {...axisProps}
                     dataKey="year"
                     type="number"
                     domain={[0, years]}
                     allowDecimals={false}
-                    stroke="var(--color-muted-foreground)"
-                    fontSize={11}
+                    tickMargin={8}
+                    ticks={yearTicks(years)}
                     tickFormatter={(v) => `${v}${t("units.yearShort")}`}
                   />
                   <YAxis
-                    stroke="var(--color-muted-foreground)"
-                    fontSize={11}
-                    tickFormatter={(v) => `${fmtNum(v / 1000)}k`}
-                    width={60}
+                    {...axisProps}
+                    tickFormatter={(v) => fmtAxis(v)}
+                    width={64}
+                    tickMargin={4}
+                    tickCount={5}
                   />
                   <RTooltip
-                    contentStyle={{
-                      background: "var(--color-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      color: "var(--color-foreground)",
-                    }}
-                    labelStyle={{ color: "var(--color-muted-foreground)" }}
+                    contentStyle={tooltipContentStyle}
+                    labelStyle={tooltipLabelStyle}
+                    cursor={{ stroke: "var(--color-border)", strokeWidth: 1 }}
                     formatter={(value: number, name) => [fmt(value), name]}
                     labelFormatter={(l) => t("chart.tooltipYearLabel", { year: l })}
                     position={{ y: isMobile ? -128 : 0 }}
@@ -428,274 +429,209 @@ function MortgageCalculator() {
                     wrapperStyle={{ zIndex: 20, pointerEvents: "none" }}
                   />
 
-                  {isAdvanced && effectiveExtra > 0 && (
-                    <Area
-                      type="monotone"
+                  {comparing && crossoverYear !== null && (
+                    <ReferenceLine
+                      x={crossoverYear}
+                      stroke="var(--color-muted-foreground)"
+                      strokeDasharray="3 3"
+                      strokeWidth={1}
+                      label={{
+                        // A phone has no room for the words; the time alone still reads.
+                        value: isMobile
+                          ? fmtYM(crossoverYearsPart, crossoverMonthsPart)
+                          : `${t("hypoteka.crossoverShort")} · ${fmtYM(
+                              crossoverYearsPart,
+                              crossoverMonthsPart,
+                            )}`,
+                        position: crossoverYear > years * 0.6 ? "insideTopRight" : "insideTopLeft",
+                        offset: 0,
+                        dy: -18,
+                        fontSize: 12,
+                        fill: "var(--color-foreground)",
+                      }}
+                    />
+                  )}
+                  {comparing && (
+                    <Line
+                      type="linear"
                       dataKey="balance"
                       name={t("hypoteka.legendBalanceStandardCompare")}
                       stroke="var(--color-muted-foreground)"
-                      fill="none"
-                      strokeDasharray="4 4"
-                      strokeWidth={2}
+                      strokeDasharray="4 3"
+                      strokeWidth={1.5}
+                      dot={false}
+                      activeDot={{ r: 3, strokeWidth: 0, fill: "var(--color-muted-foreground)" }}
+                      isAnimationActive={false}
                     />
                   )}
-                  {isAdvanced && effectiveExtra > 0 && (
-                    <Area
-                      type="monotone"
+                  {comparing && (
+                    <Line
+                      type="linear"
                       dataKey="invested"
                       name={t("hypoteka.legendInvested")}
-                      stroke="#a855f7"
-                      fill="url(#gInv)"
+                      stroke="var(--color-foreground)"
                       strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 3.5, strokeWidth: 0, fill: "var(--color-foreground)" }}
+                      isAnimationActive={false}
                     />
                   )}
-                  {isAdvanced && effectiveExtra > 0 && (
-                    <Area
-                      type="monotone"
+                  {comparing && (
+                    <Line
+                      type="linear"
                       dataKey="balanceExtra"
                       name={t("hypoteka.legendBalanceWithExtra")}
                       stroke="var(--color-brand)"
-                      fill="url(#gBal)"
-                      strokeWidth={2.5}
+                      strokeWidth={2.25}
+                      dot={false}
+                      activeDot={{ r: 4, strokeWidth: 0, fill: "var(--color-brand)" }}
+                      isAnimationActive={false}
                     />
                   )}
-                  {isAdvanced && effectiveExtra > 0 && crossoverYear !== null && (
-                    <ReferenceLine
-                      x={crossoverYear}
-                      isFront
-                      stroke="var(--color-destructive)"
-                      strokeWidth={1}
-                    />
-                  )}
-                  {!(isAdvanced && effectiveExtra > 0) && (
-                    <Area
-                      type="monotone"
+                  {!comparing && (
+                    <Line
+                      type="linear"
                       dataKey="paidInterest"
                       name={t("hypoteka.legendCumulativeInterest")}
-                      stroke="var(--color-muted-foreground)"
-                      fill="url(#gInt)"
+                      stroke="var(--color-foreground)"
                       strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 3.5, strokeWidth: 0, fill: "var(--color-foreground)" }}
+                      isAnimationActive={false}
                     />
                   )}
-                  {!(isAdvanced && effectiveExtra > 0) && (
-                    <Area
-                      type="monotone"
+                  {!comparing && (
+                    <Line
+                      type="linear"
                       dataKey="balance"
                       name={t("hypoteka.legendBalanceStandard")}
                       stroke="var(--color-brand)"
-                      fill="url(#gBal)"
-                      strokeWidth={2.5}
+                      strokeWidth={2.25}
+                      dot={false}
+                      activeDot={{ r: 4, strokeWidth: 0, fill: "var(--color-brand)" }}
+                      isAnimationActive={false}
                     />
                   )}
-                </AreaChart>
+                </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </Panel>
 
-          {compare && effectiveExtra > 0 && (
-            <div className="bg-card p-6 md:p-8 rounded-2xl border border-brand/30 relative overflow-hidden">
-              <div className="absolute top-3 right-3">
-                <span className="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/30">
-                  {t("hypoteka.compareBadge")}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-1 mt-2 md:mt-0">
-                {t("hypoteka.compareTitle")}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                {t("hypoteka.compareSubtitle", { extra: fmt(effectiveExtra) })}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div
-                  className={`rounded-xl p-5 border ${
-                    winner === "mortgage"
-                      ? "bg-brand/10 border-brand/40"
-                      : "bg-surface border-border"
-                  }`}
-                >
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                    {t("hypoteka.strategyA")}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground font-mono break-words">
-                    {fmt(compare.netExtraToMortgage)}
-                  </p>
-                  <p
-                    className="text-xs text-muted-foreground mt-2 leading-relaxed [&_strong]:text-foreground"
-                    dangerouslySetInnerHTML={{
-                      __html: t("hypoteka.strategyADesc", {
-                        payoff: fmtYM(payoffYears, payoffMonths),
-                        saved: fmt(compare.interestSaved),
-                      }),
-                    }}
-                  />
-                </div>
-
-                <div
-                  className={`rounded-xl p-5 border ${
-                    winner === "invest"
-                      ? "bg-brand/10 border-brand/40"
-                      : "bg-surface border-border"
-                  }`}
-                >
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                    {t("hypoteka.strategyB")}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground font-mono break-words">
-                    {fmt(compare.netExtraToInvest)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                    {t("hypoteka.strategyBDesc", {
-                      years,
-                      extra: fmt(effectiveExtra),
-                      rate: fmtPct(investRate),
-                    })}
-                  </p>
-                </div>
-
-                <div className="rounded-xl p-5 border bg-surface border-emerald-500/40">
-                  <p className="text-[11px] font-medium text-emerald-500 uppercase tracking-wider mb-1">
-                    {t("hypoteka.strategyC")}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground font-mono break-words">
-                    {crossoverMonthsTotal !== null
-                      ? fmtYM(crossoverYearsPart, crossoverMonthsPart)
-                      : "—"}
-                  </p>
-                  {crossoverMonthsTotal !== null ? (
-                    <p
-                      className="text-xs text-muted-foreground mt-2 leading-relaxed [&_strong]:text-foreground"
-                      dangerouslySetInnerHTML={{
-                        __html: t("hypoteka.strategyCDesc", {
-                          when: fmtYM(crossoverYearsPart, crossoverMonthsPart),
-                        }),
-                      }}
-                    />
-                  ) : (
-                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                      {t("hypoteka.strategyCNone")}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-surface rounded-xl p-4 border border-border">
-                <p
-                  className="text-sm text-foreground [&_strong]:text-brand"
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      winner === "mortgage"
-                        ? t("hypoteka.winnerMortgage", {
-                            diff: fmt(Math.abs(compare.difference)),
-                          })
-                        : t("hypoteka.winnerInvest", {
-                            diff: fmt(Math.abs(compare.difference)),
-                          }),
-                  }}
+          {compare && (
+            <Panel>
+              <div className="p-5 md:p-6">
+                <PanelHeader
+                  title={t("hypoteka.compareTitle")}
+                  subtitle={t("hypoteka.compareSubtitle", { extra: fmt(effectiveExtra) })}
                 />
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t("hypoteka.compareNote", { years })}
-                </p>
               </div>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border divide-y divide-border md:divide-y-0 md:divide-x">
+                {strategies.map((st) => {
+                  const wins = st.key === winner;
+                  return (
+                    <div
+                      key={st.key}
+                      className={`relative px-5 md:px-6 py-5 ${wins ? "bg-surface" : ""}`}
+                    >
+                      {wins && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-x-0 top-0 h-0.5 bg-brand"
+                        />
+                      )}
+                      <p className="text-[13px] font-medium text-muted-foreground">{st.label}</p>
+                      <p
+                        className={`mt-1.5 text-[22px] leading-tight font-semibold tabular-nums ${
+                          st.muted ? "text-muted-foreground" : "text-foreground"
+                        }`}
+                      >
+                        {st.value}
+                      </p>
+                      {wins && (
+                        <p className="mt-1 text-xs font-medium text-brand-dark">
+                          {t("hypoteka.winnerTag")}
+                        </p>
+                      )}
+                      {st.html ? (
+                        <p
+                          className="mt-2 text-[13px] text-muted-foreground leading-relaxed [&_strong]:font-medium [&_strong]:text-foreground"
+                          dangerouslySetInnerHTML={{ __html: st.html }}
+                        />
+                      ) : (
+                        <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">
+                          {st.text}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="px-5 md:px-6 py-4 border-t border-border text-xs text-muted-foreground">
+                {t("hypoteka.compareNote", { years })}
+              </p>
+            </Panel>
           )}
 
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="px-6 py-4 border-b border-border">
-              <h3 className="text-sm font-semibold text-foreground">{t("hypoteka.tableTitle")}</h3>
-              <p className="text-xs text-muted-foreground">{t("hypoteka.tableSubtitle")}</p>
+          <Panel className="overflow-hidden">
+            <div className="p-5 md:px-6 md:pt-6 md:pb-4">
+              <PanelHeader
+                title={t("hypoteka.tableTitle")}
+                subtitle={t("hypoteka.tableSubtitle")}
+              />
             </div>
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm tabular-nums">
                 <thead>
-                  <tr className="text-muted-foreground border-b border-border">
-                    <th className="py-3 px-6 font-medium">{t("hypoteka.tableYear")}</th>
-                    <th className="py-3 px-6 font-medium text-right">
+                  <tr className="text-xs text-muted-foreground border-t border-border">
+                    <th className="h-10 px-6 font-normal">{t("hypoteka.tableYear")}</th>
+                    <th className="h-10 px-6 font-normal text-right">
                       {t("hypoteka.tableInterest")}
                     </th>
-                    <th className="py-3 px-6 font-medium text-right">
+                    <th className="h-10 px-6 font-normal text-right">
                       {t("hypoteka.tablePrincipal")}
                     </th>
-                    <th className="py-3 px-6 font-medium text-right text-foreground">
+                    <th className="h-10 px-6 font-normal text-right">
                       {t("hypoteka.tableBalance")}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-muted-foreground font-mono">
+                <tbody className="text-muted-foreground">
                   {base.series.slice(1).map((s) => (
-                    <tr key={s.year} className="border-b border-border last:border-0">
-                      <td className="py-3 px-6">{t("hypoteka.yearRow", { n: s.year })}</td>
-                      <td className="py-3 px-6 text-right">{fmt(s.interestThisYear)}</td>
-                      <td className="py-3 px-6 text-right">{fmt(s.principalThisYear)}</td>
-                      <td className="py-3 px-6 text-right text-foreground">{fmt(s.balance)}</td>
+                    <tr key={s.year} className="border-t border-border">
+                      <td className="h-10 px-6 text-foreground">
+                        {t("hypoteka.yearRow", { n: s.year })}
+                      </td>
+                      <td className="h-10 px-6 text-right">{fmt(s.interestThisYear)}</td>
+                      <td className="h-10 px-6 text-right">{fmt(s.principalThisYear)}</td>
+                      <td className="h-10 px-6 text-right text-foreground font-medium">
+                        {fmt(s.balance)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="md:hidden divide-y divide-border">
+            <div className="md:hidden divide-y divide-border border-t border-border">
               {mobileMilestones.map((s) => (
-                <div key={s.year} className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-foreground">
+                <div key={s.year} className="px-4 py-3">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-sm text-foreground">
                       {t("hypoteka.yearRow", { n: s.year })}
                     </span>
-                    <span className="text-xs text-muted-foreground font-mono">
+                    <span className="text-sm font-medium text-foreground tabular-nums">
                       {fmt(s.balance)}
                     </span>
                   </div>
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                    <dt className="text-muted-foreground">{t("hypoteka.tableInterest")}</dt>
-                    <dd className="text-right font-mono text-foreground">
-                      {fmt(s.interestThisYear)}
-                    </dd>
-                    <dt className="text-muted-foreground">{t("hypoteka.tablePrincipal")}</dt>
-                    <dd className="text-right font-mono text-foreground">
-                      {fmt(s.principalThisYear)}
-                    </dd>
-                  </dl>
+                  <p className="mt-0.5 text-xs text-muted-foreground tabular-nums text-right">
+                    {t("hypoteka.tableInterest")} {fmt(s.interestThisYear)} ·{" "}
+                    {t("hypoteka.tablePrincipal")} {fmt(s.principalThisYear)}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
+          </Panel>
         </section>
       </main>
     </Layout>
-  );
-}
-
-function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
-  const { t } = useTranslation();
-  return (
-    <div
-      role="tablist"
-      aria-label={t("modes.ariaLabel")}
-      className="grid grid-cols-2 gap-1 p-1 bg-surface border border-border rounded-xl"
-    >
-      {(
-        [
-          { v: "basic", label: t("modes.basic") },
-          { v: "advanced", label: t("modes.advanced") },
-        ] as const
-      ).map((opt) => {
-        const active = mode === opt.v;
-        return (
-          <button
-            key={opt.v}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(opt.v as Mode)}
-            className={`py-2 text-sm font-medium rounded-lg transition-colors ${
-              active
-                ? "bg-brand text-primary-foreground shadow"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
   );
 }

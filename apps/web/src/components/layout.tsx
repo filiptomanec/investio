@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { MessageSquareWarning, Moon, Sparkles, Sun } from "lucide-react";
+import { Moon, Sparkles, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Logo } from "@/components/logo";
 import { WelcomeOverlay } from "@/components/welcome-overlay";
 import { useLanguageSync } from "@/hooks/use-language-sync";
 import { useTheme } from "@/hooks/use-theme";
@@ -47,38 +48,37 @@ export function Layout({ children }: { children: ReactNode }) {
     t("feedback.subject"),
   )}&body=${encodeURIComponent(feedbackBody)}`;
 
-  return (
-    <div className="min-h-screen bg-background font-sans text-foreground p-4 md:p-8">
-      <header className="max-w-6xl mx-auto flex justify-between items-center gap-4 mb-8 flex-wrap">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="size-8 bg-brand rounded-lg flex items-center justify-center">
-            <div className="size-4 bg-background rounded-sm rotate-45"></div>
-          </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">
-            INVEST<span className="text-brand">IO</span>
-          </span>
-        </Link>
+  const iconButton =
+    "size-9 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-        <nav className="flex items-center gap-1 text-sm font-medium order-3 md:order-2 w-full md:w-auto overflow-x-auto">
+  return (
+    <div className="min-h-screen bg-background font-sans text-foreground px-4 md:px-8">
+      {/* No-sidebar shell: the bar sits on the page ground and shares the
+          content column, so the logo and the title start on one edge. */}
+      <header className="max-w-6xl mx-auto grid grid-cols-[1fr_auto] md:grid-cols-[auto_1fr_auto] items-center gap-x-8 gap-y-2 pt-4 pb-6 md:pt-5 md:pb-10">
+        <Logo />
+
+        <nav className="col-span-2 md:col-span-1 row-start-2 md:row-start-1 md:col-start-2 flex items-center gap-1 -mx-2.5 md:mx-0 overflow-x-auto text-[15px] font-medium">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
               activeOptions={{ exact: true }}
-              className="px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors whitespace-nowrap data-[status=active]:bg-brand/10 data-[status=active]:text-brand"
+              className="px-2.5 py-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap data-[status=active]:text-foreground data-[status=active]:bg-muted"
             >
               {t(item.labelKey)}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 order-2 md:order-3">
+        <div className="flex items-center gap-1 md:col-start-3">
           <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setWelcomeOpen(true)}
             aria-label={t("header.openWelcome")}
-            className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted transition-colors text-foreground"
+            title={t("header.openWelcome")}
+            className={iconButton}
           >
             <Sparkles className="size-4" />
           </button>
@@ -86,7 +86,8 @@ export function Layout({ children }: { children: ReactNode }) {
             type="button"
             onClick={toggle}
             aria-label={t("header.toggleTheme")}
-            className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted transition-colors text-foreground"
+            title={t("header.toggleTheme")}
+            className={iconButton}
           >
             {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </button>
@@ -95,17 +96,13 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {children}
 
-      <footer className="max-w-6xl mx-auto mt-12 text-muted-foreground text-xs py-8 border-t border-border leading-relaxed">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+      <footer className="max-w-6xl mx-auto mt-16 md:mt-24 pt-6 pb-10 border-t border-border text-[13px] text-muted-foreground leading-relaxed">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-12">
           <p className="max-w-2xl">
             {t("footer.methodologyShort", { year: new Date().getFullYear() })}
           </p>
-          <div className="flex flex-col gap-2 md:items-end">
-            <a
-              href={feedbackMailto}
-              className="inline-flex items-center gap-1.5 text-foreground hover:text-brand transition-colors font-medium"
-            >
-              <MessageSquareWarning className="size-3.5" />
+          <div className="flex flex-col gap-1.5 md:items-end shrink-0">
+            <a href={feedbackMailto} className="text-foreground hover:underline underline-offset-4">
               {t("footer.reportBug")}
             </a>
             <Link to="/privacy" className="hover:text-foreground transition-colors">

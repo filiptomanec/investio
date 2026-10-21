@@ -4,9 +4,9 @@ import { hapticLight } from "@/lib/native";
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
-  const current = (supportedLocales.includes(i18n.language as Locale)
-    ? i18n.language
-    : "cs") as Locale;
+  const current = (
+    supportedLocales.includes(i18n.language as Locale) ? i18n.language : "cs"
+  ) as Locale;
   const next: Locale = current === "cs" ? "en" : "cs";
 
   const onClick = () => {
@@ -27,11 +27,11 @@ export function LanguageSwitcher() {
       type="button"
       onClick={onClick}
       aria-label={t("header.toggleLanguage")}
-      className="h-9 inline-flex items-center justify-center rounded-lg border border-border bg-card px-3 text-xs font-semibold uppercase tracking-wider text-foreground hover:bg-muted transition-colors"
+      className="h-9 inline-flex items-center justify-center rounded-md px-2.5 text-[13px] font-medium hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className={current === "cs" ? "text-brand" : "text-muted-foreground"}>CS</span>
-      <span className="mx-1.5 text-muted-foreground/40">/</span>
-      <span className={current === "en" ? "text-brand" : "text-muted-foreground"}>EN</span>
+      <span className={current === "cs" ? "text-foreground" : "text-muted-foreground"}>CS</span>
+      <span className="mx-1 text-muted-foreground/50">/</span>
+      <span className={current === "en" ? "text-foreground" : "text-muted-foreground"}>EN</span>
     </button>
   );
 }

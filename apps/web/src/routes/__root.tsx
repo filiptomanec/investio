@@ -77,7 +77,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0d9488" },
+      { name: "theme-color", content: "#f5f5f2", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#141413", media: "(prefers-color-scheme: dark)" },
       { title: "Investio — Kalkulačka složeného úročení" },
       {
         name: "description",
@@ -102,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         // requesting /favicon.ico when no public/favicon.ico is present.
         rel: "icon",
         type: "image/svg+xml",
-        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><rect x='9' y='9' width='14' height='14' rx='2' fill='white' transform='rotate(45 16 16)'/></svg>",
+        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231c1c1a'/><path d='M7 23.5 C 13 23, 18 21.5, 21.5 16.5 S 24.5 10, 25 8.5' fill='none' stroke='%2334b88a' stroke-width='2.6' stroke-linecap='round'/><circle cx='25' cy='8.5' r='2.6' fill='%23f5f5f2'/></svg>",
       },
     ],
   }),
@@ -113,9 +114,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 // Synchronous pre-hydration script: applies the saved theme to <html> before the
-// browser paints so dark/light mode never flickers on reload. Falls back to dark
-// when no preference is stored (matches the in-app useTheme default).
-const themeBootstrap = `(function(){try{var t=localStorage.getItem('investio-theme');if(t==='dark'||(!t))document.documentElement.classList.add('dark');}catch(e){}})();`;
+// browser paints so dark/light mode never flickers on reload. Without a stored
+// choice it follows the system setting.
+const themeBootstrap = `(function(){try{var t=localStorage.getItem('investio-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
