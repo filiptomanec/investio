@@ -51,3 +51,4 @@ apps/web/ios/App/DerivedData/
 # Claude Code worktrees / settings (local only)
 .claude/worktrees/
 .claude/settings.local.json
+.taste-skill/

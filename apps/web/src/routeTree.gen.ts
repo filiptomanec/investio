@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as HypotekaRouteImport } from './routes/hypoteka'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RentaRouteImport } from './routes/renta'
+import { Route as SmeryRouteImport } from './routes/smery'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const RentaRoute = RentaRouteImport.update({
   path: '/renta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SmeryRoute = SmeryRouteImport.update({
+  id: '/smery',
+  path: '/smery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/hypoteka': typeof HypotekaRoute
   '/privacy': typeof PrivacyRoute
   '/renta': typeof RentaRoute
+  '/smery': typeof SmeryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/hypoteka': typeof HypotekaRoute
   '/privacy': typeof PrivacyRoute
   '/renta': typeof RentaRoute
+  '/smery': typeof SmeryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/hypoteka': typeof HypotekaRoute
   '/privacy': typeof PrivacyRoute
   '/renta': typeof RentaRoute
+  '/smery': typeof SmeryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/hypoteka' | '/privacy' | '/renta'
+  fullPaths: '/' | '/hypoteka' | '/privacy' | '/renta' | '/smery'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/hypoteka' | '/privacy' | '/renta'
-  id: '__root__' | '/' | '/hypoteka' | '/privacy' | '/renta'
+  to: '/' | '/hypoteka' | '/privacy' | '/renta' | '/smery'
+  id: '__root__' | '/' | '/hypoteka' | '/privacy' | '/renta' | '/smery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   HypotekaRoute: typeof HypotekaRoute
   PrivacyRoute: typeof PrivacyRoute
   RentaRoute: typeof RentaRoute
+  SmeryRoute: typeof SmeryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/smery': {
+      id: '/smery'
+      path: '/smery'
+      fullPath: '/smery'
+      preLoaderRoute: typeof SmeryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   HypotekaRoute: HypotekaRoute,
   PrivacyRoute: PrivacyRoute,
   RentaRoute: RentaRoute,
+  SmeryRoute: SmeryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

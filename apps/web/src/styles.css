@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700;800&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -211,4 +211,91 @@
    status bar region matches the app background automatically. */
 .capacitor-native body {
   padding-top: env(safe-area-inset-top);
+}
+
+/* ── Design directions preview (/smery) ─────────────────────────────────────
+   A range slider whose filled part and thumb take colours from the
+   surrounding direction: --range-fill, --range-track, --range-thumb. */
+.range {
+  --fill: 0%;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+.range:focus-visible {
+  outline: none;
+}
+.range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--range-fill) var(--fill),
+    var(--range-track) var(--fill)
+  );
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--range-thumb);
+  border: 3px solid var(--range-fill);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+  transition: transform 150ms ease;
+}
+.range:hover::-webkit-slider-thumb,
+.range:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+.range:active::-webkit-slider-thumb {
+  transform: scale(1.22);
+}
+.range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--range-track);
+}
+.range::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--range-fill);
+}
+.range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--range-thumb);
+  border: 3px solid var(--range-fill);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+}
+
+/* Staggered entrance: children with --i fade and rise in sequence. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise-in 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-len);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
 }
