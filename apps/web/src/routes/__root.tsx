@@ -78,8 +78,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#f5f5f2", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#141413", media: "(prefers-color-scheme: dark)" },
       { title: "Investio — Kalkulačka složeného úročení" },
       {
         name: "description",
@@ -126,6 +124,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
     // Both are intentional post-SSR mutations — suppress the mismatch warning.
     <html lang="cs" suppressHydrationWarning>
       <head>
+        {/* Written here rather than in head() meta: HeadContent keeps only one
+            tag per name, and the bar colour needs one per colour scheme. */}
+        <meta name="theme-color" content="#f5f5f2" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
