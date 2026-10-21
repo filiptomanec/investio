@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { useEffect } from "react";
@@ -28,7 +29,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {t("errors.notFoundBack")}
           </Link>
@@ -38,7 +39,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   const { t } = useTranslation();
@@ -56,13 +57,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {t("errors.tryAgain")}
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-full border border-input bg-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             {t("errors.goHome")}
           </a>
@@ -77,7 +78,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#0d9488" },
       { title: "Investio — Kalkulačka složeného úročení" },
       {
         name: "description",
@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         // requesting /favicon.ico when no public/favicon.ico is present.
         rel: "icon",
         type: "image/svg+xml",
-        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><rect x='9' y='9' width='14' height='14' rx='2' fill='white' transform='rotate(45 16 16)'/></svg>",
+        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%2311382b'/><g fill='none' stroke='%2334c48f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M16 25v-9'/><path d='M16 16c0-4 3-6.5 7.5-6.5 0 4.5-3 6.5-7.5 6.5z'/><path d='M16 19c0-3.5-2.6-5.5-6.5-5.5 0 3.8 2.6 5.5 6.5 5.5z'/></g></svg>",
       },
     ],
   }),
@@ -113,9 +113,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 // Synchronous pre-hydration script: applies the saved theme to <html> before the
-// browser paints so dark/light mode never flickers on reload. Falls back to dark
-// when no preference is stored (matches the in-app useTheme default).
-const themeBootstrap = `(function(){try{var t=localStorage.getItem('investio-theme');if(t==='dark'||(!t))document.documentElement.classList.add('dark');}catch(e){}})();`;
+// browser paints so dark/light mode never flickers on reload. Without a stored
+// choice it follows the system setting.
+const themeBootstrap = `(function(){try{var t=localStorage.getItem('investio-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
@@ -124,6 +124,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
     // Both are intentional post-SSR mutations — suppress the mismatch warning.
     <html lang="cs" suppressHydrationWarning>
       <head>
+        {/* Written here rather than in head() meta: HeadContent keeps only one
+            tag per name, and the bar colour needs one per colour scheme. */}
+        <meta name="theme-color" content="#f4f3ee" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#111210" media="(prefers-color-scheme: dark)" />
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
