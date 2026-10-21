@@ -34,12 +34,12 @@ export function DeviceMockup({ variant, src, alt, className, style }: Props) {
   return (
     <div
       className={cn(
-        "relative rounded-xl border border-border bg-background shadow-2xl shadow-black/40 ring-1 ring-black/20 overflow-hidden",
+        "relative rounded-2xl bg-(--b-card) shadow-2xl shadow-black/20 ring-1 ring-black/5 overflow-hidden",
         className,
       )}
       style={style}
     >
-      <div className="flex items-center gap-1.5 px-3 py-2 bg-muted border-b border-border">
+      <div className="flex items-center gap-1.5 px-3 py-2 bg-(--b-sunk)">
         <span className="size-2.5 rounded-full bg-[#ff5f57]" />
         <span className="size-2.5 rounded-full bg-[#febc2e]" />
         <span className="size-2.5 rounded-full bg-[#28c840]" />

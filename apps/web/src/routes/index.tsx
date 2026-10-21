@@ -1,19 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Info, Loader2, RefreshCw } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { CalendarClock, HandCoins, PiggyBank, Wallet } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { fmtMultiple, projectionInsights, useFitSticky } from "@/components/bento/kit";
 import {
-  calculateInvestment,
-  fetchCzechInflation,
-  formatCurrency,
-  type SupportedLocale,
-} from "@investio/shared";
+  ChartTip,
+  HeroFigure,
+  HeroLabel,
+  HeroTile,
+  InflationLoader,
+  InputsHeader,
+  LegendSwatch,
+  ModeSwitch,
+  Panel,
+  PanelTitle,
+  Slider,
+  SplitBar,
+  Sub,
+  Tile,
+  Toggle,
+  Well,
+  YearBadge,
+  rise,
+} from "@/components/bento/ui";
 import { Layout } from "@/components/layout";
-import { NumField } from "@/components/num-field";
-import { ProjectionView } from "@/components/projection-view";
-import { ResetButton } from "@/components/reset-button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { usePersistedState } from "@/hooks/use-persisted-state";
+import { AnimatedNumber } from "@/hooks/use-animated-number";
+import { useInvestmentModel } from "@/hooks/use-investment-model";
+import { compactFormatter } from "@/lib/chart";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,419 +47,327 @@ export const Route = createFileRoute("/")({
   component: InvestmentCalculator,
 });
 
-type Mode = "basic" | "advanced";
-
-const DEFAULTS = {
-  initial: 100000,
-  monthly: 5000,
-  rate: 7,
-  years: 20,
-  inflation: 3.2,
-  inflationEnabled: true,
-  indexContributions: false,
-  withdrawalRate: 4,
-};
-
 function InvestmentCalculator() {
-  const { t, i18n } = useTranslation();
-  const locale: SupportedLocale = i18n.language?.startsWith("en") ? "en" : "cs";
-  const fmt = (n: number) => formatCurrency(n, locale);
-  const fmtPct = (n: number) =>
-    new Intl.NumberFormat(locale === "cs" ? "cs-CZ" : "en-US", {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    }).format(Number.isFinite(n) ? n : 0);
-  const currencySuffix = locale === "cs" ? "Kč" : "$";
+  const m = useInvestmentModel();
+  const { t, inputs: i, result, profit, fmt, fmtPct } = m;
+  const sticky = useFitSticky<HTMLDivElement>();
+  const ins = projectionInsights(result);
+  const axis = compactFormatter(m.locale);
+  const pct = (share: number) => Math.round(share * 100);
 
-  const [mode, setMode] = usePersistedState<Mode>("investio.inv.mode", "basic");
-  const [initial, setInitial] = usePersistedState("investio.inv.initial", DEFAULTS.initial);
-  const [monthly, setMonthly] = usePersistedState("investio.inv.monthly", DEFAULTS.monthly);
-  const [rate, setRate] = usePersistedState("investio.inv.rate", DEFAULTS.rate);
-  const [years, setYears] = usePersistedState("investio.inv.years", DEFAULTS.years);
-  const [inflation, setInflation] = usePersistedState(
-    "investio.inv.inflation",
-    DEFAULTS.inflation,
-  );
-  const [inflationEnabled, setInflationEnabled] = usePersistedState(
-    "investio.inv.inflationEnabled",
-    DEFAULTS.inflationEnabled,
-  );
-  const [indexContributions, setIndexContributions] = usePersistedState(
-    "investio.inv.indexContributions",
-    DEFAULTS.indexContributions,
-  );
-  const [withdrawalRate, setWithdrawalRate] = usePersistedState(
-    "investio.inv.withdrawalRate",
-    DEFAULTS.withdrawalRate,
-  );
-
-  const [loadingInflation, setLoadingInflation] = useState(false);
-  const [inflationError, setInflationError] = useState<string | null>(null);
-  const [inflationMeta, setInflationMeta] = useState<{
-    from: number;
-    to: number;
-    n: number;
-  } | null>(null);
-
-  const isAdvanced = mode === "advanced";
-  const effectiveInflation = isAdvanced && inflationEnabled ? inflation : 0;
-  const showReal = isAdvanced && inflationEnabled;
-
-  function reset() {
-    setInitial(DEFAULTS.initial);
-    setMonthly(DEFAULTS.monthly);
-    setRate(DEFAULTS.rate);
-    setYears(DEFAULTS.years);
-    setInflation(DEFAULTS.inflation);
-    setInflationEnabled(DEFAULTS.inflationEnabled);
-    setIndexContributions(DEFAULTS.indexContributions);
-    setWithdrawalRate(DEFAULTS.withdrawalRate);
-    setInflationMeta(null);
-    setInflationError(null);
-  }
-
-  const result = useMemo(
-    () =>
-      calculateInvestment({
-        initial,
-        monthly,
-        annualRatePct: rate,
-        years,
-        inflationPct: effectiveInflation,
-        increaseMonthlyWithInflation: showReal && indexContributions,
-      }),
-    [initial, monthly, rate, years, effectiveInflation, showReal, indexContributions],
-  );
-
-  const profit = result.finalNominal - result.totalContributions;
-  const annualWithdrawalNominal = result.finalNominal * (withdrawalRate / 100);
-  const monthlyWithdrawalNominal = annualWithdrawalNominal / 12;
-  const annualWithdrawalReal = result.finalReal * (withdrawalRate / 100);
-  const monthlyWithdrawalReal = annualWithdrawalReal / 12;
-
-  async function loadInflation() {
-    setLoadingInflation(true);
-    setInflationError(null);
-    try {
-      const { averagePct, samples } = await fetchCzechInflation(years);
-      setInflation(Math.round(averagePct * 10) / 10);
-      setInflationEnabled(true);
-      setInflationMeta({
-        from: samples[0].year,
-        to: samples[samples.length - 1].year,
-        n: samples.length,
-      });
-    } catch (e) {
-      setInflationError(e instanceof Error ? e.message : t("inflation.error"));
-    } finally {
-      setLoadingInflation(false);
-    }
-  }
+  const bars = result.series.filter((p) => p.year > 0);
+  const rows = [1, 5, 10, 15, 20, 25, 30, 40, 50, 60]
+    .filter((y) => y <= i.years)
+    .map((y) => result.series.find((s) => s.year === y))
+    .filter((p): p is NonNullable<typeof p> => !!p);
 
   return (
     <Layout>
-      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <section className="lg:col-span-4 space-y-6">
-          <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
-            <div className="flex items-start justify-between gap-3 mb-1">
-              <h1 className="text-lg font-semibold text-foreground">{t("investice.title")}</h1>
-              <ResetButton onClick={reset} />
-            </div>
-            <p className="text-xs text-muted-foreground mb-5">{t("investice.subtitle")}</p>
+      {/* On a phone the inputs come first; the answer stays pinned on top. */}
+      <div className="sticky top-0 z-40 px-4 pt-2 lg:hidden">
+        <div className="flex items-center justify-between rounded-2xl bg-(--b-hero) px-4 py-3 text-(--b-hero-ink) shadow-lg ring-1 ring-(--b-hero-ring)">
+          <span className="text-xs text-(--b-hero-muted)">
+            {t("results.inYears", { count: i.years })}
+          </span>
+          <span className="text-xl font-semibold tabular-nums">
+            <AnimatedNumber value={result.finalNominal} format={fmt} />
+          </span>
+        </div>
+      </div>
 
-            <ModeToggle mode={mode} onChange={setMode} />
+      <main className="mx-auto mt-3 grid max-w-7xl grid-cols-1 gap-4 px-4 md:px-8 lg:mt-0 lg:grid-cols-[360px_1fr]">
+        <Panel
+          ref={sticky.ref}
+          className="rise self-start p-6 lg:sticky"
+          style={{ ...rise(1), top: sticky.top }}
+        >
+          <InputsHeader title={t("investice.planTitle")} onReset={m.reset} />
+          <ModeSwitch mode={m.mode} onChange={m.setMode} />
+          <div className="mt-6 space-y-6">
+            <Slider
+              label={t("form.initialDeposit")}
+              value={i.initial}
+              onChange={i.setInitial}
+              min={0}
+              max={3_000_000}
+              step={10_000}
+              suffix={m.currencySuffix}
+            />
+            <Slider
+              label={t("form.monthlyContribution")}
+              value={i.monthly}
+              onChange={i.setMonthly}
+              min={0}
+              max={50_000}
+              step={500}
+              suffix={m.currencySuffix}
+            />
+            <Slider
+              label={t("form.annualRate")}
+              value={i.rate}
+              onChange={i.setRate}
+              min={0}
+              max={15}
+              step={0.1}
+              suffix={t("units.pct")}
+            />
+            <Slider
+              label={t("form.duration")}
+              value={i.years}
+              onChange={i.setYears}
+              min={1}
+              max={50}
+              step={1}
+              suffix={t("units.years")}
+            />
+          </div>
 
-            <div className="space-y-5 mt-6">
-              <NumField
-                label={t("form.initialDeposit")}
-                value={initial}
-                onChange={setInitial}
-                suffix={currencySuffix}
-                step={1000}
+          {m.isAdvanced && (
+            <Well>
+              <Toggle
+                label={t("form.enableInflation")}
+                checked={i.inflationEnabled}
+                onChange={i.setInflationEnabled}
               />
-              <NumField
-                label={t("form.monthlyContribution")}
-                value={monthly}
-                onChange={setMonthly}
-                suffix={currencySuffix}
-                step={500}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <NumField
-                  label={t("form.annualRate")}
-                  value={rate}
-                  onChange={setRate}
-                  suffix={t("units.pct")}
-                  step={0.1}
-                />
-                <NumField
-                  label={t("form.duration")}
-                  value={years}
-                  onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
-                  suffix={t("units.years")}
-                  step={1}
-                  min={1}
-                  max={60}
-                />
-              </div>
-
-              {isAdvanced && (
+              {i.inflationEnabled && (
                 <>
-                  <div className="pt-4 border-t border-border space-y-4">
-                    <div className="flex items-center justify-between">
-                      <label
-                        htmlFor="inflation-toggle"
-                        className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                      >
-                        {t("form.enableInflation")}
-                      </label>
-                      <button
-                        id="inflation-toggle"
-                        type="button"
-                        role="switch"
-                        aria-checked={inflationEnabled}
-                        onClick={() => setInflationEnabled((v) => !v)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          inflationEnabled ? "bg-brand" : "bg-muted"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-background shadow transition-transform ${
-                            inflationEnabled ? "translate-x-6" : "translate-x-1"
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    {inflationEnabled && (
-                      <>
-                        <NumField
-                          label={t("form.expectedInflation")}
-                          value={inflation}
-                          onChange={setInflation}
-                          suffix={t("units.pct")}
-                          step={0.1}
-                        />
-                        <button
-                          type="button"
-                          onClick={loadInflation}
-                          disabled={loadingInflation}
-                          className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors disabled:opacity-60"
-                        >
-                          {loadingInflation ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            <RefreshCw className="size-3.5" />
-                          )}
-                          {t("inflation.loadButton", { years })}
-                        </button>
-                        {inflationMeta && !inflationError && (
-                          <p className="text-[11px] text-muted-foreground">
-                            {t("inflation.source", {
-                              from: inflationMeta.from,
-                              to: inflationMeta.to,
-                              n: inflationMeta.n,
-                            })}
-                          </p>
-                        )}
-                        {inflationError && (
-                          <p className="text-[11px] text-destructive">{inflationError}</p>
-                        )}
-
-                        <div className="flex items-center justify-between gap-2">
-                          <label
-                            htmlFor="index-toggle"
-                            className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer flex items-center gap-1.5"
-                          >
-                            {t("advanced.indexContributions")}
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="text-muted-foreground hover:text-brand"
-                                >
-                                  <Info className="size-3" />
-                                </button>
-                              </PopoverTrigger>
-                              <PopoverContent side="top">
-                                {t("advanced.indexContributionsTooltip")}
-                              </PopoverContent>
-                            </Popover>
-                          </label>
-                          <button
-                            id="index-toggle"
-                            type="button"
-                            role="switch"
-                            aria-checked={indexContributions}
-                            onClick={() => setIndexContributions((v) => !v)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                              indexContributions ? "bg-brand" : "bg-muted"
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-background shadow transition-transform ${
-                                indexContributions ? "translate-x-6" : "translate-x-1"
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="pt-4 border-t border-border">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                        {t("form.withdrawalRate")}
-                      </label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button
-                            type="button"
-                            aria-label={t("form.withdrawalRateInfo")}
-                            className="text-muted-foreground hover:text-brand"
-                          >
-                            <Info className="size-3.5" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent side="top" className="text-center">
-                          {t("form.withdrawalRateTooltip")}
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <NumField
-                      value={withdrawalRate}
-                      onChange={(v) => setWithdrawalRate(Math.max(0, Math.min(20, v)))}
-                      suffix={t("units.pctPerYear")}
-                      step={0.1}
-                    />
-                  </div>
+                  <Slider
+                    label={t("form.expectedInflation")}
+                    value={i.inflation}
+                    onChange={i.setInflation}
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    suffix={t("units.pct")}
+                  />
+                  <InflationLoader years={i.years} {...m.inflationLoad} />
+                  <Toggle
+                    label={t("advanced.indexContributions")}
+                    checked={i.indexContributions}
+                    onChange={i.setIndexContributions}
+                    info={t("advanced.indexContributionsTooltip")}
+                  />
                 </>
               )}
-            </div>
-          </div>
-        </section>
+              <Slider
+                label={t("form.withdrawalRate")}
+                value={i.withdrawalRate}
+                onChange={i.setWithdrawalRate}
+                min={1}
+                max={10}
+                step={0.1}
+                suffix={t("units.pct")}
+                info={t("form.withdrawalRateTooltip")}
+              />
+            </Well>
+          )}
+        </Panel>
 
-        <section className="lg:col-span-8 space-y-6">
-          <div className={`grid grid-cols-1 gap-4 ${showReal ? "md:grid-cols-2" : ""}`}>
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("results.nominalLabel")}
+        <section className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+          <HeroTile i={2} className="sm:col-span-2">
+            <HeroLabel>{t("results.heroLabel", { count: i.years })}</HeroLabel>
+            <HeroFigure>
+              <AnimatedNumber value={result.finalNominal} format={fmt} />
+            </HeroFigure>
+            {ins.multiple !== null && ins.multiple > 1 && (
+              <p className="mt-3 text-[15px] text-(--b-hero-soft)">
+                {t("results.multipleBefore")}{" "}
+                <b className="font-semibold text-(--b-mint)">
+                  {fmtMultiple(ins.multiple, m.locale)}×
+                </b>{" "}
+                {t("results.multipleAfter")}
               </p>
-              <p className="text-3xl font-bold text-foreground font-mono break-words">
-                {fmt(result.finalNominal)}
-              </p>
-              <p className="text-xs text-brand mt-2 flex items-center gap-1">
-                <span>▲</span>{" "}
-                {t("results.profitDetail", {
-                  profit: fmt(profit),
-                  contributed: fmt(result.totalContributions),
-                })}
-              </p>
-            </div>
-            {showReal && (
-              <div className="bg-card p-6 rounded-2xl border border-brand/30 relative overflow-hidden">
-                <div className="absolute top-3 right-3">
-                  <span className="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/30">
-                    {t("results.inflationAdjustedBadge")}
-                  </span>
-                </div>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                  {t("results.realLabel")}
-                </p>
-                <p className="text-3xl font-bold text-foreground font-mono break-words">
-                  {fmt(result.finalReal)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t("results.realDescription", { pct: fmtPct(inflation) })}
-                </p>
-              </div>
             )}
-          </div>
+            <SplitBar
+              left={result.totalContributions}
+              right={Math.max(0, profit)}
+              leftLabel={t("results.ownShare", { pct: pct(1 - ins.interestShare) })}
+              rightLabel={t("results.interestShare", { pct: pct(ins.interestShare) })}
+            />
+          </HeroTile>
 
-          {isAdvanced && (
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {t("results.passiveIncomeTitle")}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("results.passiveIncomeDescription", {
-                      pct: fmtPct(withdrawalRate),
-                      years,
-                    })}
-                  </p>
-                </div>
-              </div>
-              <div className={`grid grid-cols-1 gap-4 ${showReal ? "md:grid-cols-2" : ""}`}>
-                <div className="bg-surface rounded-xl p-4 border border-border">
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                    {t("results.monthlyNominal")}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground font-mono break-words">
-                    {fmt(monthlyWithdrawalNominal)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {fmt(annualWithdrawalNominal)} {t("results.annuallySuffix")}
-                  </p>
-                </div>
-                {showReal && (
-                  <div className="bg-surface rounded-xl p-4 border border-brand/30">
-                    <p className="text-[11px] font-medium text-brand uppercase tracking-wider mb-1">
-                      {t("results.monthlyReal")}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground font-mono break-words">
-                      {fmt(monthlyWithdrawalReal)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {fmt(annualWithdrawalReal)} {t("results.annuallySuffix")}
-                    </p>
-                  </div>
+          <Tile
+            i={3}
+            tone="sky"
+            icon={<PiggyBank className="size-5" />}
+            label={t("results.contributedTile")}
+          >
+            <AnimatedNumber value={result.totalContributions} format={fmt} />
+            <Sub>
+              {t("results.contributedSub", { initial: fmt(i.initial), monthly: fmt(i.monthly) })}
+            </Sub>
+          </Tile>
+          <Tile
+            i={4}
+            tone="mint"
+            icon={<HandCoins className="size-5" />}
+            label={t("results.interestTile")}
+          >
+            {profit > 0 ? "+ " : ""}
+            <AnimatedNumber value={profit} format={fmt} />
+            <Sub>
+              {ins.breakEven
+                ? t("results.breakEvenSub", { year: ins.breakEven.year })
+                : t("results.noBreakEven")}
+            </Sub>
+          </Tile>
+
+          {m.isAdvanced && (
+            <>
+              <Tile
+                i={5}
+                tone="lilac"
+                icon={<Wallet className="size-5" />}
+                label={t("results.realTile")}
+              >
+                {m.showReal ? (
+                  <AnimatedNumber value={result.finalReal} format={fmt} />
+                ) : (
+                  fmt(result.finalNominal)
                 )}
-              </div>
-            </div>
+                <Sub>
+                  {m.showReal
+                    ? t("results.realSub", { pct: fmtPct(i.inflation) })
+                    : t("results.enableInflationHint")}
+                </Sub>
+              </Tile>
+              <Tile
+                i={6}
+                tone="stone"
+                icon={<CalendarClock className="size-5" />}
+                label={t("results.rentMonthly")}
+              >
+                <AnimatedNumber value={m.income.monthlyNominal} format={fmt} />
+                <Sub>
+                  {t("results.rentSub", { pct: fmtPct(i.withdrawalRate) })}
+                  {m.showReal && t("results.rentToday", { value: fmt(m.income.monthlyReal) })}
+                </Sub>
+              </Tile>
+            </>
           )}
 
-          <ProjectionView result={result} years={years} showReal={showReal} />
+          <Panel className="rise p-5 sm:col-span-2 md:p-7" style={rise(7)}>
+            <PanelTitle
+              title={t("chart.yearByYear")}
+              subtitle={t("chart.yearByYearSub")}
+              aside={
+                <div className="flex gap-4 text-xs text-(--b-muted)">
+                  <LegendSwatch color="var(--b-sky)" label={t("breakdown.contributions")} />
+                  <LegendSwatch color="var(--b-mint)" label={t("breakdown.interest")} />
+                </div>
+              }
+            />
+            <div className="mt-5 h-[260px] -ml-2 md:h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={bars}
+                  margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
+                  barCategoryGap="18%"
+                >
+                  <CartesianGrid vertical={false} stroke="var(--b-grid)" />
+                  <XAxis
+                    dataKey="year"
+                    stroke="var(--b-axis)"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    interval="preserveStartEnd"
+                    minTickGap={18}
+                  />
+                  <YAxis
+                    tickFormatter={axis}
+                    stroke="var(--b-axis)"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    width={76}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "var(--b-cursor)", radius: 8 }}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const p = payload[0].payload as (typeof bars)[number];
+                      return (
+                        <ChartTip
+                          title={t("breakdown.yearOrdinal", { n: label })}
+                          value={fmt(p.nominal)}
+                          rows={[
+                            {
+                              label: t("breakdown.contributions"),
+                              value: fmt(p.contributions),
+                              color: "var(--b-sky)",
+                            },
+                            {
+                              label: t("breakdown.interest"),
+                              value: fmt(p.interest),
+                              color: "var(--b-mint)",
+                            },
+                            ...(m.showReal
+                              ? [
+                                  {
+                                    label: t("breakdown.real"),
+                                    value: fmt(p.real),
+                                    color: "var(--b-lilac-ink)",
+                                  },
+                                ]
+                              : []),
+                          ]}
+                        />
+                      );
+                    }}
+                  />
+                  <Bar
+                    dataKey="contributions"
+                    stackId="s"
+                    fill="var(--b-sky)"
+                    animationDuration={900}
+                  />
+                  <Bar
+                    dataKey="interest"
+                    stackId="s"
+                    fill="var(--b-mint)"
+                    radius={[6, 6, 0, 0]}
+                    animationDuration={1100}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          <Panel className="rise p-3 sm:col-span-2" style={rise(8)}>
+            {rows.map((p) => {
+              const share = p.nominal > 0 ? Math.max(0, p.interest) / p.nominal : 0;
+              return (
+                <div
+                  key={p.year}
+                  className="flex items-center gap-4 rounded-2xl px-3 py-3 transition hover:bg-(--b-well)"
+                >
+                  <YearBadge>{t("breakdown.yearBadge", { n: p.year })}</YearBadge>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex h-2 overflow-hidden rounded-full bg-(--b-sky-soft)">
+                      <div
+                        className="ml-auto h-full bg-(--b-mint)"
+                        style={{ width: `${share * 100}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 truncate text-xs text-(--b-muted) tabular-nums">
+                      {t("results.rowSub", {
+                        contributions: fmt(p.contributions),
+                        interest: fmt(p.interest),
+                      })}
+                      {m.showReal && ` · ${t("breakdown.real").toLowerCase()} ${fmt(p.real)}`}
+                    </p>
+                  </div>
+                  <span className="w-28 shrink-0 text-right text-base font-semibold tabular-nums sm:w-32">
+                    {fmt(p.nominal)}
+                  </span>
+                </div>
+              );
+            })}
+          </Panel>
         </section>
       </main>
     </Layout>
-  );
-}
-
-function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
-  const { t } = useTranslation();
-  return (
-    <div
-      role="tablist"
-      aria-label={t("modes.ariaLabel")}
-      className="grid grid-cols-2 gap-1 p-1 bg-surface border border-border rounded-xl"
-    >
-      {(
-        [
-          { v: "basic", label: t("modes.basic") },
-          { v: "advanced", label: t("modes.advanced") },
-        ] as const
-      ).map((opt) => {
-        const active = mode === opt.v;
-        return (
-          <button
-            key={opt.v}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(opt.v as Mode)}
-            className={`py-2 text-sm font-medium rounded-lg transition-colors ${
-              active
-                ? "bg-brand text-primary-foreground shadow"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
   );
 }

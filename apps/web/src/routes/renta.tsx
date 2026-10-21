@@ -1,18 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Info, Loader2, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Coins, Landmark, PiggyBank, Wallet } from "lucide-react";
 import {
   fetchCzechInflation,
   formatCurrency,
   solveMonthlyForTargetIncome,
   type SupportedLocale,
 } from "@investio/shared";
+import { useFitSticky } from "@/components/bento/kit";
+import {
+  HeroFigure,
+  HeroLabel,
+  HeroTile,
+  InflationLoader,
+  InputsHeader,
+  Panel,
+  PanelTitle,
+  Slider,
+  SplitBar,
+  Sub,
+  Tile,
+  Well,
+  rise,
+} from "@/components/bento/ui";
 import { Layout } from "@/components/layout";
-import { NumField } from "@/components/num-field";
-import { ResetButton } from "@/components/reset-button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AnimatedNumber } from "@/hooks/use-animated-number";
 import { usePersistedState } from "@/hooks/use-persisted-state";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/renta")({
   head: () => ({
@@ -52,6 +67,7 @@ function RentaCalculator() {
       maximumFractionDigits: 1,
     }).format(Number.isFinite(n) ? n : 0);
   const currencySuffix = locale === "cs" ? "Kč" : "$";
+  const sticky = useFitSticky<HTMLDivElement>();
 
   const [target, setTarget] = usePersistedState("investio.renta.target", DEFAULTS.target);
   const [years, setYears] = usePersistedState("investio.renta.years", DEFAULTS.years);
@@ -97,6 +113,11 @@ function RentaCalculator() {
   const required = Math.max(0, result.requiredMonthly);
   const unreachable = result.requiredMonthly < 0;
   const nominalMonthly = (result.requiredNominalPortfolio * (withdrawal / 100)) / 12;
+  // What you pay in over the years against what returns add to reach the goal.
+  const contributed = initial + required * 12 * years;
+  const growth = Math.max(0, result.requiredNominalPortfolio - contributed);
+  const share = (part: number) =>
+    contributed + growth > 0 ? Math.round((part / (contributed + growth)) * 100) : 0;
 
   async function loadInflation() {
     setLoading(true);
@@ -116,205 +137,229 @@ function RentaCalculator() {
     }
   }
 
+  // The calculation, step by step: each value feeds the next.
+  const ladder = [
+    {
+      label: t("renta.ladderAnnual"),
+      note: t("renta.ladderAnnualNote", { target: fmt(target) }),
+      value: fmt(target * 12),
+    },
+    {
+      label: t("renta.ladderReal"),
+      note: t("renta.ladderRealNote", { withdrawal: fmtPct(withdrawal) }),
+      value: fmt(result.requiredRealPortfolio),
+    },
+    {
+      label: t("renta.ladderNominal"),
+      note: t("renta.ladderNominalNote", { inflation: fmtPct(inflation) }),
+      value: fmt(result.requiredNominalPortfolio),
+    },
+    {
+      label: t("renta.ladderMonthly"),
+      note:
+        t("renta.ladderMonthlyNote", { rate: fmtPct(rate) }) +
+        (initial > 0 ? ` · ${t("renta.ladderInitialNote", { initial: fmt(initial) })}` : ""),
+      value: fmt(required),
+    },
+  ];
+
   return (
     <Layout>
-      <main className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <section className="lg:col-span-5 space-y-6">
-          <div className="bg-card p-6 rounded-2xl border border-border shadow-xl">
-            <div className="flex items-start justify-between gap-3 mb-1">
-              <h1 className="text-lg font-semibold text-foreground">{t("renta.title")}</h1>
-              <ResetButton onClick={reset} />
-            </div>
-            <p className="text-xs text-muted-foreground mb-6">{t("renta.subtitle")}</p>
+      <div className="sticky top-0 z-40 px-4 pt-2 lg:hidden">
+        <div className="flex items-center justify-between rounded-2xl bg-(--b-hero) px-4 py-3 text-(--b-hero-ink) shadow-lg ring-1 ring-(--b-hero-ring)">
+          <span className="text-xs text-(--b-hero-muted)">{t("renta.mobileLabel")}</span>
+          <span className="text-xl font-semibold tabular-nums">
+            <AnimatedNumber value={required} format={fmt} />
+          </span>
+        </div>
+      </div>
 
-            <div className="space-y-5">
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("renta.targetMonthly")}
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label={t("renta.targetMonthlyInfo")}
-                        className="text-muted-foreground hover:text-brand"
-                      >
-                        <Info className="size-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent side="top">{t("renta.targetMonthlyTooltip")}</PopoverContent>
-                  </Popover>
-                </div>
-                <NumField
-                  value={target}
-                  onChange={setTarget}
-                  suffix={currencySuffix}
-                  step={1000}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <NumField
-                  label={t("form.annualRate")}
-                  value={rate}
-                  onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
-                  suffix={t("units.pct")}
-                  step={0.1}
-                />
-                <NumField
-                  label={t("renta.yearsToRetirement")}
-                  value={years}
-                  onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
-                  suffix={t("units.years")}
-                  step={1}
-                  min={1}
-                  max={60}
-                />
-              </div>
-              <NumField
-                label={t("renta.initialOptional")}
-                value={initial}
-                onChange={setInitial}
-                suffix={currencySuffix}
-                step={10000}
-              />
-
-              <div className="pt-4 border-t border-border space-y-4">
-                <NumField
-                  label={t("form.expectedInflation")}
-                  value={inflation}
-                  onChange={setInflation}
-                  suffix={t("units.pct")}
-                  step={0.1}
-                />
-                <button
-                  type="button"
-                  onClick={loadInflation}
-                  disabled={loading}
-                  className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors disabled:opacity-60"
-                >
-                  {loading ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    <RefreshCw className="size-3.5" />
-                  )}
-                  {t("inflation.loadButton", { years })}
-                </button>
-                {meta && !error && (
-                  <p className="text-[11px] text-muted-foreground">
-                    {t("inflation.source", { from: meta.from, to: meta.to, n: meta.n })}
-                  </p>
-                )}
-                {error && <p className="text-[11px] text-destructive">{error}</p>}
-              </div>
-
-              <div className="pt-4 border-t border-border">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("renta.withdrawalRateLabel")}
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-brand">
-                        <Info className="size-3.5" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent side="top">{t("renta.withdrawalRateTooltip")}</PopoverContent>
-                  </Popover>
-                </div>
-                <NumField
-                  value={withdrawal}
-                  onChange={(v) => setWithdrawal(Math.max(0.5, Math.min(20, v)))}
-                  suffix={t("units.pctPerYear")}
-                  step={0.1}
-                />
-              </div>
-            </div>
+      <main className="mx-auto mt-3 grid max-w-7xl grid-cols-1 gap-4 px-4 md:px-8 lg:mt-0 lg:grid-cols-[360px_1fr]">
+        <Panel
+          ref={sticky.ref}
+          className="rise self-start p-6 lg:sticky"
+          style={{ ...rise(1), top: sticky.top }}
+        >
+          <InputsHeader title={t("renta.planTitle")} onReset={reset} />
+          <div className="mt-6 space-y-6">
+            <Slider
+              label={t("renta.targetMonthly")}
+              info={t("renta.targetMonthlyTooltip")}
+              value={target}
+              onChange={setTarget}
+              min={0}
+              max={200_000}
+              step={1000}
+              suffix={currencySuffix}
+            />
+            <Slider
+              label={t("form.annualRate")}
+              value={rate}
+              onChange={(v) => setRate(Math.max(0, Math.min(100, v)))}
+              min={0}
+              max={15}
+              step={0.1}
+              suffix={t("units.pct")}
+            />
+            <Slider
+              label={t("renta.yearsToRetirement")}
+              value={years}
+              onChange={(v) => setYears(Math.max(1, Math.min(60, Math.round(v))))}
+              min={1}
+              max={50}
+              step={1}
+              suffix={t("units.years")}
+            />
+            <Slider
+              label={t("renta.initialOptional")}
+              value={initial}
+              onChange={setInitial}
+              min={0}
+              max={5_000_000}
+              step={10_000}
+              suffix={currencySuffix}
+            />
           </div>
-        </section>
+          <Well>
+            <Slider
+              label={t("form.expectedInflation")}
+              value={inflation}
+              onChange={setInflation}
+              min={0}
+              max={10}
+              step={0.1}
+              suffix={t("units.pct")}
+            />
+            <InflationLoader
+              years={years}
+              load={loadInflation}
+              loading={loading}
+              error={error}
+              meta={meta}
+            />
+            <Slider
+              label={t("renta.withdrawalRateLabel")}
+              info={t("renta.withdrawalRateTooltip")}
+              value={withdrawal}
+              onChange={(v) => setWithdrawal(Math.max(0.5, Math.min(20, v)))}
+              min={1}
+              max={10}
+              step={0.1}
+              suffix={t("units.pct")}
+            />
+          </Well>
+        </Panel>
 
-        <section className="lg:col-span-7 space-y-6">
-          <div className="bg-card p-6 rounded-2xl border border-brand/30 relative overflow-hidden">
-            <div className="absolute top-3 right-3">
-              <span className="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded border border-brand/30">
-                {t("renta.resultBadge")}
-              </span>
-            </div>
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              {t("renta.requiredMonthlyLabel")}
-            </p>
-            <p className="text-4xl md:text-5xl font-bold text-foreground font-mono break-words">
-              {unreachable ? "—" : fmt(required)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-3">
+        <section className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+          <HeroTile i={2} className="sm:col-span-2">
+            <HeroLabel>{t("renta.requiredMonthlyLabel")}</HeroLabel>
+            <HeroFigure muted={unreachable}>
+              <AnimatedNumber value={required} format={fmt} />
+            </HeroFigure>
+            <p className="mt-3 max-w-2xl text-[15px] text-(--b-hero-soft)">
               {unreachable
                 ? t("renta.unreachable")
                 : t("renta.afterYears", { years, target: fmt(target) })}
             </p>
-          </div>
+            <SplitBar
+              left={contributed}
+              right={growth}
+              leftLabel={t("results.ownShare", { pct: share(contributed) })}
+              rightLabel={t("results.interestShare", { pct: share(growth) })}
+            />
+          </HeroTile>
 
-          {!unreachable && (
-            <div className="bg-card p-6 rounded-2xl border border-brand/30">
-              <p className="text-[11px] font-medium text-brand uppercase tracking-wider mb-1">
-                {t("renta.nominalMonthlyLabel")}
-              </p>
-              <p className="text-3xl font-bold text-foreground font-mono break-words">
-                {fmt(nominalMonthly)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.nominalMonthlyDesc", { years, inflation: fmtPct(inflation) })}
-              </p>
-            </div>
-          )}
+          <Tile
+            i={3}
+            tone="sky"
+            icon={<Coins className="size-5" />}
+            label={t("renta.nominalMonthlyLabel")}
+          >
+            <AnimatedNumber value={nominalMonthly} format={fmt} />
+            <Sub>{t("renta.nominalMonthlyDesc", { years, inflation: fmtPct(inflation) })}</Sub>
+          </Tile>
+          <Tile
+            i={4}
+            tone="mint"
+            icon={<PiggyBank className="size-5" />}
+            label={t("renta.contributedTile")}
+          >
+            <AnimatedNumber value={contributed} format={fmt} />
+            <Sub>{t("renta.contributedSub", { growth: fmt(growth) })}</Sub>
+          </Tile>
+          <Tile
+            i={5}
+            tone="lilac"
+            icon={<Wallet className="size-5" />}
+            label={t("renta.portfolioReal")}
+          >
+            <AnimatedNumber value={result.requiredRealPortfolio} format={fmt} />
+            <Sub>
+              {t("renta.portfolioRealDesc", {
+                target: fmt(target),
+                withdrawal: fmtPct(withdrawal),
+              })}
+            </Sub>
+          </Tile>
+          <Tile
+            i={6}
+            tone="stone"
+            icon={<Landmark className="size-5" />}
+            label={t("renta.portfolioNominal")}
+          >
+            <AnimatedNumber value={result.requiredNominalPortfolio} format={fmt} />
+            <Sub>{t("renta.portfolioNominalDesc", { years })}</Sub>
+          </Tile>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("renta.portfolioNominal")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(result.requiredNominalPortfolio)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.portfolioNominalDesc", { years })}
-              </p>
-            </div>
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
-                {t("renta.portfolioReal")}
-              </p>
-              <p className="text-2xl font-bold text-foreground font-mono break-words">
-                {fmt(result.requiredRealPortfolio)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("renta.portfolioRealDesc", {
-                  target: fmt(target),
-                  withdrawal: fmtPct(withdrawal),
-                })}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-card p-6 rounded-2xl border border-border text-sm text-muted-foreground leading-relaxed">
-            <h3 className="text-sm font-semibold text-foreground mb-2">{t("renta.howItWorks")}</h3>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>{t("renta.step1", { value: fmt(target * 12) })}</li>
-              <li>
-                {t("renta.step2", {
-                  withdrawal: fmtPct(withdrawal),
-                  value: fmt(result.requiredRealPortfolio),
-                })}
-              </li>
-              <li>
-                {t("renta.step3", {
-                  years,
-                  inflation: fmtPct(inflation),
-                  value: fmt(result.requiredNominalPortfolio),
-                })}
-              </li>
-              <li>{t("renta.step4", { rate: fmtPct(rate) })}</li>
+          <Panel className="rise p-5 sm:col-span-2 md:p-7" style={rise(7)}>
+            <PanelTitle title={t("renta.howItWorks")} />
+            <ol className="mt-5 space-y-2">
+              {ladder.map((step, idx) => {
+                const last = idx === ladder.length - 1;
+                return (
+                  <li
+                    key={step.label}
+                    className={cn(
+                      "flex items-center gap-4 rounded-2xl px-4 py-3.5 transition",
+                      last ? "bg-(--b-mint-soft) text-(--b-mint-ink)" : "hover:bg-(--b-well)",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "grid size-9 shrink-0 place-items-center rounded-full text-sm font-semibold tabular-nums",
+                        last
+                          ? "bg-(--b-mint) text-(--b-hero)"
+                          : "bg-(--b-badge) text-(--b-badge-ink)",
+                      )}
+                    >
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={cn(
+                          "text-[15px]",
+                          last ? "font-semibold" : "font-medium text-(--b-ink)",
+                        )}
+                      >
+                        {step.label}
+                      </p>
+                      <p className={cn("mt-0.5 text-xs", last ? "opacity-80" : "text-(--b-muted)")}>
+                        {step.note}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "shrink-0 text-right tabular-nums",
+                        last ? "text-xl font-semibold" : "text-base font-semibold text-(--b-ink)",
+                      )}
+                    >
+                      {step.value}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
-          </div>
+          </Panel>
         </section>
       </main>
     </Layout>

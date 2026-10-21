@@ -3,11 +3,13 @@ import type { InvestmentResult } from "@investio/shared";
 import { NumField } from "@/components/num-field";
 import { cn } from "@/lib/utils";
 
-// Shared building blocks for the three design directions on /smery. Each
-// direction colours them through CSS variables and class overrides.
+// Interactive building blocks of the Bento screens: a slider with an
+// editable number, a sliding segmented control, projection facts and a
+// side panel that sticks without hiding its lower fields.
 
 export function SliderField({
   label,
+  labelNode,
   value,
   onChange,
   min,
@@ -20,6 +22,7 @@ export function SliderField({
   suffixClassName,
 }: {
   label: string;
+  labelNode?: ReactNode;
   value: number;
   onChange: (v: number) => void;
   min: number;
@@ -34,31 +37,32 @@ export function SliderField({
   const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
   return (
     <div className={className}>
-      <div className="flex items-center justify-between gap-3">
-        <span className={cn("text-sm", labelClassName)}>{label}</span>
-        <div className="w-[9.5rem] shrink-0">
-          <NumField
-            value={value}
-            onChange={onChange}
-            suffix={suffix}
-            step={step}
-            ariaLabel={label}
-            inputClassName={inputClassName}
-            suffixClassName={suffixClassName}
-          />
-        </div>
+      {/* The label gets its own line, so long ones never squeeze the number. */}
+      <span className={cn("flex min-h-5 items-center text-sm", labelClassName)}>
+        {labelNode ?? label}
+      </span>
+      <div className="mt-2 grid grid-cols-[minmax(0,1fr)_8.5rem] items-center gap-4">
+        <input
+          type="range"
+          className="range"
+          aria-label={label}
+          min={min}
+          max={max}
+          step={step}
+          value={Math.min(max, Math.max(min, value))}
+          style={{ "--fill": `${pct}%` } as React.CSSProperties}
+          onChange={(e) => onChange(Number(e.target.value))}
+        />
+        <NumField
+          value={value}
+          onChange={onChange}
+          suffix={suffix}
+          step={step}
+          ariaLabel={label}
+          inputClassName={inputClassName}
+          suffixClassName={suffixClassName}
+        />
       </div>
-      <input
-        type="range"
-        className="range mt-2"
-        aria-label={label}
-        min={min}
-        max={max}
-        step={step}
-        value={Math.min(max, Math.max(min, value))}
-        style={{ "--fill": `${pct}%` } as React.CSSProperties}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
     </div>
   );
 }

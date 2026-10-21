@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -12,8 +12,9 @@
  * The @theme inline block maps CSS custom properties to Tailwind utility
  * classes (e.g. --color-primary -> bg-primary, text-primary).
  *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
+ * The palette lives in the --b-* "Bento" tokens further down (ivory by day,
+ * warm graphite by night); the shadcn names in :root and .dark point at them
+ * so library components (popover, drawer, carousel) follow the same look.
  *
  * To add a new semantic color:
  * 1. Add the variable to :root (light value) and .dark (dark value)
@@ -26,8 +27,8 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
   --color-surface: var(--surface);
@@ -71,82 +72,51 @@
 }
 
 :root {
-  --radius: 0.875rem;
-  --background: oklch(0.985 0.005 250);
-  --foreground: oklch(0.22 0.04 265);
-  --surface: oklch(0.97 0.008 250);
-  --card2: oklch(1 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.04 265);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 265);
-  --brand: oklch(0.62 0.16 162);
-  --brand-dark: oklch(0.55 0.15 162);
-  --primary: oklch(0.62 0.16 162);
-  --primary-foreground: oklch(0.985 0.005 250);
-  --secondary: oklch(0.95 0.01 250);
-  --secondary-foreground: oklch(0.22 0.04 265);
-  --muted: oklch(0.95 0.01 250);
-  --muted-foreground: oklch(0.5 0.025 257);
-  --accent: oklch(0.95 0.01 250);
-  --accent-foreground: oklch(0.22 0.04 265);
-  --destructive: oklch(0.62 0.21 25);
-  --destructive-foreground: oklch(0.98 0.01 255);
-  --border: oklch(0 0 0 / 8%);
-  --input: oklch(0 0 0 / 10%);
-  --ring: oklch(0.62 0.16 162 / 50%);
-  --chart-1: oklch(0.62 0.16 162);
-  --chart-2: oklch(0.5 0.025 257);
-  --chart-3: oklch(0.6 0.12 180);
-  --chart-4: oklch(0.55 0.18 30);
-  --chart-5: oklch(0.55 0.2 300);
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.22 0.04 265);
-  --sidebar-primary: oklch(0.62 0.16 162);
-  --sidebar-primary-foreground: oklch(0.985 0.005 250);
-  --sidebar-accent: oklch(0.95 0.01 250);
-  --sidebar-accent-foreground: oklch(0.22 0.04 265);
-  --sidebar-border: oklch(0 0 0 / 8%);
-  --sidebar-ring: oklch(0.62 0.16 162 / 50%);
+  --radius: 1rem;
+  --background: var(--b-bg);
+  --foreground: var(--b-ink);
+  --surface: var(--b-sunk);
+  --card2: var(--b-card);
+  --card: var(--b-card);
+  --card-foreground: var(--b-ink);
+  --popover: var(--b-card);
+  --popover-foreground: var(--b-ink);
+  --brand: var(--b-mint);
+  --brand-dark: var(--b-mint-ink);
+  --primary: var(--b-hero);
+  --primary-foreground: var(--b-hero-ink);
+  --secondary: var(--b-sunk);
+  --secondary-foreground: var(--b-ink);
+  --muted: var(--b-sunk);
+  --muted-foreground: var(--b-muted);
+  --accent: var(--b-sunk);
+  --accent-foreground: var(--b-ink);
+  --destructive: var(--b-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--b-line);
+  --input: var(--b-line);
+  --ring: var(--b-mint);
+  --chart-1: var(--b-mint);
+  --chart-2: var(--b-sky);
+  --chart-3: var(--b-lilac-ink);
+  --chart-4: var(--b-error);
+  --chart-5: var(--b-muted);
+  --sidebar: var(--b-card);
+  --sidebar-foreground: var(--b-ink);
+  --sidebar-primary: var(--b-hero);
+  --sidebar-primary-foreground: var(--b-hero-ink);
+  --sidebar-accent: var(--b-sunk);
+  --sidebar-accent-foreground: var(--b-ink);
+  --sidebar-border: var(--b-line);
+  --sidebar-ring: var(--b-mint);
+  --range-fill: var(--b-range-fill);
+  --range-track: var(--b-line);
+  --range-thumb: var(--b-range-thumb);
 }
 
 .dark {
-  --background: oklch(0.205 0.04 265);
-  --foreground: oklch(0.93 0.015 255);
-  --surface: oklch(0.205 0.04 265);
-  --card2: oklch(0.275 0.035 263);
-  --card: oklch(0.275 0.035 263);
-  --card-foreground: oklch(0.97 0.01 255);
-  --popover: oklch(0.275 0.035 263);
-  --popover-foreground: oklch(0.97 0.01 255);
-  --brand: oklch(0.745 0.165 162);
-  --brand-dark: oklch(0.66 0.15 162);
-  --primary: oklch(0.745 0.165 162);
-  --primary-foreground: oklch(0.18 0.04 265);
-  --secondary: oklch(0.33 0.04 260);
-  --secondary-foreground: oklch(0.97 0.01 255);
-  --muted: oklch(0.33 0.04 260);
-  --muted-foreground: oklch(0.7 0.03 257);
-  --accent: oklch(0.33 0.04 260);
-  --accent-foreground: oklch(0.97 0.01 255);
-  --destructive: oklch(0.62 0.21 25);
-  --destructive-foreground: oklch(0.98 0.01 255);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.745 0.165 162 / 50%);
-  --chart-1: oklch(0.745 0.165 162);
-  --chart-2: oklch(0.7 0.03 257);
-  --chart-3: oklch(0.7 0.12 180);
-  --chart-4: oklch(0.55 0.18 30);
-  --chart-5: oklch(0.65 0.2 300);
-  --sidebar: oklch(0.275 0.035 263);
-  --sidebar-foreground: oklch(0.97 0.01 255);
-  --sidebar-primary: oklch(0.745 0.165 162);
-  --sidebar-primary-foreground: oklch(0.18 0.04 265);
-  --sidebar-accent: oklch(0.33 0.04 260);
-  --sidebar-accent-foreground: oklch(0.97 0.01 255);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.745 0.165 162 / 50%);
+  --primary: var(--b-ink);
+  --primary-foreground: var(--b-bg);
 }
 
 @layer base {
@@ -157,6 +127,8 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 
   /* Extend background behind the iOS status bar (safe-area-inset-top).
@@ -213,8 +185,7 @@
   padding-top: env(safe-area-inset-top);
 }
 
-/* ── Design directions preview (/smery) ─────────────────────────────────────
-   A range slider whose filled part and thumb take colours from the
+/* A range slider whose filled part and thumb take colours from the
    surrounding direction: --range-fill, --range-track, --range-thumb. */
 .range {
   --fill: 0%;
@@ -300,8 +271,8 @@
   }
 }
 
-/* Direction B "Bento" tokens: ivory by day, warm graphite by night. */
-.dir-b {
+/* Bento tokens: ivory by day, warm graphite by night. */
+:root {
   color-scheme: light;
   --b-bg: #f4f3ee;
   --b-card: #ffffff;
@@ -340,7 +311,7 @@
   --b-stone-soft: #ebe8df;
   --b-stone-ink: #1b1b19;
 }
-.dark .dir-b {
+.dark {
   color-scheme: dark;
   --b-bg: #111210;
   --b-card: #1a1b19;
@@ -380,6 +351,6 @@
   --b-stone-ink: #ebe7dc;
 }
 /* Fields inside the grey settings well sit on the card colour, not the well's. */
-.dir-b .b-well {
+.b-well {
   --b-sunk: var(--b-card);
 }

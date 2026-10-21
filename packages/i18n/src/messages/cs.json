@@ -64,7 +64,30 @@
     "shareOfFinal": "{{pct}} % konečné částky",
     "rentMonthly": "Renta měsíčně",
     "rentMonthlyReal": "Renta v dnešních cenách",
-    "rentNote": "Výběr {{pct}} % ročně · {{annual}} za rok"
+    "rentNote": "Výběr {{pct}} % ročně · {{annual}} za rok",
+    "inYears_one": "Za {{count}} rok",
+    "inYears_few": "Za {{count}} roky",
+    "inYears_many": "Za {{count}} let",
+    "inYears_other": "Za {{count}} let",
+    "heroLabel_one": "Za {{count}} rok budeš mít",
+    "heroLabel_few": "Za {{count}} roky budeš mít",
+    "heroLabel_many": "Za {{count}} let budeš mít",
+    "heroLabel_other": "Za {{count}} let budeš mít",
+    "multipleBefore": "To je",
+    "multipleAfter": "víc, než kolik do toho vložíš.",
+    "ownShare": "Tvoje vklady {{pct}} %",
+    "interestShare": "Úrok {{pct}} %",
+    "contributedTile": "Vložíš celkem",
+    "contributedSub": "{{initial}} na začátku + {{monthly}} měsíčně",
+    "interestTile": "Úrok přidá",
+    "breakEvenSub": "Od {{year}}. roku vydělává víc než ty",
+    "noBreakEven": "Úrok zatím nedohoní tvoje vklady",
+    "realTile": "V dnešních cenách",
+    "realSub": "Při inflaci {{pct}} % ročně",
+    "enableInflationHint": "Zapni inflaci a uvidíš reálnou hodnotu",
+    "rentSub": "Výběr {{pct}} % ročně",
+    "rentToday": " · dnes {{value}}",
+    "rowSub": "vklady {{contributions}} · úrok {{interest}}"
   },
   "chart": {
     "title": "Projekce růstu portfolia",
@@ -75,7 +98,9 @@
     "legendContributions": "Vklady",
     "realExplainer": "Reálná hodnota = nominální hodnota očištěná o inflaci. Ukazuje, jakou kupní sílu budou peníze mít v dnešních cenách.",
     "realExplainerInfo": "Vysvětlení reálné hodnoty",
-    "tooltipYearLabel": "Rok {{year}}"
+    "tooltipYearLabel": "Rok {{year}}",
+    "yearByYear": "Rok po roku",
+    "yearByYearSub": "Každý sloupec je stav na konci roku"
   },
   "breakdown": {
     "year": "Rok",
@@ -83,7 +108,8 @@
     "contributions": "Vklady",
     "interest": "Úroky",
     "nominal": "Nominální",
-    "real": "Reálná"
+    "real": "Reálná",
+    "yearBadge": "{{n}}. r"
   },
   "footer": {
     "copyright": "© {{year}} Investio",
@@ -115,7 +141,8 @@
     "metaOgTitle": "Investio — Investice",
     "metaOgDescription": "Základní i rozšířený režim: počáteční vklad, měsíční vklad, úrok, doba, inflace a renta.",
     "title": "Investiční kalkulačka",
-    "subtitle": "Složené úročení s měsíční kapitalizací"
+    "subtitle": "Složené úročení s měsíční kapitalizací",
+    "planTitle": "Tvůj plán"
   },
   "basic": {
     "metaTitle": "Investio — Základní kalkulačka složeného úročení",
@@ -167,7 +194,11 @@
     "ladderNominalNote": "Přepočet při {{inflation}} % inflaci",
     "ladderMonthly": "Měsíční vklad",
     "ladderMonthlyNote": "Při ročním úroku {{rate}} %",
-    "ladderInitialNote": "počáteční vklad {{initial}}"
+    "ladderInitialNote": "počáteční vklad {{initial}}",
+    "planTitle": "Tvůj cíl",
+    "mobileLabel": "Investuj měsíčně",
+    "contributedTile": "Celkem vložíš",
+    "contributedSub": "Zbytek, {{growth}}, dodá výnos"
   },
   "hypoteka": {
     "metaTitle": "Investio — Kalkulačka hypotéky a mimořádných splátek",
@@ -203,7 +234,7 @@
     "compareTitle": "Mimořádné splátky vs. investování",
     "compareSubtitle": "Co se vyplatí víc s {{extra}} měsíčně navíc?",
     "strategyA": "A) Doplácet hypotéku → pak investovat",
-    "strategyADesc": "Hypotéka bude splacena za <strong>{{payoff}}</strong>. Ušetříš <strong>{{saved}}</strong> na úrocích.",
+    "strategyADesc": "Hypotéka bude splacena za <strong>{{payoff}}</strong> a na úrocích ušetříš <strong>{{saved}}</strong>.",
     "strategyB": "B) Investovat celou dobu",
     "strategyBDesc": "Splácíš standardně {{years}} let a celou dobu investuješ {{extra}} měsíčně při {{rate}} % p.a.",
     "strategyC": "C) Splatit při protnutí",
@@ -225,7 +256,18 @@
     "yearUnit_other": "let",
     "monthsShort": "{{n}} měs.",
     "crossoverShort": "Investice dorovná dluh",
-    "winnerTag": "Vychází lépe"
+    "winnerTag": "Vychází lépe",
+    "planTitle": "Tvoje hypotéka",
+    "heroSub": "Anuitní splátka po dobu {{years}} let",
+    "principalShare": "Jistina {{pct}} %",
+    "interestShareBar": "Úroky {{pct}} %",
+    "savedTile": "Ušetříš na úrocích",
+    "savedSub": "Hypotéka splacená za {{payoff}}",
+    "crossoverTile": "Investice dorovná dluh",
+    "crossoverSub": "Když místo splátek investuješ při {{rate}} % ročně",
+    "rowSub": "jistina {{principal}} · úrok {{interest}}",
+    "showAllYears": "Zobrazit všechny roky",
+    "showFewerYears": "Jen vybrané roky"
   },
   "welcome": {
     "kicker": "Vítej v Investiu",

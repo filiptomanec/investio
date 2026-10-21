@@ -62,7 +62,26 @@
     "shareOfFinal": "{{pct}} % of the total",
     "rentMonthly": "Monthly income",
     "rentMonthlyReal": "Income in today's money",
-    "rentNote": "{{pct}} % withdrawn a year · {{annual}} a year"
+    "rentNote": "{{pct}} % withdrawn a year · {{annual}} a year",
+    "inYears_one": "In {{count}} year",
+    "inYears_other": "In {{count}} years",
+    "heroLabel_one": "In {{count}} year you'll have",
+    "heroLabel_other": "In {{count}} years you'll have",
+    "multipleBefore": "That's",
+    "multipleAfter": "more than you put in.",
+    "ownShare": "Your deposits {{pct}} %",
+    "interestShare": "Interest {{pct}} %",
+    "contributedTile": "You'll put in",
+    "contributedSub": "{{initial}} up front + {{monthly}} a month",
+    "interestTile": "Interest adds",
+    "breakEvenSub": "From year {{year}} it earns more than you put in",
+    "noBreakEven": "Interest doesn't overtake your deposits yet",
+    "realTile": "In today's money",
+    "realSub": "At {{pct}} % inflation a year",
+    "enableInflationHint": "Turn on inflation to see the real value",
+    "rentSub": "{{pct}} % withdrawn a year",
+    "rentToday": " · {{value}} in today's money",
+    "rowSub": "deposits {{contributions}} · interest {{interest}}"
   },
   "chart": {
     "title": "Portfolio growth projection",
@@ -73,7 +92,9 @@
     "legendContributions": "Contributions",
     "realExplainer": "Real value = nominal value adjusted for inflation. Shows how much purchasing power the money will have in today's prices.",
     "realExplainerInfo": "Real value explainer",
-    "tooltipYearLabel": "Year {{year}}"
+    "tooltipYearLabel": "Year {{year}}",
+    "yearByYear": "Year by year",
+    "yearByYearSub": "Each column is the balance at year end"
   },
   "breakdown": {
     "year": "Year",
@@ -81,7 +102,8 @@
     "contributions": "Contributions",
     "interest": "Interest",
     "nominal": "Nominal",
-    "real": "Real"
+    "real": "Real",
+    "yearBadge": "Y{{n}}"
   },
   "footer": {
     "copyright": "© {{year}} Investio",
@@ -113,7 +135,8 @@
     "metaOgTitle": "Investio — Investments",
     "metaOgDescription": "Basic and advanced modes: initial deposit, monthly contribution, rate, duration, inflation and pension.",
     "title": "Investment calculator",
-    "subtitle": "Compound interest with monthly compounding"
+    "subtitle": "Compound interest with monthly compounding",
+    "planTitle": "Your plan"
   },
   "basic": {
     "metaTitle": "Investio — Basic compound interest calculator",
@@ -165,7 +188,11 @@
     "ladderNominalNote": "Converted at {{inflation}} % inflation",
     "ladderMonthly": "Monthly contribution",
     "ladderMonthlyNote": "At {{rate}} % a year",
-    "ladderInitialNote": "starting with {{initial}}"
+    "ladderInitialNote": "starting with {{initial}}",
+    "planTitle": "Your goal",
+    "mobileLabel": "Invest monthly",
+    "contributedTile": "You'll put in",
+    "contributedSub": "Returns add the rest, {{growth}}"
   },
   "hypoteka": {
     "metaTitle": "Investio — Mortgage calculator with extra payments",
@@ -201,7 +228,7 @@
     "compareTitle": "Extra payments vs. investing",
     "compareSubtitle": "Which pays off more with {{extra}} extra per month?",
     "strategyA": "A) Pay down mortgage → then invest",
-    "strategyADesc": "Mortgage paid off in <strong>{{payoff}}</strong>. You save <strong>{{saved}}</strong> on interest.",
+    "strategyADesc": "Mortgage paid off in <strong>{{payoff}}</strong>, saving <strong>{{saved}}</strong> in interest.",
     "strategyB": "B) Invest the whole time",
     "strategyBDesc": "Standard amortization for {{years}} years while investing {{extra}} per month at {{rate}} % p.a.",
     "strategyC": "C) Pay off at crossover",
@@ -223,7 +250,18 @@
     "yearUnit_other": "yrs",
     "monthsShort": "{{n}} mo.",
     "crossoverShort": "Investment catches the balance",
-    "winnerTag": "Comes out ahead"
+    "winnerTag": "Comes out ahead",
+    "planTitle": "Your mortgage",
+    "heroSub": "Annuity payment over {{years}} years",
+    "principalShare": "Principal {{pct}} %",
+    "interestShareBar": "Interest {{pct}} %",
+    "savedTile": "Interest you save",
+    "savedSub": "Mortgage paid off in {{payoff}}",
+    "crossoverTile": "Investment catches the balance",
+    "crossoverSub": "If you invest instead at {{rate}} % a year",
+    "rowSub": "principal {{principal}} · interest {{interest}}",
+    "showAllYears": "Show every year",
+    "showFewerYears": "Selected years only"
   },
   "welcome": {
     "kicker": "Welcome to Investio",

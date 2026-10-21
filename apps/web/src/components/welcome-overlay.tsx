@@ -37,7 +37,7 @@ type SlideDef = {
   to: "/" | "/renta" | "/hypoteka";
   desktop: string;
   mobile: string;
-  gradient: string;
+  tone: "mint" | "lilac" | "sky";
 };
 
 const slidesDef: SlideDef[] = [
@@ -47,7 +47,7 @@ const slidesDef: SlideDef[] = [
     to: "/",
     desktop: basicDesktop,
     mobile: basicMobile,
-    gradient: "from-emerald-500/40 via-teal-500/20 to-transparent",
+    tone: "mint",
   },
   {
     key: "renta",
@@ -55,7 +55,7 @@ const slidesDef: SlideDef[] = [
     to: "/renta",
     desktop: rentaDesktop,
     mobile: rentaMobile,
-    gradient: "from-violet-500/40 via-fuchsia-500/20 to-transparent",
+    tone: "lilac",
   },
   {
     key: "hypoteka",
@@ -63,7 +63,7 @@ const slidesDef: SlideDef[] = [
     to: "/hypoteka",
     desktop: hypotekaDesktop,
     mobile: hypotekaMobile,
-    gradient: "from-amber-500/40 via-orange-500/20 to-transparent",
+    tone: "sky",
   },
 ];
 
@@ -124,7 +124,7 @@ export function WelcomeOverlay({ open, onClose }: Props) {
         }}
         shouldScaleBackground={false}
       >
-        <DrawerContent className="h-[96dvh] bg-card border-border p-0 focus:outline-none">
+        <DrawerContent className="h-[96dvh] bg-(--b-card) border-(--b-line) p-0 focus:outline-none">
           <DrawerTitle className="sr-only">{t("welcome.drawerTitle")}</DrawerTitle>
           <div className="flex-1 min-h-0 flex flex-col">{body}</div>
         </DrawerContent>
@@ -134,12 +134,12 @@ export function WelcomeOverlay({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/85 backdrop-blur-md animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="welcome-title"
     >
-      <div className="relative w-full max-w-6xl max-h-[95vh] h-[760px] overflow-hidden bg-card border border-border rounded-3xl shadow-2xl flex flex-col">
+      <div className="relative w-full max-w-6xl max-h-[95vh] h-[760px] overflow-hidden bg-(--b-card) rounded-[32px] shadow-2xl flex flex-col animate-in zoom-in-95 fade-in duration-300">
         {body}
       </div>
     </div>
@@ -170,21 +170,22 @@ function Shell({
         type="button"
         onClick={onClose}
         aria-label={t("welcome.close")}
-        className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 size-9 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 grid size-9 place-items-center rounded-full bg-(--b-track) text-(--b-muted) hover:text-(--b-ink) transition-colors"
       >
         <X className="size-4" />
       </button>
 
       <div className="px-4 sm:px-10 pt-4 sm:pt-8 pb-2 sm:pb-4 flex-shrink-0">
-        <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider text-brand bg-brand/10 border border-brand/30 rounded-full px-2 py-0.5 sm:py-1 mb-1.5 sm:mb-3">
+        <div className="inline-flex items-center gap-1.5 text-xs font-medium text-(--b-mint-ink) bg-(--b-mint-soft) rounded-full px-2.5 py-1 mb-2 sm:mb-3">
           <Sparkles className="size-3" />
           {t("welcome.kicker")}
         </div>
         <h2
           id="welcome-title"
-          className="text-lg sm:text-3xl font-bold tracking-tight text-foreground leading-tight"
+          className="text-xl sm:text-[32px] font-semibold tracking-[-0.025em] text-(--b-ink) leading-tight"
         >
-          {t("welcome.title")} <span className="text-brand">{t("welcome.titleHighlight")}</span>
+          {t("welcome.title")}{" "}
+          <span className="text-(--b-mint-ink)">{t("welcome.titleHighlight")}</span>
         </h2>
       </div>
 
@@ -215,7 +216,7 @@ function Shell({
           type="button"
           onClick={() => api?.scrollPrev()}
           aria-label={t("welcome.prev")}
-          className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors flex-shrink-0"
+          className="grid size-10 place-items-center rounded-full bg-(--b-track) text-(--b-ink) hover:bg-(--b-line) transition-colors flex-shrink-0"
         >
           <ChevronLeft className="size-4" />
         </button>
@@ -228,10 +229,10 @@ function Shell({
               onClick={() => api?.scrollTo(i)}
               aria-label={t("welcome.slideAria", { n: i + 1 })}
               className={cn(
-                "h-1.5 rounded-full transition-all",
+                "h-1.5 rounded-full transition-[width,background-color] duration-300",
                 i === current
-                  ? "w-6 sm:w-8 bg-brand"
-                  : "w-1.5 bg-border hover:bg-muted-foreground/40",
+                  ? "w-6 sm:w-8 bg-(--b-mint)"
+                  : "w-1.5 bg-(--b-line) hover:bg-(--b-muted)",
               )}
             />
           ))}
@@ -241,26 +242,26 @@ function Shell({
           type="button"
           onClick={() => api?.scrollNext()}
           aria-label={t("welcome.next")}
-          className="size-9 inline-flex items-center justify-center rounded-lg border border-border bg-surface hover:bg-muted text-foreground transition-colors flex-shrink-0"
+          className="grid size-10 place-items-center rounded-full bg-(--b-track) text-(--b-ink) hover:bg-(--b-line) transition-colors flex-shrink-0"
         >
           <ChevronRight className="size-4" />
         </button>
       </div>
 
-      <div className="px-3 sm:px-10 py-3 sm:py-4 border-t border-border flex items-center justify-between gap-3 flex-shrink-0">
-        <label className="flex items-center gap-2 text-[11px] sm:text-xs text-muted-foreground cursor-pointer select-none">
+      <div className="px-3 sm:px-10 py-3 sm:py-4 border-t border-(--b-line) flex items-center justify-between gap-3 flex-shrink-0">
+        <label className="flex items-center gap-2 text-xs sm:text-[13px] text-(--b-muted) cursor-pointer select-none">
           <input
             type="checkbox"
             checked={dontShow}
             onChange={(e) => setDontShow(e.target.checked)}
-            className="size-4 rounded border-border accent-brand"
+            className="size-4 rounded accent-[var(--b-mint)]"
           />
           {t("welcome.dontShow")}
         </label>
         <button
           type="button"
           onClick={onClose}
-          className="text-xs font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-brand text-primary-foreground hover:bg-brand-dark transition-colors whitespace-nowrap"
+          className="text-sm font-semibold px-5 py-2.5 rounded-full bg-(--b-hero) text-(--b-hero-ink) hover:opacity-90 dark:bg-(--b-mint) dark:text-(--b-hero) transition whitespace-nowrap"
         >
           {t("welcome.start")}
         </button>
@@ -284,14 +285,11 @@ function SlideCard({
   const bullets = [t(`${base}.bullet1`), t(`${base}.bullet2`), t(`${base}.bullet3`)];
 
   return (
-    <div className="relative h-full rounded-2xl border border-border bg-surface overflow-hidden">
-      <div
-        className={cn(
-          "absolute inset-0 bg-gradient-to-br pointer-events-none opacity-90",
-          slide.gradient,
-        )}
-      />
-      <div className="absolute -top-24 -right-24 size-72 rounded-full bg-brand/15 blur-3xl pointer-events-none" />
+    <div
+      className="relative h-full rounded-[28px] overflow-hidden"
+      style={{ background: `var(--b-${slide.tone}-soft)`, color: `var(--b-${slide.tone}-ink)` }}
+    >
+      <div className="absolute -top-20 -right-20 size-72 rounded-full bg-white/25 dark:bg-white/[0.04] pointer-events-none" />
 
       <div
         className={cn(
@@ -300,20 +298,20 @@ function SlideCard({
         )}
       >
         <div className="flex flex-col justify-center min-w-0">
-          <div className="inline-flex w-fit items-center gap-1.5 text-[10px] uppercase tracking-wider text-brand bg-brand/10 border border-brand/30 rounded-full px-2 py-0.5 mb-2 sm:mb-3">
+          <div className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold bg-(--b-icon-bg) rounded-full px-2.5 py-1 mb-2 sm:mb-3">
             <Icon className="size-3" />
             {t(`${base}.kicker`)}
           </div>
-          <h3 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
-            {t(`${base}.title`)} <span className="text-brand">{t(`${base}.highlight`)}</span>
+          <h3 className="text-xl sm:text-2xl lg:text-4xl font-semibold tracking-[-0.025em] leading-tight">
+            {t(`${base}.title`)} <span className="opacity-70">{t(`${base}.highlight`)}</span>
           </h3>
-          <p className="mt-2 sm:mt-3 text-sm md:text-base text-muted-foreground leading-relaxed max-w-md">
+          <p className="mt-2 sm:mt-3 text-sm md:text-base opacity-80 leading-relaxed max-w-md">
             {t(`${base}.description`)}
           </p>
           <ul className="mt-3 sm:mt-4 space-y-1.5">
             {bullets.map((b) => (
-              <li key={b} className="flex items-center gap-2 text-xs sm:text-sm text-foreground/85">
-                <span className="size-1.5 rounded-full bg-brand flex-shrink-0" />
+              <li key={b} className="flex items-center gap-2 text-sm">
+                <span className="size-1.5 rounded-full bg-current flex-shrink-0" />
                 {b}
               </li>
             ))}
@@ -322,7 +320,7 @@ function SlideCard({
             <Link
               to={slide.to}
               onClick={onCta}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-4 py-2 sm:py-2.5 rounded-xl bg-brand text-primary-foreground hover:bg-brand-dark transition-colors w-fit"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-full bg-(--b-hero) text-(--b-hero-ink) hover:opacity-90 dark:bg-(--b-mint) dark:text-(--b-hero) transition w-fit"
             >
               {t(`${base}.cta`)}
               <ChevronRight className="size-3.5" />
