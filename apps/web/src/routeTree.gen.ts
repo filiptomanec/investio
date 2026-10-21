@@ -9,19 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RentaRouteImport } from './routes/renta'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as HypotekaRouteImport } from './routes/hypoteka'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HypotekaRouteImport } from './routes/hypoteka'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RentaRouteImport } from './routes/renta'
 
-const RentaRoute = RentaRouteImport.update({
-  id: '/renta',
-  path: '/renta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HypotekaRoute = HypotekaRouteImport.update({
@@ -29,9 +24,14 @@ const HypotekaRoute = HypotekaRouteImport.update({
   path: '/hypoteka',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RentaRoute = RentaRouteImport.update({
+  id: '/renta',
+  path: '/renta',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -71,18 +71,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/renta': {
-      id: '/renta'
-      path: '/renta'
-      fullPath: '/renta'
-      preLoaderRoute: typeof RentaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hypoteka': {
@@ -92,11 +85,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HypotekaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/renta': {
+      id: '/renta'
+      path: '/renta'
+      fullPath: '/renta'
+      preLoaderRoute: typeof RentaRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
