@@ -299,3 +299,87 @@
     animation: none;
   }
 }
+
+/* Direction B "Bento" tokens: ivory by day, warm graphite by night. */
+.dir-b {
+  color-scheme: light;
+  --b-bg: #f4f3ee;
+  --b-card: #ffffff;
+  --b-sunk: #f4f3ee;
+  --b-well: #f6f5f0;
+  --b-track: #f0eee7;
+  --b-pill: #ffffff;
+  --b-line: #e4e2da;
+  --b-toggle-off: #dcdad2;
+  --b-ink: #1b1b19;
+  --b-ink2: #3a3936;
+  --b-muted: #6b6a64;
+  --b-axis: #8a8983;
+  --b-grid: #efede6;
+  --b-cursor: rgb(17 56 43 / 0.06);
+  --b-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.04);
+  --b-hero: #11382b;
+  --b-hero-ring: transparent;
+  --b-hero-ink: #f4f3ee;
+  --b-hero-muted: #a9c9bb;
+  --b-hero-soft: #cfe3da;
+  --b-badge: #11382b;
+  --b-badge-ink: #ffffff;
+  --b-range-fill: #11382b;
+  --b-range-thumb: #ffffff;
+  --b-mint: #34c48f;
+  --b-sky: #5b8def;
+  --b-icon-bg: rgb(255 255 255 / 0.8);
+  --b-error: #c4423a;
+  --b-sky-soft: #e3ecfb;
+  --b-sky-ink: #1d3f73;
+  --b-mint-soft: #ddf3e9;
+  --b-mint-ink: #0d5a40;
+  --b-lilac-soft: #ece8fb;
+  --b-lilac-ink: #43358a;
+  --b-stone-soft: #ebe8df;
+  --b-stone-ink: #1b1b19;
+}
+.dark .dir-b {
+  color-scheme: dark;
+  --b-bg: #111210;
+  --b-card: #1a1b19;
+  --b-sunk: #242522;
+  --b-well: #20211e;
+  --b-track: #242522;
+  --b-pill: #393a35;
+  --b-line: #33342f;
+  --b-toggle-off: #3c3d38;
+  --b-ink: #f1f0eb;
+  --b-ink2: #d6d4cc;
+  --b-muted: #a3a29b;
+  --b-axis: #8a8983;
+  --b-grid: #262724;
+  --b-cursor: rgb(255 255 255 / 0.05);
+  --b-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+  --b-hero: #133d2f;
+  --b-hero-ring: rgb(61 220 158 / 0.22);
+  --b-hero-ink: #f1f0eb;
+  --b-hero-muted: #9cc4b2;
+  --b-hero-soft: #cfe3da;
+  --b-badge: #1f5a44;
+  --b-badge-ink: #e9fbf2;
+  --b-range-fill: #3ddc9e;
+  --b-range-thumb: #111210;
+  --b-mint: #3ddc9e;
+  --b-sky: #6f9df5;
+  --b-icon-bg: rgb(255 255 255 / 0.08);
+  --b-error: #f07a6c;
+  --b-sky-soft: #16213a;
+  --b-sky-ink: #a9c5fa;
+  --b-mint-soft: #11291f;
+  --b-mint-ink: #8fe6c1;
+  --b-lilac-soft: #1f1b36;
+  --b-lilac-ink: #c3b8f7;
+  --b-stone-soft: #24231f;
+  --b-stone-ink: #ebe7dc;
+}
+/* Fields inside the grey settings well sit on the card colour, not the well's. */
+.dir-b .b-well {
+  --b-sunk: var(--b-card);
+}

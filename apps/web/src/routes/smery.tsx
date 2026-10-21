@@ -23,7 +23,7 @@ export const Route = createFileRoute("/smery")({
 
 const DIRS: { id: Dir; name: string; note: string }[] = [
   { id: "a", name: "A · Grafit", note: "tmavý" },
-  { id: "b", name: "B · Bento", note: "světlý" },
+  { id: "b", name: "B · Bento", note: "světlý i tmavý" },
   { id: "c", name: "C · Časová osa", note: "světlý i tmavý" },
 ];
 
@@ -60,7 +60,7 @@ function Directions() {
               {x.name}
             </button>
           ))}
-          {d === "c" && (
+          {(d === "b" || d === "c") && (
             <button
               type="button"
               onClick={toggle}
