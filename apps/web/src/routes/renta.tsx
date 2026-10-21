@@ -13,6 +13,7 @@ import {
   HeroFigure,
   HeroLabel,
   HeroTile,
+  MobileAnswer,
   InflationLoader,
   InputsHeader,
   Panel,
@@ -165,14 +166,9 @@ function RentaCalculator() {
 
   return (
     <Layout>
-      <div className="sticky top-0 z-40 px-4 pt-2 lg:hidden">
-        <div className="flex items-center justify-between rounded-2xl bg-(--b-hero) px-4 py-3 text-(--b-hero-ink) shadow-lg ring-1 ring-(--b-hero-ring)">
-          <span className="text-xs text-(--b-hero-muted)">{t("renta.mobileLabel")}</span>
-          <span className="text-xl font-semibold tabular-nums">
-            <AnimatedNumber value={required} format={fmt} />
-          </span>
-        </div>
-      </div>
+      <MobileAnswer label={t("renta.mobileLabel")} fit={fmt(required)}>
+        <AnimatedNumber value={required} format={fmt} />
+      </MobileAnswer>
 
       <main className="mx-auto mt-3 grid max-w-7xl grid-cols-1 gap-4 px-4 md:px-8 lg:mt-0 lg:grid-cols-[360px_1fr]">
         <Panel
@@ -253,13 +249,13 @@ function RentaCalculator() {
         <section className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
           <HeroTile i={2} className="sm:col-span-2">
             <HeroLabel>{t("renta.requiredMonthlyLabel")}</HeroLabel>
-            <HeroFigure muted={unreachable}>
+            <HeroFigure fit={fmt(required)} muted={unreachable}>
               <AnimatedNumber value={required} format={fmt} />
             </HeroFigure>
             <p className="mt-3 max-w-2xl text-[15px] text-(--b-hero-soft)">
               {unreachable
                 ? t("renta.unreachable")
-                : t("renta.afterYears", { years, target: fmt(target) })}
+                : t("renta.afterYears", { count: years, years, target: fmt(target) })}
             </p>
             <SplitBar
               left={contributed}
@@ -270,15 +266,19 @@ function RentaCalculator() {
           </HeroTile>
 
           <Tile
+            fit={fmt(nominalMonthly)}
             i={3}
             tone="sky"
             icon={<Coins className="size-5" />}
             label={t("renta.nominalMonthlyLabel")}
           >
             <AnimatedNumber value={nominalMonthly} format={fmt} />
-            <Sub>{t("renta.nominalMonthlyDesc", { years, inflation: fmtPct(inflation) })}</Sub>
+            <Sub>
+              {t("renta.nominalMonthlyDesc", { count: years, years, inflation: fmtPct(inflation) })}
+            </Sub>
           </Tile>
           <Tile
+            fit={fmt(contributed)}
             i={4}
             tone="mint"
             icon={<PiggyBank className="size-5" />}
@@ -288,6 +288,7 @@ function RentaCalculator() {
             <Sub>{t("renta.contributedSub", { growth: fmt(growth) })}</Sub>
           </Tile>
           <Tile
+            fit={fmt(result.requiredRealPortfolio)}
             i={5}
             tone="lilac"
             icon={<Wallet className="size-5" />}
@@ -302,13 +303,14 @@ function RentaCalculator() {
             </Sub>
           </Tile>
           <Tile
+            fit={fmt(result.requiredNominalPortfolio)}
             i={6}
             tone="stone"
             icon={<Landmark className="size-5" />}
             label={t("renta.portfolioNominal")}
           >
             <AnimatedNumber value={result.requiredNominalPortfolio} format={fmt} />
-            <Sub>{t("renta.portfolioNominalDesc", { years })}</Sub>
+            <Sub>{t("renta.portfolioNominalDesc", { count: years, years })}</Sub>
           </Tile>
 
           <Panel className="rise p-5 sm:col-span-2 md:p-7" style={rise(7)}>

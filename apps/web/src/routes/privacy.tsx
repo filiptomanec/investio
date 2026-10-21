@@ -35,7 +35,7 @@ function PrivacyPage() {
 
       <main className="max-w-3xl mx-auto px-4 md:px-8 pb-16">
         {/* ── ENGLISH ─────────────────────────────────────────────────────── */}
-        <section className="mb-16">
+        <section lang="en" className="mb-16">
           <p className="text-xs text-muted-foreground mb-6">Last updated: 2026-05-27</p>
 
           <h1 className="text-3xl font-bold text-foreground mb-4">Privacy Policy for Investio</h1>
@@ -162,7 +162,7 @@ function PrivacyPage() {
         <hr className="border-border mb-16" />
 
         {/* ── ČESKY ───────────────────────────────────────────────────────── */}
-        <section>
+        <section lang="cs">
           <p className="text-xs text-muted-foreground mb-6">Poslední aktualizace: 27. 5. 2026</p>
 
           <h1 className="text-3xl font-bold text-foreground mb-4">
@@ -180,7 +180,7 @@ function PrivacyPage() {
               <h2 className="text-xl font-semibold mb-3">Jaká data shromažďujeme</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Žádná. Investio neshromažďuje, neukládá, nepřenáší ani nesdílí žádné osobní údaje
-                ani informace o použití.
+                ani informace o použití.
               </p>
             </div>
 
@@ -188,10 +188,10 @@ function PrivacyPage() {
               <h2 className="text-xl font-semibold mb-3">Jak aplikace funguje</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Investio je offline kalkulačka složeného úročení. Každý výpočet probíhá výhradně na
-                tvém zařízení s čísly, která zadáš. Nic se neposílá na žádný server. Neexistuje
+                tvém zařízení s čísly, která zadáš. Nic se neposílá na žádný server. Neexistuje
                 žádný backend. Neexistuje žádná databáze tvých vstupů. Když aplikaci zavřeš, tvoje
                 zadané hodnoty zmizí. Jediné, co si aplikace lokálně pamatuje, jsou tvoje předvolby
-                zobrazení (téma a jazyk) — a jen tehdy, pokud je máš nainstalovanou.
+                zobrazení (téma a jazyk) — a jen tehdy, pokud je máš nainstalovanou.
               </p>
             </div>
 
@@ -202,17 +202,17 @@ function PrivacyPage() {
               </p>
               <p className="text-muted-foreground leading-relaxed mt-2">
                 Ověření: Mobilní aplikace nepoužívá Sentry, Firebase, Amplitude, Mixpanel, AppCenter
-                ani žádný ekvivalentní nástroj. Toto bylo záměrné rozhodnutí v souladu s přístupem
+                ani žádný ekvivalentní nástroj. Toto bylo záměrné rozhodnutí v souladu s přístupem
                 aplikace, který staví soukromí na první místo. Webová verze Investio je samostatný
-                produkt s vlastními zásadami ochrany osobních údajů.
+                produkt s vlastními zásadami ochrany osobních údajů.
               </p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-3">Reklama a sledování</h2>
               <p className="text-muted-foreground leading-relaxed">
-                V Investio nejsou žádné reklamy. Nejsou přistupovány žádné reklamní identifikátory
-                (IDFA). Nedochází k žádnému sledování napříč aplikacemi nebo weby.
+                V Investio nejsou žádné reklamy. Nejsou přistupovány žádné reklamní identifikátory
+                (IDFA). Nedochází k žádnému sledování napříč aplikacemi nebo weby.
               </p>
             </div>
 
@@ -222,8 +222,8 @@ function PrivacyPage() {
               </h2>
               <p className="text-muted-foreground leading-relaxed">
                 Žádné. Závislosti za běhu (Expo, React Native, victory-native, NativeWind) jsou
-                open-source knihovny, které se spouštějí lokálně. Žádná z nich není konfigurována k
-                odesílání dat kamkoli.
+                open-source knihovny, které se spouštějí lokálně. Žádná z nich není konfigurována
+                k odesílání dat kamkoli.
               </p>
             </div>
 
@@ -249,15 +249,15 @@ function PrivacyPage() {
               <h2 className="text-xl font-semibold mb-3">Změny těchto zásad</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Pokud tyto zásady kdykoli změníme — například pokud budoucí verze přidá volitelnou
-                analytiku — aktualizujeme tento dokument novým datem a uživatele upozorníme v sekci
-                „Co je nového" v App Store. Do té doby platí: neshromažďujeme nic.
+                analytiku — aktualizujeme tento dokument novým datem a uživatele upozorníme v sekci
+                „Co je nového" v App Store. Do té doby platí: neshromažďujeme nic.
               </p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-3">Kontakt</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Dotazy k těmto zásadám ochrany osobních údajů:
+                Dotazy k těmto zásadám ochrany osobních údajů:
               </p>
               <ul className="mt-2 space-y-1 text-muted-foreground">
                 <li>

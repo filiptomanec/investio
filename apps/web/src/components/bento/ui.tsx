@@ -10,6 +10,12 @@ import { Segmented, SliderField } from "./kit";
 
 export type Tone = "sky" | "mint" | "lilac" | "stone";
 
+// A font size that keeps a one-line figure inside its box: the size it is
+// set at, or smaller when the text is long for the box's width. 1cqi is 1%
+// of the nearest @container's width; a digit is about 0.6em wide.
+export const fitFont = (text: string, maxPx: string) =>
+  `min(${maxPx}, ${(100 / (0.6 * Math.max(text.length, 1))).toFixed(2)}cqi)`;
+
 // Staggered entrance index for the `.rise` animation.
 export const rise = (i: number) => ({ "--i": i }) as CSSProperties;
 
@@ -81,7 +87,7 @@ export function HeroTile({
         aria-hidden="true"
         className="absolute -right-4 top-24 size-32 rounded-full bg-(--b-mint)/10"
       />
-      <div className="relative">{children}</div>
+      <div className="relative @container">{children}</div>
     </div>
   );
 }
@@ -90,13 +96,22 @@ export function HeroLabel({ children }: { children: ReactNode }) {
   return <p className="text-sm text-(--b-hero-muted)">{children}</p>;
 }
 
-export function HeroFigure({ children, muted }: { children: ReactNode; muted?: boolean }) {
+export function HeroFigure({
+  children,
+  fit,
+  muted,
+}: {
+  children: ReactNode;
+  fit: string;
+  muted?: boolean;
+}) {
   return (
     <p
       className={cn(
-        "mt-2 text-[44px] font-semibold leading-none tracking-[-0.035em] tabular-nums sm:text-[64px] md:text-[76px]",
-        muted && "text-(--b-hero-muted)",
+        "mt-2 whitespace-nowrap font-semibold leading-none tracking-[-0.035em] tabular-nums [--fig:44px] sm:[--fig:64px] md:[--fig:76px]",
+        muted ? "text-(--b-hero-muted)" : "text-(--b-hero-figure)",
       )}
+      style={{ fontSize: fitFont(fit, "var(--fig)") }}
     >
       {children}
     </p>
@@ -121,7 +136,7 @@ export function SplitBar({
     <div className="mt-7">
       <div className="flex h-4 overflow-hidden rounded-full bg-white/10">
         <div
-          className="h-full rounded-l-full bg-(--b-hero-ink) transition-[width] duration-1000 ease-out"
+          className="h-full rounded-l-full bg-(--b-hero-own) transition-[width] duration-1000 ease-out"
           style={{ width: `${l * 100}%` }}
         />
         <div
@@ -143,6 +158,7 @@ export function Tile({
   tone,
   icon,
   label,
+  fit,
   className,
   children,
 }: {
@@ -150,13 +166,14 @@ export function Tile({
   tone: Tone;
   icon: ReactNode;
   label: ReactNode;
+  fit: string;
   className?: string;
   children: ReactNode;
 }) {
   return (
     <div
       className={cn(
-        "rise group rounded-[28px] p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgb(0_0_0/0.08)]",
+        "rise group @container rounded-[28px] p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgb(0_0_0/0.08)]",
         className,
       )}
       style={
@@ -173,7 +190,10 @@ export function Tile({
         </span>
         <span className="text-sm font-medium opacity-80">{label}</span>
       </div>
-      <div className="mt-5 text-[30px] font-semibold leading-tight tracking-tight tabular-nums md:text-[32px]">
+      <div
+        className="mt-5 font-semibold leading-tight tracking-tight tabular-nums [&>span:not(.block)]:whitespace-nowrap"
+        style={{ fontSize: fitFont(fit, "32px") }}
+      >
         {children}
       </div>
     </div>
@@ -326,7 +346,7 @@ export function InflationLoader({
         ) : (
           <RefreshCw className="size-3.5 text-(--b-mint)" />
         )}
-        {t("inflation.loadButton", { years })}
+        {t("inflation.loadButton", { count: years, years })}
       </button>
       {meta && !error && (
         <p className="text-xs text-(--b-muted)">
@@ -399,5 +419,31 @@ export function YearBadge({ children }: { children: ReactNode }) {
     <span className="grid h-9 min-w-14 shrink-0 place-items-center rounded-xl bg-(--b-badge) px-2 text-sm font-semibold text-(--b-badge-ink) tabular-nums">
       {children}
     </span>
+  );
+}
+
+// On a phone the inputs come first; the answer stays pinned on top. Its
+// figure shrinks when a long number would not fit beside the label.
+export function MobileAnswer({
+  label,
+  fit,
+  children,
+}: {
+  label: ReactNode;
+  fit: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="sticky top-0 z-40 px-4 pt-2 lg:hidden">
+      <div className="@container flex items-center justify-between gap-3 rounded-2xl bg-(--b-hero) px-4 py-3 text-(--b-hero-ink) shadow-lg ring-1 ring-(--b-hero-ring)">
+        <span className="shrink-0 text-xs text-(--b-hero-muted)">{label}</span>
+        <span
+          className="min-w-0 whitespace-nowrap font-semibold text-(--b-hero-figure) tabular-nums"
+          style={{ fontSize: `min(20px, ${(62 / (0.6 * Math.max(fit.length, 1))).toFixed(2)}cqi)` }}
+        >
+          {children}
+        </span>
+      </div>
+    </div>
   );
 }

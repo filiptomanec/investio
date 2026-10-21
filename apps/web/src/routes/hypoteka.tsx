@@ -25,6 +25,7 @@ import {
   HeroFigure,
   HeroLabel,
   HeroTile,
+  MobileAnswer,
   InputsHeader,
   LegendSwatch,
   ModeSwitch,
@@ -197,7 +198,8 @@ function MortgageCalculator() {
         : "";
     const mstr = m > 0 ? t("hypoteka.monthsShort", { n: m }) : "";
     if (!ystr && !mstr) return t("hypoteka.monthsShort", { n: 0 });
-    if (ystr && mstr) return `${ystr} ${locale === "cs" ? "a" : "and"} ${mstr}`;
+    // "a" must not end a line, so it is bound to the months.
+    if (ystr && mstr) return `${ystr} ${locale === "cs" ? "a\u00a0" : "and "}${mstr}`;
     return ystr || mstr;
   };
 
@@ -232,6 +234,7 @@ function MortgageCalculator() {
           label: t("hypoteka.strategyB"),
           value: fmt(compare.netExtraToInvest),
           html: t("hypoteka.strategyBDesc", {
+            count: years,
             years,
             extra: fmt(effectiveExtra),
             rate: fmtPct(investRate),
@@ -254,14 +257,9 @@ function MortgageCalculator() {
 
   return (
     <Layout>
-      <div className="sticky top-0 z-40 px-4 pt-2 lg:hidden">
-        <div className="flex items-center justify-between rounded-2xl bg-(--b-hero) px-4 py-3 text-(--b-hero-ink) shadow-lg ring-1 ring-(--b-hero-ring)">
-          <span className="text-xs text-(--b-hero-muted)">{t("hypoteka.monthlyPayment")}</span>
-          <span className="text-xl font-semibold tabular-nums">
-            <AnimatedNumber value={base.monthlyPayment} format={fmt} />
-          </span>
-        </div>
-      </div>
+      <MobileAnswer label={t("hypoteka.monthlyPayment")} fit={fmt(base.monthlyPayment)}>
+        <AnimatedNumber value={base.monthlyPayment} format={fmt} />
+      </MobileAnswer>
 
       <main className="mx-auto mt-3 grid max-w-7xl grid-cols-1 gap-4 px-4 md:px-8 lg:mt-0 lg:grid-cols-[360px_1fr]">
         <Panel
@@ -335,7 +333,7 @@ function MortgageCalculator() {
         <section className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
           <HeroTile i={2} className="sm:col-span-2">
             <HeroLabel>{t("hypoteka.monthlyPayment")}</HeroLabel>
-            <HeroFigure>
+            <HeroFigure fit={fmt(base.monthlyPayment)}>
               <AnimatedNumber value={base.monthlyPayment} format={fmt} />
             </HeroFigure>
             <p className="mt-3 text-[15px] text-(--b-hero-soft)">
@@ -344,7 +342,7 @@ function MortgageCalculator() {
                     extra: fmt(effectiveExtra),
                     total: fmt(base.monthlyPayment + effectiveExtra),
                   })
-                : t("hypoteka.heroSub", { years })}
+                : t("hypoteka.heroSub", { count: years, years })}
             </p>
             <SplitBar
               left={principal}
@@ -355,15 +353,17 @@ function MortgageCalculator() {
           </HeroTile>
 
           <Tile
+            fit={fmt(base.totalPaid)}
             i={3}
             tone="sky"
             icon={<Banknote className="size-5" />}
             label={t("hypoteka.totalPaid")}
           >
             <AnimatedNumber value={base.totalPaid} format={fmt} />
-            <Sub>{t("hypoteka.totalPaidNote", { years })}</Sub>
+            <Sub>{t("hypoteka.totalPaidNote", { count: years, years })}</Sub>
           </Tile>
           <Tile
+            fit={fmt(base.totalInterest)}
             i={4}
             tone="lilac"
             icon={<Percent className="size-5" />}
@@ -376,6 +376,7 @@ function MortgageCalculator() {
           {compare && (
             <>
               <Tile
+                fit={fmt(compare.interestSaved)}
                 i={5}
                 tone="mint"
                 icon={<CalendarCheck2 className="size-5" />}
@@ -385,6 +386,11 @@ function MortgageCalculator() {
                 <Sub>{t("hypoteka.savedSub", { payoff: fmtYM(payoffYears, payoffMonths) })}</Sub>
               </Tile>
               <Tile
+                fit={
+                  crossoverMonthsTotal !== null
+                    ? fmtYM(crossoverYearsPart, crossoverMonthsPart)
+                    : "—"
+                }
                 i={6}
                 tone="stone"
                 icon={<Scale className="size-5" />}
@@ -510,71 +516,63 @@ function MortgageCalculator() {
                       );
                     }}
                   />
-                  {comparing ? (
-                    <>
-                      <Line
-                        type="monotone"
-                        dataKey="balance"
-                        stroke="var(--b-axis)"
-                        strokeDasharray="5 4"
-                        strokeWidth={1.5}
-                        dot={false}
-                        animationDuration={900}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="invested"
-                        stroke="var(--b-sky)"
-                        strokeWidth={2.5}
-                        dot={false}
-                        animationDuration={1200}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="balanceExtra"
-                        stroke="var(--b-mint)"
-                        strokeWidth={2.5}
-                        fill="url(#h-bal)"
-                        animationDuration={1200}
-                      />
-                      {crossoverYear !== null && (
-                        <ReferenceLine
-                          x={crossoverYear}
-                          stroke="var(--b-ink2)"
-                          strokeDasharray="3 3"
-                          label={{
-                            value: isMobile
-                              ? fmtYM(crossoverYearsPart, crossoverMonthsPart)
-                              : `${t("hypoteka.crossoverShort")} · ${fmtYM(crossoverYearsPart, crossoverMonthsPart)}`,
-                            position:
-                              crossoverYear > years * 0.6 ? "insideTopRight" : "insideTopLeft",
-                            offset: 0,
-                            dy: -20,
-                            fontSize: 12,
-                            fill: "var(--b-ink)",
-                          }}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <Area
-                        type="monotone"
-                        dataKey="balance"
-                        stroke="var(--b-mint)"
-                        strokeWidth={2.5}
-                        fill="url(#h-bal)"
-                        animationDuration={1200}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="paidInterest"
-                        stroke="var(--b-sky)"
-                        strokeWidth={2.5}
-                        dot={false}
-                        animationDuration={1200}
-                      />
-                    </>
+                  {/* Recharts reads its series from direct children only, so each
+                      one is its own conditional rather than a fragment. */}
+                  {comparing && (
+                    <Line
+                      type="monotone"
+                      dataKey="balance"
+                      stroke="var(--b-axis)"
+                      strokeDasharray="5 4"
+                      strokeWidth={1.5}
+                      dot={false}
+                      animationDuration={900}
+                    />
+                  )}
+                  {comparing && (
+                    <Line
+                      type="monotone"
+                      dataKey="invested"
+                      stroke="var(--b-sky)"
+                      strokeWidth={2.5}
+                      dot={false}
+                      animationDuration={1200}
+                    />
+                  )}
+                  <Area
+                    type="monotone"
+                    dataKey={comparing ? "balanceExtra" : "balance"}
+                    stroke="var(--b-mint)"
+                    strokeWidth={2.5}
+                    fill="url(#h-bal)"
+                    animationDuration={1200}
+                  />
+                  {!comparing && (
+                    <Line
+                      type="monotone"
+                      dataKey="paidInterest"
+                      stroke="var(--b-sky)"
+                      strokeWidth={2.5}
+                      dot={false}
+                      animationDuration={1200}
+                    />
+                  )}
+                  {comparing && crossoverYear !== null && (
+                    <ReferenceLine
+                      x={crossoverYear}
+                      stroke="var(--b-ink2)"
+                      strokeDasharray="3 3"
+                      label={{
+                        value: isMobile
+                          ? fmtYM(crossoverYearsPart, crossoverMonthsPart)
+                          : `${t("hypoteka.crossoverShort")} · ${fmtYM(crossoverYearsPart, crossoverMonthsPart)}`,
+                        position: crossoverYear > years * 0.6 ? "insideTopRight" : "insideTopLeft",
+                        offset: 0,
+                        dy: -20,
+                        fontSize: 12,
+                        fill: "var(--b-ink)",
+                      }}
+                    />
                   )}
                 </ComposedChart>
               </ResponsiveContainer>
@@ -600,7 +598,7 @@ function MortgageCalculator() {
                           : "bg-(--b-well)",
                       )}
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
                         <p
                           className={cn(
                             "text-sm font-medium",
@@ -641,7 +639,7 @@ function MortgageCalculator() {
                 }}
               />
               <p className="mt-2 text-xs text-(--b-muted)">
-                {t("hypoteka.compareNote", { years })}
+                {t("hypoteka.compareNote", { count: years, years })}
               </p>
             </Panel>
           )}
@@ -673,7 +671,7 @@ function MortgageCalculator() {
                       })}
                     </p>
                   </div>
-                  <span className="w-28 shrink-0 text-right text-base font-semibold tabular-nums sm:w-32">
+                  <span className="min-w-28 shrink-0 text-right text-base font-semibold whitespace-nowrap tabular-nums sm:min-w-32">
                     {fmt(r.balance)}
                   </span>
                 </div>

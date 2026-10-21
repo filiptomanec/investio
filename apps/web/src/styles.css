@@ -294,6 +294,8 @@
   --b-hero-ink: #f4f3ee;
   --b-hero-muted: #a9c9bb;
   --b-hero-soft: #cfe3da;
+  --b-hero-figure: #f4f3ee;
+  --b-hero-own: #f4f3ee;
   --b-badge: #11382b;
   --b-badge-ink: #ffffff;
   --b-range-fill: #11382b;
@@ -333,6 +335,10 @@
   --b-hero-ink: #f1f0eb;
   --b-hero-muted: #9cc4b2;
   --b-hero-soft: #cfe3da;
+  /* By night the answer is set in a pale mint, and your own deposits in
+     the bar take the deposits' blue used by the tiles and the chart. */
+  --b-hero-figure: #b4f0d3;
+  --b-hero-own: #6f9df5;
   --b-badge: #1f5a44;
   --b-badge-ink: #e9fbf2;
   --b-range-fill: #3ddc9e;

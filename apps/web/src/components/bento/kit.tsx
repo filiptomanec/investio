@@ -35,13 +35,19 @@ export function SliderField({
   suffixClassName?: string;
 }) {
   const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  // The number field grows with its value, so "999 000 000" still fits.
+  const chars = new Intl.NumberFormat("cs-CZ", { maximumFractionDigits: 2 }).format(value).length;
+  const fieldWidth = Math.max(136, Math.round(chars * 9.6 + 64));
   return (
     <div className={className}>
       {/* The label gets its own line, so long ones never squeeze the number. */}
       <span className={cn("flex min-h-5 items-center text-sm", labelClassName)}>
         {labelNode ?? label}
       </span>
-      <div className="mt-2 grid grid-cols-[minmax(0,1fr)_8.5rem] items-center gap-4">
+      <div
+        className="mt-2 grid items-center gap-4"
+        style={{ gridTemplateColumns: `minmax(0, 1fr) ${fieldWidth}px` }}
+      >
         <input
           type="range"
           className="range"

@@ -7,6 +7,7 @@ import {
   HeroFigure,
   HeroLabel,
   HeroTile,
+  MobileAnswer,
   InflationLoader,
   InputsHeader,
   LegendSwatch,
@@ -63,17 +64,9 @@ function InvestmentCalculator() {
 
   return (
     <Layout>
-      {/* On a phone the inputs come first; the answer stays pinned on top. */}
-      <div className="sticky top-0 z-40 px-4 pt-2 lg:hidden">
-        <div className="flex items-center justify-between rounded-2xl bg-(--b-hero) px-4 py-3 text-(--b-hero-ink) shadow-lg ring-1 ring-(--b-hero-ring)">
-          <span className="text-xs text-(--b-hero-muted)">
-            {t("results.inYears", { count: i.years })}
-          </span>
-          <span className="text-xl font-semibold tabular-nums">
-            <AnimatedNumber value={result.finalNominal} format={fmt} />
-          </span>
-        </div>
-      </div>
+      <MobileAnswer label={t("results.inYears", { count: i.years })} fit={fmt(result.finalNominal)}>
+        <AnimatedNumber value={result.finalNominal} format={fmt} />
+      </MobileAnswer>
 
       <main className="mx-auto mt-3 grid max-w-7xl grid-cols-1 gap-4 px-4 md:px-8 lg:mt-0 lg:grid-cols-[360px_1fr]">
         <Panel
@@ -166,7 +159,7 @@ function InvestmentCalculator() {
         <section className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
           <HeroTile i={2} className="sm:col-span-2">
             <HeroLabel>{t("results.heroLabel", { count: i.years })}</HeroLabel>
-            <HeroFigure>
+            <HeroFigure fit={fmt(result.finalNominal)}>
               <AnimatedNumber value={result.finalNominal} format={fmt} />
             </HeroFigure>
             {ins.multiple !== null && ins.multiple > 1 && (
@@ -187,6 +180,7 @@ function InvestmentCalculator() {
           </HeroTile>
 
           <Tile
+            fit={fmt(result.totalContributions)}
             i={3}
             tone="sky"
             icon={<PiggyBank className="size-5" />}
@@ -198,6 +192,7 @@ function InvestmentCalculator() {
             </Sub>
           </Tile>
           <Tile
+            fit={"+ " + fmt(profit)}
             i={4}
             tone="mint"
             icon={<HandCoins className="size-5" />}
@@ -215,6 +210,7 @@ function InvestmentCalculator() {
           {m.isAdvanced && (
             <>
               <Tile
+                fit={fmt(result.finalReal)}
                 i={5}
                 tone="lilac"
                 icon={<Wallet className="size-5" />}
@@ -232,6 +228,7 @@ function InvestmentCalculator() {
                 </Sub>
               </Tile>
               <Tile
+                fit={fmt(m.income.monthlyNominal)}
                 i={6}
                 tone="stone"
                 icon={<CalendarClock className="size-5" />}
@@ -359,7 +356,7 @@ function InvestmentCalculator() {
                       {m.showReal && ` · ${t("breakdown.real").toLowerCase()} ${fmt(p.real)}`}
                     </p>
                   </div>
-                  <span className="w-28 shrink-0 text-right text-base font-semibold tabular-nums sm:w-32">
+                  <span className="min-w-28 shrink-0 text-right text-base font-semibold whitespace-nowrap tabular-nums sm:min-w-32">
                     {fmt(p.nominal)}
                   </span>
                 </div>
