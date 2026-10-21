@@ -14,7 +14,7 @@ import { AnimatedNumber } from "@/hooks/use-animated-number";
 import { useInvestmentModel, type Mode } from "@/hooks/use-investment-model";
 import { compactFormatter } from "@/lib/chart";
 import { cn } from "@/lib/utils";
-import { Segmented, SliderField, fmtMultiple, projectionInsights } from "./kit";
+import { Segmented, SliderField, fmtMultiple, projectionInsights, useFitSticky } from "./kit";
 import { yearsCs } from "./copy";
 
 // Direction B, "Bento": a page of rounded tiles in different sizes and soft
@@ -24,6 +24,7 @@ import { yearsCs } from "./copy";
 
 export function DirectionB() {
   const m = useInvestmentModel();
+  const sticky = useFitSticky<HTMLElement>();
   const { inputs: i, result, profit, fmt, fmtPct } = m;
   const ins = projectionInsights(result);
   const axis = compactFormatter(m.locale);
@@ -82,8 +83,9 @@ export function DirectionB() {
       <main className="mx-auto mt-3 grid max-w-7xl lg:mt-0 grid-cols-1 gap-4 px-4 md:px-8 lg:grid-cols-[360px_1fr]">
         {/* Inputs */}
         <aside
-          className="rise self-start rounded-[28px] bg-(--b-card) p-6 shadow-(--b-shadow) lg:sticky lg:top-6"
-          style={{ "--i": 1 } as React.CSSProperties}
+          ref={sticky.ref}
+          className="rise self-start rounded-[28px] bg-(--b-card) p-6 shadow-(--b-shadow) lg:sticky"
+          style={{ "--i": 1, top: sticky.top } as React.CSSProperties}
         >
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold tracking-tight">Tvůj plán</h1>

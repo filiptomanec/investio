@@ -189,3 +189,26 @@ export function fmtMultiple(n: number, locale: "cs" | "en") {
     maximumFractionDigits: 1,
   }).format(n);
 }
+
+// Sticky offset for a side panel that may be taller than the window. A panel
+// that fits sticks 24px below the top; a taller one scrolls with the page
+// until its bottom edge is 24px above the window's bottom, and sticks there,
+// so every field stays reachable without a scroll box of its own.
+export function useFitSticky<T extends HTMLElement>(gap = 24) {
+  const ref = useRef<T | null>(null);
+  const [top, setTop] = useState(gap);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setTop(Math.min(gap, window.innerHeight - el.offsetHeight - gap));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [gap]);
+  return { ref, top };
+}

@@ -14,7 +14,7 @@ import { AnimatedNumber } from "@/hooks/use-animated-number";
 import { useInvestmentModel, type Mode } from "@/hooks/use-investment-model";
 import { compactFormatter, yearTicks } from "@/lib/chart";
 import { cn } from "@/lib/utils";
-import { Segmented, SliderField, fmtMultiple, projectionInsights } from "./kit";
+import { Segmented, SliderField, fmtMultiple, projectionInsights, useFitSticky } from "./kit";
 import { yearsCs } from "./copy";
 
 // Direction A, "Grafit": a dark premium fintech screen. Warm graphite, one
@@ -33,6 +33,7 @@ const C = {
 
 export function DirectionA() {
   const m = useInvestmentModel();
+  const sticky = useFitSticky<HTMLElement>();
   const { inputs: i, result, profit, fmt, fmtPct } = m;
   const ins = projectionInsights(result);
   const axis = compactFormatter(m.locale);
@@ -103,8 +104,9 @@ export function DirectionA() {
       <main className="relative mx-auto mt-3 grid max-w-7xl lg:mt-0 grid-cols-1 gap-5 px-4 md:px-8 lg:grid-cols-[380px_1fr] lg:gap-6">
         {/* Inputs */}
         <aside
-          className="rise lg:sticky lg:top-6 self-start rounded-3xl bg-[#171716] p-6 ring-1 ring-white/[0.06]"
-          style={{ "--i": 1 } as React.CSSProperties}
+          ref={sticky.ref}
+          className="rise lg:sticky self-start rounded-3xl bg-[#171716] p-6 ring-1 ring-white/[0.06]"
+          style={{ "--i": 1, top: sticky.top } as React.CSSProperties}
         >
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-xl font-semibold tracking-tight">Investiční kalkulačka</h1>
